@@ -1,0 +1,23 @@
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+*.test
+*.out
+
+# IDEs directories
+.idea
+.vscode
+
+# Reports
+report.xml
+profile.cov
+coverage.html
+
+# macos stuff
+.DS_Store
+
+# test paths
+test/**
