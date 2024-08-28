@@ -66,7 +66,11 @@ func (svc *Service) Close() error {
 	return svc.pool.Close() //nolint:wrapcheck // unnecessary
 }
 
-func (svc *Service) ExecAndFetchAll(ctx context.Context, query string, params map[string]*Ydb.TypedValue) (*result.Result, error) {
+func (svc *Service) ExecAndFetchAll(
+	ctx context.Context,
+	query string,
+	params map[string]*Ydb.TypedValue,
+) (*result.Result, error) {
 	sess := svc.pool.Get(ctx)
 	defer func() {
 		// get will return nil if canceled
