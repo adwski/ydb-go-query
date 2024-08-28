@@ -9,11 +9,13 @@ import (
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
 	"github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
+	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Issue"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb_TableStats"
 )
 
 var (
 	ErrPartStatus = errors.New("result part status error")
+	ErrStream     = errors.New("result stream error")
 )
 
 type Result struct {
@@ -26,6 +28,8 @@ type Result struct {
 	stats *Ydb_TableStats.QueryStats
 
 	err error
+
+	issues []*Ydb_Issue.IssueMessage
 
 	cols []*Ydb.Column
 	rows []*Ydb.Value
@@ -47,15 +51,16 @@ func NewResult(
 
 // Close closes result stream,
 // but result data is still available to be read.
-func (r *Result) Close() error {
+func (r *Result) Close() {
 	r.cancel()
 	r.done.Store(true)
-	return r.err
 }
 
 func (r *Result) Err() error {
 	return r.err
 }
+
+func (r *Result) Issues() []*Ydb_Issue.IssueMessage { return r.issues }
 
 func (r *Result) Cols() []*Ydb.Column {
 	return r.cols
@@ -72,39 +77,44 @@ func (r *Result) Stats() *Ydb_TableStats.QueryStats {
 // ReceiveAll reads all parts from result stream.
 // It assumes that parts are arriving sequentially,
 // i.e. ConcurrentResultSets is false.
-func (r *Result) ReceiveAll() {
+func (r *Result) ReceiveAll() error {
 	if r.done.Load() {
-		return
+		return nil
 	}
 	for {
 		part, err := r.stream.Recv()
 		r.logger.Trace("received result part", "part", part, "error", err)
 		if err != nil {
-			r.err = err
-			break
+			return errors.Join(ErrStream, err)
 		}
 
 		if part.Status != Ydb.StatusIds_SUCCESS {
+			r.issues = append(r.issues, part.Issues...)
 			r.err = errors.Join(ErrPartStatus, fmt.Errorf("status: %s", part.Status))
+
 			break
 		}
 
-		if r.cols == nil && len(part.ResultSet.Columns) > 0 {
-			r.cols = make([]*Ydb.Column, len(part.ResultSet.Columns))
-			copy(r.cols, part.ResultSet.GetColumns())
-		}
+		if part.ResultSet != nil {
+			if r.cols == nil && len(part.ResultSet.Columns) > 0 {
+				r.cols = make([]*Ydb.Column, len(part.ResultSet.Columns))
+				copy(r.cols, part.ResultSet.GetColumns())
+			}
 
-		if len(part.ResultSet.Rows) > 0 {
-			r.rows = append(r.rows, part.ResultSet.Rows...)
+			if len(part.ResultSet.Rows) > 0 {
+				r.rows = append(r.rows, part.ResultSet.Rows...)
+			}
 		}
 
 		if part.ExecStats != nil {
 			// stats on the last part
-			// Is there a better way to detect last part?
+			// TODO: find better way to detect last part
 			r.stats = part.ExecStats
 			break
 		}
 	}
 
-	_ = r.Close()
+	r.Close()
+
+	return nil
 }

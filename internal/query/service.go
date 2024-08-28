@@ -15,10 +15,16 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	maxQueryLogLength = 1000
+)
+
 var (
 	ErrExec      = errors.New("query execution failed")
 	ErrResult    = errors.New("result fetch error")
 	ErrNoSession = errors.New("no session")
+
+	queryLogCut = []byte("...")
 )
 
 type Service struct {
@@ -60,7 +66,7 @@ func (svc *Service) Close() error {
 	return svc.pool.Close() //nolint:wrapcheck // unnecessary
 }
 
-func (svc *Service) Exec(ctx context.Context, query string, params map[string]*Ydb.TypedValue) (*result.Result, error) {
+func (svc *Service) ExecAndFetchAll(ctx context.Context, query string, params map[string]*Ydb.TypedValue) (*result.Result, error) {
 	sess := svc.pool.Get(ctx)
 	defer func() {
 		// get will return nil if canceled
@@ -78,13 +84,20 @@ func (svc *Service) Exec(ctx context.Context, query string, params map[string]*Y
 		return nil, errors.Join(ErrExec, err)
 	}
 
-	svc.logger.Trace("received result stream", "query", query)
+	svc.logger.Trace("received result stream", "query", strip(query))
 
-	res.ReceiveAll()
-
-	if res.Err() != nil {
+	if err = res.ReceiveAll(); err != nil {
 		return nil, errors.Join(ErrResult, err)
 	}
 
 	return res, nil
+}
+
+func strip(s string) string {
+	if len(s) > maxQueryLogLength {
+		b := []byte(s[:maxQueryLogLength-2])
+		return string(append(b, queryLogCut...))
+	}
+
+	return s
 }
