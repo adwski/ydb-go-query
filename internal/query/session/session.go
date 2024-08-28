@@ -192,9 +192,9 @@ func (s *Session) cleanup(ctx context.Context) error {
 	if err != nil {
 		return errors.Join(ErrSessionDelete, err)
 	}
-	if status := respDelete.Status; status != Ydb.StatusIds_SUCCESS {
+	if respDelete.Status != Ydb.StatusIds_SUCCESS {
 		return errors.Join(ErrSessionDelete,
-			fmt.Errorf("status: %s", status))
+			fmt.Errorf("status: %s", respDelete.Status))
 	}
 
 	return nil
