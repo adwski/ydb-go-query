@@ -16,6 +16,7 @@ import (
 var (
 	ErrPartStatus = errors.New("result part status error")
 	ErrStream     = errors.New("result stream error")
+	ErrIssues     = errors.New("query result has issues")
 )
 
 type Result struct {
@@ -88,11 +89,16 @@ func (r *Result) ReceiveAll() error {
 			return errors.Join(ErrStream, err)
 		}
 
+		r.issues = append(r.issues, part.Issues...)
+
 		if part.Status != Ydb.StatusIds_SUCCESS {
-			r.issues = append(r.issues, part.Issues...)
 			r.err = errors.Join(ErrPartStatus, fmt.Errorf("status: %s", part.Status))
 
 			break
+		}
+
+		if len(part.Issues) > 0 && r.err == nil {
+			r.err = ErrIssues
 		}
 
 		if part.ResultSet != nil {
