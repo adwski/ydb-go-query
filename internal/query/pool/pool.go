@@ -152,7 +152,7 @@ getLoop:
 		select {
 		case itm := <-p.queue:
 			if itm.Alive() {
-				p.logger.Trace("item in use", "id", itm.ID())
+				p.logger.Trace("item retrieved from pool", "id", itm.ID())
 				return itm
 			}
 			_ = itm.Close()
@@ -305,11 +305,11 @@ recycleLoop:
 				// alive and not expired
 				// push item back and finish iteration
 				p.queue <- itm
-				break recycleLoop
+				break
 			}
-			p.logger.Trace("item recycled", "id", itm.ID())
 			// recycle
 			_ = itm.Close()
+			p.logger.Trace("item recycled", "id", itm.ID())
 			// push token
 			p.tokens <- struct{}{}
 		}
