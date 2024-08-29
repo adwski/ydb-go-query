@@ -58,7 +58,11 @@ type (
 		Logger logger.Logger
 
 		// CreateFunc is used to create pool item.
-		CreateFunc func(context.Context, time.Duration) (PT, error)
+		// Timeout is not set as context.WithTimeout
+		// because this is running context for long-lived item.
+		// Timeout itself should limit only creation steps,
+		// and it is responsibility of CreateFunc to handle it appropriately.
+		CreateFunc func(ctx context.Context, createTimeout time.Duration) (PT, error)
 
 		// CreateTimeout limits runtime for CreateFunc.
 		// This timeout cannot be less than a second (minCreateTimeout).
@@ -176,7 +180,7 @@ func (p *Pool[PT, T]) Put(itm PT) {
 		if !p.itemRecycling || !p.itemExpired(itm) {
 			// alive and not expired
 			// push item back and finish iteration
-			p.queue <- itm
+			p.queue <- itm // ignoring ctx.Done(), should never block here
 			p.logger.Trace("item returned to pool", "id", itm.ID())
 			return
 		}
@@ -185,7 +189,7 @@ func (p *Pool[PT, T]) Put(itm PT) {
 	// recycle
 	_ = itm.Close()
 	// push token
-	p.tokens <- struct{}{}
+	p.tokens <- struct{}{} // ignoring ctx.Done(), should never block here
 }
 
 func (p *Pool[PT, T]) spawnItems(ctx context.Context) {
@@ -304,14 +308,14 @@ recycleLoop:
 			if itm.Alive() && p.itemExpired(itm) {
 				// alive and not expired
 				// push item back and finish iteration
-				p.queue <- itm
+				p.queue <- itm // ignoring ctx.Done(), should never block here
 				break
 			}
 			// recycle
 			_ = itm.Close()
 			p.logger.Trace("item recycled", "id", itm.ID())
 			// push token
-			p.tokens <- struct{}{}
+			p.tokens <- struct{}{} // ignoring ctx.Done(), should never block here
 		}
 	}
 }
