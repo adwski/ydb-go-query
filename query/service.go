@@ -7,9 +7,9 @@ import (
 
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
 	"github.com/adwski/ydb-go-query/v1/internal/query/pool"
-	"github.com/adwski/ydb-go-query/v1/internal/query/result"
 	"github.com/adwski/ydb-go-query/v1/internal/query/session"
-	"github.com/adwski/ydb-go-query/v1/internal/query/transaction"
+	"github.com/adwski/ydb-go-query/v1/query/result"
+	"github.com/adwski/ydb-go-query/v1/query/transaction"
 
 	"github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"

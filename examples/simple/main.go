@@ -7,7 +7,7 @@ import (
 	"os/signal"
 
 	ydb "github.com/adwski/ydb-go-query/v1"
-	"github.com/adwski/ydb-go-query/v1/internal/query/result"
+	"github.com/adwski/ydb-go-query/v1/query/result"
 
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"

@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
-	"github.com/adwski/ydb-go-query/v1/internal/query"
 	"github.com/adwski/ydb-go-query/v1/internal/transport/balancing/grid"
 	"github.com/adwski/ydb-go-query/v1/internal/transport/dispatcher"
+	"github.com/adwski/ydb-go-query/v1/query"
 )
 
 const (

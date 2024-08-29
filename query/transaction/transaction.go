@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
-	"github.com/adwski/ydb-go-query/v1/result"
+	"github.com/adwski/ydb-go-query/v1/query/result"
 
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"

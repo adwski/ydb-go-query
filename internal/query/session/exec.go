@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/adwski/ydb-go-query/v1/internal/query/result"
+	"github.com/adwski/ydb-go-query/v1/query/result"
 
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"
