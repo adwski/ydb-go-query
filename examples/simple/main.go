@@ -7,6 +7,7 @@ import (
 	"os/signal"
 
 	ydb "github.com/adwski/ydb-go-query/v1"
+	"github.com/adwski/ydb-go-query/v1/internal/query/result"
 
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
@@ -70,55 +71,42 @@ func main() {
 		return
 	}
 
-	// query execution helper
-	doQuery := func(
-		query string,
-		params map[string]*Ydb.TypedValue,
-	) {
-		// ExecAndFetchAll() will run query and block until it fetches result completely.
-		// It will also provide basic stats.
-		result, errRes := client.Query().ExecAndFetchAll(ctx, query, params)
+	// run queries
 
-		fmt.Println("==========")
-		// check result
-		switch {
-		case errRes != nil:
-			// ydb interaction error (most likely io error)
-			fmt.Printf("YDB error: %v\n", errRes)
+	// ExecOne() executes query outside of transaction.
+	// It blocks until it fetches result completely.
+	// It also provides basic execution stats.
+	checkResult(client.Query().Exec(ctx, `SELECT 1`, nil))
 
-		case result.Err() != nil:
-			// query execution error (syntax, etc...)
-			fmt.Printf("Query returned error: %v\nIssues: \n%v\n",
-				result.Err(), result.Issues())
+	// ExecDDL() is same as ExecOne() but doesn't have params.
+	checkResult(client.Query().ExecDDL(ctx, seriesCreateTable))
+	checkResult(client.Query().ExecDDL(ctx, seasonsCreateTable))
+	checkResult(client.Query().ExecDDL(ctx, episodesCreateTable))
 
-		default:
-			// all fine here
-			fmt.Printf("Query executed successfully!\nstats: %v\ncols: %v\n",
-				result.Stats(), result.Cols())
-			for rIdx, row := range result.Rows() {
-				fmt.Printf("row %d: %v\n", rIdx, row)
-			}
-		}
-		fmt.Println("==========")
+	// Tx() creates 'transaction scope'.
+	// This means that every ExecOne() will be executed in its own transaction.
+	// Every transaction inherits settings of the scope, i.e. transaction mode.
+	// By default, tx mode is serializable read/write.
+	// Read more about transactions here https://ydb.tech/docs/en/concepts/transactions.
+	checkResult(client.Query().Tx().ExecOne(ctx, seriesData, nil))
+
+	// Exec several queries in one transaction.
+	// This approach requires explicit transaction creation
+	// (and can lead to error).
+	tx, errTx := client.Query().Tx().ExecMany(ctx)
+	if errTx != nil {
+		logger.Error().Err(err).Msg("cannot create transaction")
+		defer os.Exit(1)
+		return
 	}
+	checkResult(tx.Do(ctx, seasonsData, nil, false))
+	// Only last query in transaction should have commit flag.
+	// This flag also implies transaction cleanup (underlying session will be freed).
+	checkResult(tx.Do(ctx, episodesData, nil, true))
+	// Any following calls to tx.Do() will result in error.
 
-	// exec queries
-
-	// create tables
-	doQuery(`DROP TABLE IF EXISTS series`, nil)
-	doQuery(seriesCreateTable, nil)
-
-	doQuery(`DROP TABLE IF EXISTS seasons`, nil)
-	doQuery(seasonsCreateTable, nil)
-
-	doQuery(`DROP TABLE IF EXISTS episodes`, nil)
-	doQuery(episodesCreateTable, nil)
-
-	doQuery(seriesData, nil)
-	doQuery(seasonsData, nil)
-	doQuery(episodesData, nil)
-
-	doQuery(`DECLARE $seriesId AS Uint64;
+	// Here tx mode is online-read-only.
+	checkResult(client.Query().Tx().OnlineReadOnly().ExecOne(ctx, `DECLARE $seriesId AS Uint64;
 	SELECT
 	    sa.title AS season_title,
 	    sr.title AS series_title,
@@ -138,15 +126,15 @@ func main() {
 				Type:  &Ydb.Type{Type: &Ydb.Type_TypeId{TypeId: Ydb.Type_UINT64}},
 				Value: &Ydb.Value{Value: &Ydb.Value_Uint64Value{Uint64Value: 1}},
 			},
-		})
+		}))
 
-	doQuery(`UPSERT INTO episodes (
+	checkResult(client.Query().Tx().ExecOne(ctx, `UPSERT INTO episodes (
 		series_id, season_id, episode_id, title, air_date
 	) VALUES (
-    2, 5, 13, "Test Episode", CAST(Date("2018-08-27") AS Uint64))`, nil)
+    2, 5, 13, "Test Episode", CAST(Date("2018-08-27") AS Uint64))`, nil))
 
 	selectEpisodes := func() {
-		doQuery(`DECLARE $seriesId AS Uint64; DECLARE $seasonId AS Uint64;
+		checkResult(client.Query().Tx().ExecOne(ctx, `DECLARE $seriesId AS Uint64; DECLARE $seasonId AS Uint64;
 	SELECT * FROM episodes WHERE series_id = $seriesId AND season_id = $seasonId;`,
 			map[string]*Ydb.TypedValue{
 				"$seriesId": {
@@ -157,27 +145,50 @@ func main() {
 					Type:  &Ydb.Type{Type: &Ydb.Type_TypeId{TypeId: Ydb.Type_UINT64}},
 					Value: &Ydb.Value{Value: &Ydb.Value_Uint64Value{Uint64Value: 5}},
 				},
-			})
+			}))
 	}
 	selectEpisodes()
 
-	doQuery(`DECLARE $title AS Utf8;
+	checkResult(client.Query().Tx().ExecOne(ctx, `DECLARE $title AS Utf8;
 	DELETE FROM episodes WHERE title = $title;`,
 		map[string]*Ydb.TypedValue{
 			"$title": {
 				Type:  &Ydb.Type{Type: &Ydb.Type_TypeId{TypeId: Ydb.Type_UTF8}},
 				Value: &Ydb.Value{Value: &Ydb.Value_TextValue{TextValue: "Test Episode"}},
 			},
-		})
+		}))
 	selectEpisodes()
 
-	doQuery(`ALTER TABLE episodes ADD COLUMN viewers Uint64;`, nil)
-	doQuery(`ALTER TABLE episodes DROP COLUMN viewers;`, nil)
-
-	doQuery(`DROP TABLE series`, nil)
-	doQuery(`DROP TABLE seasons`, nil)
-	doQuery(`DROP TABLE episodes`, nil)
+	checkResult(client.Query().Exec(ctx, `ALTER TABLE episodes ADD COLUMN viewers Uint64;`, nil))
+	checkResult(client.Query().Exec(ctx, `ALTER TABLE episodes DROP COLUMN viewers;`, nil))
+	checkResult(client.Query().Exec(ctx, `DROP TABLE series`, nil))
+	checkResult(client.Query().Exec(ctx, `DROP TABLE seasons`, nil))
+	checkResult(client.Query().Exec(ctx, `DROP TABLE episodes`, nil))
 
 	// close client
 	client.Close() // blocks until all cleanup is finished
+}
+
+func checkResult(result *result.Result, err error) {
+	fmt.Println("==========")
+	// check result
+	switch {
+	case err != nil:
+		// ydb interaction error (most likely io error)
+		fmt.Printf("YDB error: %v\n", err)
+
+	case result.Err() != nil:
+		// query execution error (syntax, etc...)
+		fmt.Printf("Query returned error: %v\nIssues: \n%v\n",
+			result.Err(), result.Issues())
+
+	default:
+		// all fine here
+		fmt.Printf("Query executed successfully!\nstats: %v\ncols: %v\n",
+			result.Stats(), result.Cols())
+		for rIdx, row := range result.Rows() {
+			fmt.Printf("row %d: %v\n", rIdx, row)
+		}
+	}
+	fmt.Println("==========")
 }

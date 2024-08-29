@@ -9,9 +9,11 @@ import (
 	"github.com/adwski/ydb-go-query/v1/internal/query/pool"
 	"github.com/adwski/ydb-go-query/v1/internal/query/result"
 	"github.com/adwski/ydb-go-query/v1/internal/query/session"
+	"github.com/adwski/ydb-go-query/v1/internal/query/transaction"
 
 	"github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
+	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"
 	"google.golang.org/grpc"
 )
 
@@ -66,10 +68,41 @@ func (svc *Service) Close() error {
 	return svc.pool.Close() //nolint:wrapcheck // unnecessary
 }
 
-func (svc *Service) ExecAndFetchAll(
+func (svc *Service) Exec(
 	ctx context.Context,
 	query string,
 	params map[string]*Ydb.TypedValue,
+) (*result.Result, error) {
+	return svc.exec(ctx, query, params, nil)
+}
+
+func (svc *Service) ExecDDL(
+	ctx context.Context,
+	query string,
+) (*result.Result, error) {
+	return svc.exec(ctx, query, nil, nil)
+}
+
+func (svc *Service) Tx() *transaction.Settings {
+	return transaction.New(
+		svc.logger,
+		func(ctx context.Context) (transaction.ExecFunc, func(), error) {
+			sess := svc.pool.Get(ctx)
+			if sess == nil {
+				return nil, nil, ErrNoSession
+			}
+
+			return sess.Exec, func() {
+				svc.pool.Put(sess)
+			}, nil
+		})
+}
+
+func (svc *Service) exec(
+	ctx context.Context,
+	query string,
+	params map[string]*Ydb.TypedValue,
+	txControl *Ydb_Query.TransactionControl,
 ) (*result.Result, error) {
 	sess := svc.pool.Get(ctx)
 	defer func() {
@@ -83,7 +116,7 @@ func (svc *Service) ExecAndFetchAll(
 		return nil, ErrNoSession
 	}
 
-	res, err := sess.Exec(ctx, query, params, nil)
+	res, err := sess.Exec(ctx, query, params, txControl)
 	if err != nil {
 		return nil, errors.Join(ErrExec, err)
 	}

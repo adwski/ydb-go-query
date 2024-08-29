@@ -7,6 +7,7 @@ import (
 	"sync/atomic"
 
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
+
 	"github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Issue"
@@ -34,6 +35,8 @@ type Result struct {
 
 	cols []*Ydb.Column
 	rows []*Ydb.Value
+
+	txID string
 
 	done atomic.Bool
 }
@@ -75,6 +78,10 @@ func (r *Result) Stats() *Ydb_TableStats.QueryStats {
 	return r.stats
 }
 
+func (r *Result) TxID() string {
+	return r.txID
+}
+
 // ReceiveAll reads all parts from result stream.
 // It assumes that parts are arriving sequentially,
 // i.e. ConcurrentResultSets is false.
@@ -95,6 +102,10 @@ func (r *Result) ReceiveAll() error {
 			r.err = errors.Join(ErrPartStatus, fmt.Errorf("status: %s", part.Status))
 
 			break
+		}
+
+		if part.TxMeta != nil {
+			r.txID = part.TxMeta.Id
 		}
 
 		if len(part.Issues) > 0 && r.err == nil {
