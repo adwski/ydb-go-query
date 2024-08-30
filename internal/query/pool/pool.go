@@ -305,7 +305,7 @@ recycleLoop:
 			break recycleLoop
 		case itm := <-p.queue:
 			// check if alive
-			if itm.Alive() && p.itemExpired(itm) {
+			if itm.Alive() && !p.itemExpired(itm) {
 				// alive and not expired
 				// push item back and finish iteration
 				p.queue <- itm // ignoring ctx.Done(), should never block here
