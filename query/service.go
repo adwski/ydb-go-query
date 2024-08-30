@@ -3,6 +3,7 @@ package query
 import (
 	"context"
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
@@ -33,6 +34,8 @@ type Service struct {
 	logger logger.Logger
 	qsc    Ydb_Query_V1.QueryServiceClient
 
+	wg *sync.WaitGroup
+
 	pool *pool.Pool[*session.Session, session.Session]
 }
 
@@ -43,7 +46,7 @@ type Config struct {
 	PoolSize      uint
 }
 
-func NewService(runCtx context.Context, cfg Config) *Service {
+func NewService(runCtx context.Context, wg *sync.WaitGroup, cfg Config) *Service {
 	qsc := Ydb_Query_V1.NewQueryServiceClient(cfg.Transport)
 
 	sessionPool := pool.New[*session.Session, session.Session](
@@ -57,15 +60,24 @@ func NewService(runCtx context.Context, cfg Config) *Service {
 			},
 		})
 
-	return &Service{
+	svc := &Service{
 		logger: cfg.Logger,
 		qsc:    qsc,
 		pool:   sessionPool,
+		wg:     wg,
 	}
+
+	// wait for context cancellation
+	go svc.waitClose(runCtx)
+
+	return svc
 }
 
-func (svc *Service) Close() error {
-	return svc.pool.Close() //nolint:wrapcheck // unnecessary
+// waitClose ensures pool is closed before signaling wg.Done() to the owner or query service.
+func (svc *Service) waitClose(ctx context.Context) {
+	<-ctx.Done()
+	_ = svc.pool.Close() //nolint:wrapcheck // unnecessary
+	svc.wg.Done()
 }
 
 func (svc *Service) Exec(

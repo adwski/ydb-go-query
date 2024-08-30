@@ -23,7 +23,7 @@ var (
 )
 
 func Open(ctx context.Context, cfg Config, opts ...Option) (*Client, error) {
-	client, err := newClient(cfg, opts...)
+	client, err := newClient(ctx, cfg, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,8 @@ func Open(ctx context.Context, cfg Config, opts ...Option) (*Client, error) {
 		return nil, errors.Join(ErrCfgDispatcher, err)
 	}
 
-	client.querySvc = query.NewService(runCtx, query.Config{
+	client.wg.Add(1)
+	client.querySvc = query.NewService(runCtx, client.wg, query.Config{
 		Logger:        client.logger,
 		Transport:     client.dispatcher.Transport(),
 		CreateTimeout: client.sessionCreateTimeout,
@@ -79,19 +80,16 @@ func (c *Client) Query() *query.Service {
 
 func (c *Client) Close() {
 	c.cancel()
-	_ = c.querySvc.Close()
 	c.wg.Wait()
 }
 
-func newClient(cfg Config, opts ...Option) (*Client, error) {
+func newClient(ctx context.Context, cfg Config, opts ...Option) (*Client, error) {
 	if len(cfg.InitialNodes) == 0 {
 		return nil, ErrNoInitialNodes
 	}
 	if len(cfg.DB) == 0 {
 		return nil, ErrDBEmpty
 	}
-
-	ctx := context.TODO()
 
 	cfg.setDefaults()
 
