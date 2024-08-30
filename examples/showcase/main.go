@@ -87,7 +87,7 @@ func main() {
 	// Every transaction inherits settings of the scope, i.e. transaction mode.
 	// By default, tx mode is serializable read/write.
 	// Read more about transactions here https://ydb.tech/docs/en/concepts/transactions.
-	checkResult(client.Query().Tx().ExecOne(ctx, seriesData, nil))
+	checkResult(client.Query().Tx().ExecOne(ctx, seriesData, nil, nil))
 
 	// ExecMany allows to execute several queries in one transaction.
 	// This approach requires explicit transaction creation (which can lead to error).
@@ -98,10 +98,10 @@ func main() {
 		return
 	}
 	// exec query with this transaction
-	checkResult(tx.Do(ctx, seasonsData, nil, false))
-	// Only last query in transaction should have commit flag.
+	checkResult(tx.Do(ctx, seasonsData, nil, nil, false))
+	// Only last query in transaction should have commit flag set to true.
 	// This flag also implies transaction cleanup (underlying session will be freed).
-	checkResult(tx.Do(ctx, episodesData, nil, true))
+	checkResult(tx.Do(ctx, episodesData, nil, nil, true))
 	// Any following calls to tx.Do() will result in error.
 
 	// Here tx mode is online-read-only.
@@ -125,12 +125,12 @@ func main() {
 				Type:  &Ydb.Type{Type: &Ydb.Type_TypeId{TypeId: Ydb.Type_UINT64}},
 				Value: &Ydb.Value{Value: &Ydb.Value_Uint64Value{Uint64Value: 1}},
 			},
-		}))
+		}, nil))
 
 	checkResult(client.Query().Tx().ExecOne(ctx, `UPSERT INTO episodes (
 		series_id, season_id, episode_id, title, air_date
 	) VALUES (
-    2, 5, 13, "Test Episode", CAST(Date("2018-08-27") AS Uint64))`, nil))
+    2, 5, 13, "Test Episode", CAST(Date("2018-08-27") AS Uint64))`, nil, nil))
 
 	selectEpisodes := func() {
 		checkResult(client.Query().Tx().ExecOne(ctx, `DECLARE $seriesId AS Uint64; DECLARE $seasonId AS Uint64;
@@ -144,6 +144,18 @@ func main() {
 					Type:  &Ydb.Type{Type: &Ydb.Type_TypeId{TypeId: Ydb.Type_UINT64}},
 					Value: &Ydb.Value{Value: &Ydb.Value_Uint64Value{Uint64Value: 5}},
 				},
+			},
+			// This func will be called every time new result part is arrived.
+			// If nil, rows are collected internally and can be retrieved by result.Rows().
+			func(rows []*Ydb.Value) {
+				fmt.Println(">>> Collecting rows in user defined function.")
+				for _, row := range rows {
+					fmt.Print("row: ")
+					for idx, col := range row.Items {
+						fmt.Printf("col%d: %v ", idx, col.String())
+					}
+					fmt.Println()
+				}
 			}))
 	}
 	selectEpisodes()
@@ -155,7 +167,7 @@ func main() {
 				Type:  &Ydb.Type{Type: &Ydb.Type_TypeId{TypeId: Ydb.Type_UTF8}},
 				Value: &Ydb.Value{Value: &Ydb.Value_TextValue{TextValue: "Test Episode"}},
 			},
-		}))
+		}, nil))
 	selectEpisodes()
 
 	checkResult(client.Query().Exec(ctx, `ALTER TABLE episodes ADD COLUMN viewers Uint64;`, nil))

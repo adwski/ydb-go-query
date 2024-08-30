@@ -25,14 +25,14 @@ type (
 		string,
 		map[string]*Ydb.TypedValue,
 		*Ydb_Query.TransactionControl,
+		func([]*Ydb.Value),
 	) (*result.Result, error)
 
 	prepareFunc func(ctx context.Context) (ExecFunc, func(), error)
 
 	Settings struct {
-		logger logger.Logger
-		txSet  *Ydb_Query.TransactionSettings
-		// execFunc    ExecFunc
+		logger      logger.Logger
+		txSet       *Ydb_Query.TransactionSettings
 		prepareFunc prepareFunc
 	}
 
@@ -63,6 +63,7 @@ func (s *Settings) ExecOne(
 	ctx context.Context,
 	query string,
 	params map[string]*Ydb.TypedValue,
+	collectRowsFunc func([]*Ydb.Value),
 ) (*result.Result, error) {
 	if s.txSet == nil {
 		s.SerializableReadWrite()
@@ -81,7 +82,7 @@ func (s *Settings) ExecOne(
 		commit:   true,
 	}
 
-	return tx.exec(ctx, query, params)
+	return tx.exec(ctx, query, params, collectRowsFunc)
 }
 
 func (s *Settings) ExecMany(ctx context.Context) (*Transaction, error) {
@@ -160,6 +161,7 @@ func (tx *Transaction) Do(
 	ctx context.Context,
 	query string,
 	params map[string]*Ydb.TypedValue,
+	collectRowsFunc func([]*Ydb.Value),
 	commit bool,
 ) (*result.Result, error) {
 	if tx.finish.Load() {
@@ -189,13 +191,13 @@ func (tx *Transaction) Do(
 		}
 	}
 
-	res, err := tx.execFunc(ctx, query, params, txControl)
+	res, err := tx.execFunc(ctx, query, params, txControl, collectRowsFunc)
 
 	if err != nil {
 		return nil, errors.Join(ErrExec, err)
 	}
 
-	if err = res.ReceiveAll(); err != nil {
+	if err = res.Recv(); err != nil {
 		return nil, errors.Join(ErrResult, err)
 	}
 
@@ -209,6 +211,7 @@ func (tx *Transaction) exec(
 	ctx context.Context,
 	query string,
 	params map[string]*Ydb.TypedValue,
+	collectRowsFunc func([]*Ydb.Value),
 ) (*result.Result, error) {
 	if tx.finish.Load() {
 		return nil, ErrFinished
@@ -225,13 +228,13 @@ func (tx *Transaction) exec(
 		},
 		CommitTx: tx.commit,
 	}
-	res, err := tx.execFunc(ctx, query, params, txControl)
+	res, err := tx.execFunc(ctx, query, params, txControl, collectRowsFunc)
 
 	if err != nil {
 		return nil, errors.Join(ErrExec, err)
 	}
 
-	if err = res.ReceiveAll(); err != nil {
+	if err = res.Recv(); err != nil {
 		return nil, errors.Join(ErrResult, err)
 	}
 

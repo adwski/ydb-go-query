@@ -76,7 +76,7 @@ func NewService(runCtx context.Context, wg *sync.WaitGroup, cfg Config) *Service
 // waitClose ensures pool is closed before signaling wg.Done() to the owner or query service.
 func (svc *Service) waitClose(ctx context.Context) {
 	<-ctx.Done()
-	_ = svc.pool.Close() //nolint:wrapcheck // unnecessary
+	_ = svc.pool.Close()
 	svc.wg.Done()
 }
 
@@ -128,14 +128,14 @@ func (svc *Service) exec(
 		return nil, ErrNoSession
 	}
 
-	res, err := sess.Exec(ctx, query, params, txControl)
+	res, err := sess.Exec(ctx, query, params, txControl, nil)
 	if err != nil {
 		return nil, errors.Join(ErrExec, err)
 	}
 
 	svc.logger.Trace("received result stream", "query", strip(query))
 
-	if err = res.ReceiveAll(); err != nil {
+	if err = res.Recv(); err != nil {
 		return nil, errors.Join(ErrResult, err)
 	}
 

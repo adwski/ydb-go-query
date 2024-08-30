@@ -31,12 +31,13 @@ type Result struct {
 
 	err error
 
-	issues []*Ydb_Issue.IssueMessage
-
-	cols []*Ydb.Column
-	rows []*Ydb.Value
-
 	txID string
+
+	collectRowsFunc func([]*Ydb.Value)
+
+	issues []*Ydb_Issue.IssueMessage
+	cols   []*Ydb.Column
+	rows   []*Ydb.Value
 
 	done atomic.Bool
 }
@@ -45,11 +46,14 @@ func NewResult(
 	stream Ydb_Query_V1.QueryService_ExecuteQueryClient,
 	cancel context.CancelFunc,
 	logger logger.Logger,
+	collectRowsFunc func([]*Ydb.Value),
 ) *Result {
 	return &Result{
 		logger: logger,
 		stream: stream,
 		cancel: cancel,
+
+		collectRowsFunc: collectRowsFunc,
 	}
 }
 
@@ -82,10 +86,10 @@ func (r *Result) TxID() string {
 	return r.txID
 }
 
-// ReceiveAll reads all parts from result stream.
+// Recv reads all parts from result stream till completion.
 // It assumes that parts are arriving sequentially,
 // i.e. ConcurrentResultSets is false.
-func (r *Result) ReceiveAll() error {
+func (r *Result) Recv() error {
 	if r.done.Load() {
 		return nil
 	}
@@ -114,12 +118,15 @@ func (r *Result) ReceiveAll() error {
 
 		if part.ResultSet != nil {
 			if r.cols == nil && len(part.ResultSet.Columns) > 0 {
-				r.cols = make([]*Ydb.Column, len(part.ResultSet.Columns))
-				copy(r.cols, part.ResultSet.GetColumns())
+				r.cols = part.ResultSet.Columns
 			}
 
 			if len(part.ResultSet.Rows) > 0 {
-				r.rows = append(r.rows, part.ResultSet.Rows...)
+				if r.collectRowsFunc != nil {
+					r.collectRowsFunc(part.ResultSet.Rows)
+				} else {
+					r.rows = append(r.rows, part.ResultSet.Rows...)
+				}
 			}
 		}
 

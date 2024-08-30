@@ -26,6 +26,7 @@ func (s *Session) Exec(
 	query string,
 	params map[string]*Ydb.TypedValue,
 	txControl *Ydb_Query.TransactionControl,
+	collectRowsFunc func([]*Ydb.Value),
 ) (*result.Result, error) {
 	if s.shutdown.Load() {
 		return nil, ErrShutdown
@@ -53,5 +54,5 @@ func (s *Session) Exec(
 		return nil, errors.Join(ErrExec, err)
 	}
 
-	return result.NewResult(respExec, cancelStream, s.logger), nil
+	return result.NewResult(respExec, cancelStream, s.logger, collectRowsFunc), nil
 }
