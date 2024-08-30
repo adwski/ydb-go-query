@@ -52,12 +52,11 @@ func main() {
 		ydb.WithZeroLogger(logger.With().Str("component", "ydb").Logger()),
 		ydb.WithSessionPoolSize(*poolSize)}
 
-	if *ycIamFile != "" { // this enables Yandex Cloud authentication & authorization
-		// configure secure connection params
-		// by default it's without TLS and no auth
+	if *ycIamFile != "" {
+		// Enable Yandex Cloud authentication & authorization.
 		options = append(options,
 			ydb.WithTransportTLS(),         // use TLS
-			ydb.WithYCAuthFile(*ycIamFile)) // use service acc IAM key
+			ydb.WithYCAuthFile(*ycIamFile)) // use YC authorization with service acc IAM key
 	}
 
 	// create client
@@ -73,32 +72,32 @@ func main() {
 
 	// run queries
 
-	// ExecOne() executes query outside of transaction.
+	// Exec() executes query outside of transaction.
 	// It blocks until it fetches result completely.
 	// It also provides basic execution stats.
 	checkResult(client.Query().Exec(ctx, `SELECT 1`, nil))
 
-	// ExecDDL() is same as ExecOne() but doesn't have params.
+	// ExecDDL() is same as Exec() but doesn't have params.
 	checkResult(client.Query().ExecDDL(ctx, seriesCreateTable))
 	checkResult(client.Query().ExecDDL(ctx, seasonsCreateTable))
 	checkResult(client.Query().ExecDDL(ctx, episodesCreateTable))
 
-	// Tx() creates 'transaction scope'.
+	// Tx() creates 'transaction settings scope'.
 	// This means that every ExecOne() will be executed in its own transaction.
 	// Every transaction inherits settings of the scope, i.e. transaction mode.
 	// By default, tx mode is serializable read/write.
 	// Read more about transactions here https://ydb.tech/docs/en/concepts/transactions.
 	checkResult(client.Query().Tx().ExecOne(ctx, seriesData, nil))
 
-	// Exec several queries in one transaction.
-	// This approach requires explicit transaction creation
-	// (and can lead to error).
+	// ExecMany allows to execute several queries in one transaction.
+	// This approach requires explicit transaction creation (which can lead to error).
 	tx, errTx := client.Query().Tx().ExecMany(ctx)
 	if errTx != nil {
 		logger.Error().Err(err).Msg("cannot create transaction")
 		defer os.Exit(1)
 		return
 	}
+	// exec query with this transaction
 	checkResult(tx.Do(ctx, seasonsData, nil, false))
 	// Only last query in transaction should have commit flag.
 	// This flag also implies transaction cleanup (underlying session will be freed).
