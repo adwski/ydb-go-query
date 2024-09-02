@@ -98,13 +98,13 @@ func (svc *Service) ExecDDL(
 func (svc *Service) Tx() *transaction.Settings {
 	return transaction.New(
 		svc.logger,
-		func(ctx context.Context) (transaction.ExecFunc, func(), error) {
+		func(ctx context.Context) (*session.Session, func(), error) {
 			sess := svc.pool.Get(ctx)
 			if sess == nil {
 				return nil, nil, ErrNoSession
 			}
 
-			return sess.Exec, func() {
+			return sess, func() {
 				svc.pool.Put(sess)
 			}, nil
 		})

@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
+	"github.com/adwski/ydb-go-query/v1/internal/query/session"
 	"github.com/adwski/ydb-go-query/v1/query/result"
 
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
@@ -17,30 +18,16 @@ var (
 	ErrPrepare  = errors.New("unable to prepare transaction")
 	ErrResult   = errors.New("result fetch error")
 	ErrExec     = errors.New("query execution failed")
+	ErrCommited = errors.New("commited transaction")
 )
 
 type (
-	ExecFunc func(
-		context.Context,
-		string,
-		map[string]*Ydb.TypedValue,
-		*Ydb_Query.TransactionControl,
-		func([]*Ydb.Value),
-	) (*result.Result, error)
-
-	prepareFunc func(ctx context.Context) (ExecFunc, func(), error)
-
-	Settings struct {
-		logger      logger.Logger
-		txSet       *Ydb_Query.TransactionSettings
-		prepareFunc prepareFunc
-	}
-
 	Transaction struct {
 		logger logger.Logger
 
-		execFunc ExecFunc
-		cleanup  func()
+		sess *session.Session
+
+		cleanup func()
 
 		settings *Ydb_Query.TransactionSettings
 
@@ -52,109 +39,16 @@ type (
 	}
 )
 
-func New(log logger.Logger, pF prepareFunc) *Settings {
-	return &Settings{
-		logger:      log,
-		prepareFunc: pF,
-	}
-}
-
-func (s *Settings) ExecOne(
-	ctx context.Context,
-	query string,
-	params map[string]*Ydb.TypedValue,
-	collectRowsFunc func([]*Ydb.Value),
-) (*result.Result, error) {
-	if s.txSet == nil {
-		s.SerializableReadWrite()
+func (tx *Transaction) Rollback(ctx context.Context) error {
+	if tx.commit {
+		return ErrCommited
 	}
 
-	execFunc, cleanup, err := s.prepareFunc(ctx)
-	if err != nil {
-		return nil, errors.Join(ErrPrepare, err)
+	if err := tx.sess.RollbackTX(ctx, tx.id); err != nil {
+		return err
 	}
 
-	tx := &Transaction{
-		logger:   s.logger,
-		execFunc: execFunc,
-		cleanup:  cleanup,
-		settings: s.txSet,
-		commit:   true,
-	}
-
-	return tx.exec(ctx, query, params, collectRowsFunc)
-}
-
-func (s *Settings) ExecMany(ctx context.Context) (*Transaction, error) {
-	if s.txSet == nil {
-		s.SerializableReadWrite()
-	}
-
-	execFunc, cleanup, err := s.prepareFunc(ctx)
-	if err != nil {
-		return nil, errors.Join(ErrPrepare, err)
-	}
-
-	tx := &Transaction{
-		logger:   s.logger,
-		execFunc: execFunc,
-		cleanup:  cleanup,
-		settings: s.txSet,
-	}
-
-	return tx, nil
-}
-
-func (s *Settings) OnlineReadOnly() *Settings {
-	s.txSet = &Ydb_Query.TransactionSettings{
-		TxMode: &Ydb_Query.TransactionSettings_OnlineReadOnly{
-			OnlineReadOnly: &Ydb_Query.OnlineModeSettings{},
-		},
-	}
-
-	return s
-}
-
-func (s *Settings) OnlineReadOnlyInconsistent() *Settings {
-	s.txSet = &Ydb_Query.TransactionSettings{
-		TxMode: &Ydb_Query.TransactionSettings_OnlineReadOnly{
-			OnlineReadOnly: &Ydb_Query.OnlineModeSettings{
-				AllowInconsistentReads: true,
-			},
-		},
-	}
-
-	return s
-}
-
-func (s *Settings) SnapshotReadOnly() *Settings {
-	s.txSet = &Ydb_Query.TransactionSettings{
-		TxMode: &Ydb_Query.TransactionSettings_SnapshotReadOnly{
-			SnapshotReadOnly: &Ydb_Query.SnapshotModeSettings{},
-		},
-	}
-
-	return s
-}
-
-func (s *Settings) StaleReadOnly() *Settings {
-	s.txSet = &Ydb_Query.TransactionSettings{
-		TxMode: &Ydb_Query.TransactionSettings_StaleReadOnly{
-			StaleReadOnly: &Ydb_Query.StaleModeSettings{},
-		},
-	}
-
-	return s
-}
-
-func (s *Settings) SerializableReadWrite() *Settings {
-	s.txSet = &Ydb_Query.TransactionSettings{
-		TxMode: &Ydb_Query.TransactionSettings_SerializableReadWrite{
-			SerializableReadWrite: &Ydb_Query.SerializableModeSettings{},
-		},
-	}
-
-	return s
+	return nil
 }
 
 func (tx *Transaction) Do(
@@ -191,7 +85,7 @@ func (tx *Transaction) Do(
 		}
 	}
 
-	res, err := tx.execFunc(ctx, query, params, txControl, collectRowsFunc)
+	res, err := tx.sess.Exec(ctx, query, params, txControl, collectRowsFunc)
 
 	if err != nil {
 		return nil, errors.Join(ErrExec, err)
@@ -228,7 +122,7 @@ func (tx *Transaction) exec(
 		},
 		CommitTx: tx.commit,
 	}
-	res, err := tx.execFunc(ctx, query, params, txControl, collectRowsFunc)
+	res, err := tx.sess.Exec(ctx, query, params, txControl, collectRowsFunc)
 
 	if err != nil {
 		return nil, errors.Join(ErrExec, err)

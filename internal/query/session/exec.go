@@ -3,6 +3,7 @@ package session
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/adwski/ydb-go-query/v1/query/result"
 
@@ -17,9 +18,25 @@ const (
 )
 
 var (
-	ErrExec     = errors.New("exec error")
-	ErrShutdown = errors.New("session is shut down")
+	ErrExec       = errors.New("exec error")
+	ErrTxRollback = errors.New("transaction rollback error")
+	ErrShutdown   = errors.New("session is shut down")
 )
+
+func (s *Session) RollbackTX(ctx context.Context, txID string) error {
+	resp, err := s.qsc.RollbackTransaction(ctx, &Ydb_Query.RollbackTransactionRequest{
+		SessionId: s.id,
+		TxId:      txID,
+	})
+	if err != nil {
+		return errors.Join(ErrTxRollback, err)
+	}
+	if resp.Status != Ydb.StatusIds_SUCCESS {
+		return errors.Join(ErrTxRollback, fmt.Errorf("status: %s", resp.Status.String()))
+	}
+
+	return nil
+}
 
 func (s *Session) Exec(
 	ctx context.Context,

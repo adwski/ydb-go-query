@@ -170,6 +170,23 @@ func main() {
 		}, nil))
 	selectEpisodes()
 
+	// Create and rollback transaction.
+	if tx, err = client.Query().Tx().ExecMany(ctx); err != nil {
+		logger.Error().Err(err).Msg("cannot create transaction")
+		defer os.Exit(1)
+		return
+	}
+	checkResult(tx.Do(ctx, `UPSERT INTO episodes (
+		series_id, season_id, episode_id, title, air_date
+	) VALUES (
+    2, 5, 13, "Test Episode", CAST(Date("2018-08-27") AS Uint64))`, nil, nil, false))
+	if err = tx.Rollback(ctx); err != nil { // Only uncommitted transaction can be rolled back.
+		logger.Error().Err(err).Msg("cannot rollback transaction")
+		defer os.Exit(1)
+		return
+	}
+	selectEpisodes()
+
 	checkResult(client.Query().Exec(ctx, `ALTER TABLE episodes ADD COLUMN viewers Uint64;`, nil))
 	checkResult(client.Query().Exec(ctx, `ALTER TABLE episodes DROP COLUMN viewers;`, nil))
 	checkResult(client.Query().Exec(ctx, `DROP TABLE series`, nil))
