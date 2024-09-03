@@ -70,29 +70,28 @@ func main() {
 		defer os.Exit(1)
 		return
 	}
+	defer client.Close() // blocks until all cleanup is finished
 
 	// ----------------------------------------------------------------------
 	// Run queries
+
+	// client.QueryCtx() returns query execution context which holds
+	// global configuration that all queries use.
+	// At the moment it controls transaction mode only.
+	qCtx := client.QueryCtx()
 
 	// ----------------------------------------------------------------------
 	// Simple query execution.
 
 	// Exec() executes query outside of transaction
-	// and without any parameters.
+	// and with no parameters.
 	// It blocks until it fetches result completely.
 	// It also provides basic execution stats.
-	checkResult(client.Query().Exec(ctx, `SELECT 1`))
+	checkResult(qCtx.Exec(ctx, `SELECT 1`))
 
-	checkResult(client.Query().Exec(ctx, seriesCreateTable))
-
-	// New() creates 'query' entity which can be configured
-	// and then executed with Exec(ctx).
-	checkResult(client.Query().New(seasonsCreateTable).Exec(ctx))
-	// This style of execution uses transaction settings which means
-	// every call will be executed in its own transaction.
-	// Default tx mode is serializable read/write.
-	// Read more about transactions here https://ydb.tech/docs/en/concepts/transactions.
-	checkResult(client.Query().New(episodesCreateTable).Exec(ctx))
+	checkResult(qCtx.Exec(ctx, seriesCreateTable))
+	checkResult(qCtx.Exec(ctx, seasonsCreateTable))
+	checkResult(qCtx.Exec(ctx, episodesCreateTable))
 
 	// ----------------------------------------------------------------------
 	// Execute several queries inside transaction.
@@ -100,13 +99,17 @@ func main() {
 	// Tx() creates 'transaction' entity which allows to
 	// execute several queries in one transaction.
 	// Under the hood it will acquire and hold YDB session until transaction is finished.
-	tx, errTx := client.Query().Tx(ctx)
+	// Default tx mode is serializable read/write.
+	// Read more about transactions here https://ydb.tech/docs/en/concepts/transactions.
+	tx, errTx := qCtx.Tx(ctx)
 	if errTx != nil {
 		logger.Error().Err(err).Msg("cannot create transaction")
 		defer os.Exit(1)
 		return
 	}
 	// exec queries inside this transaction
+	// Query() creates 'query' entity which can be configured
+	// and then executed with Exec(ctx).
 	checkResult(tx.Query(seasonsData).Exec(ctx))
 	checkResult(tx.Query(seriesData).Exec(ctx))
 	// Commit() will configure query to send inline commit flag.
@@ -117,7 +120,7 @@ func main() {
 	/*
 		// Or you can also commit transaction with explicit tx.Commit() call
 		// which will result in +1 request to YDB.
-		checkResult(tx.Query(episodesData).Exec(ctx)) // no commit flag
+		checkResult(tx.QueryCtx(episodesData).Exec(ctx)) // no commit flag
 		if err = tx.Commit(ctx); err != nil {
 			logger.Error().Err(err).Msg("cannot commit transaction")
 			defer os.Exit(1)
@@ -125,12 +128,14 @@ func main() {
 		}
 	*/
 	// After transaction is commited any following calls to
-	// tx.Query().Exec(), tx.Rollback() or tx.Commit() will result in error.
+	// tx.QueryCtx().Exec(), tx.Rollback() or tx.Commit() will result in error.
 
 	// ----------------------------------------------------------------------
 	// Select with params
 
-	checkResult(client.Query().New(
+	// qCtx.Query() also uses transaction settings which means
+	// every call will be executed in its own transaction.
+	checkResult(qCtx.Query(
 		`DECLARE $seriesId AS Uint64;
 	SELECT
 	    sa.title AS season_title,
@@ -144,17 +149,16 @@ func main() {
 	ON sa.series_id = sr.series_id
 	WHERE sa.series_id = $seriesId
 	ORDER BY sr.series_id, sa.season_id`).
-		OnlineReadOnly().                    // Here tx mode is overwritten to online-read-only.
 		Param("$seriesId", types.Uint64(1)). // Parameters for query declared with DECLARE
 		Exec(ctx))
 
-	checkResult(client.Query().New(`UPSERT INTO episodes (
+	checkResult(qCtx.Query(`UPSERT INTO episodes (
 		series_id, season_id, episode_id, title, air_date
 	) VALUES (
     2, 5, 13, "Test Episode", CAST(Date("2018-08-27") AS Uint64))`).Exec(ctx))
 
 	selectEpisodes := func() {
-		checkResult(client.Query().New(`DECLARE $seriesId AS Uint64;
+		checkResult(qCtx.Query(`DECLARE $seriesId AS Uint64;
 	DECLARE $seasonId AS Uint64;
 	SELECT * FROM episodes WHERE series_id = $seriesId AND season_id = $seasonId;`).
 			Param("$seriesId", types.Uint64(2)).
@@ -184,7 +188,7 @@ func main() {
 	// ----------------------------------------------------------------------
 	// Delete with params
 
-	checkResult(client.Query().New(`DECLARE $title AS Utf8;
+	checkResult(qCtx.Query(`DECLARE $title AS Utf8;
 	DELETE FROM episodes WHERE title = $title;`).
 		Param("$title", types.UTF8("Test Episode")).
 		Exec(ctx))
@@ -193,7 +197,7 @@ func main() {
 	// ----------------------------------------------------------------------
 	// Create and rollback transaction.
 
-	if tx, err = client.Query().Tx(ctx); err != nil {
+	if tx, err = qCtx.Tx(ctx); err != nil {
 		logger.Error().Err(err).Msg("cannot create transaction")
 		defer os.Exit(1)
 		return
@@ -214,14 +218,12 @@ func main() {
 	// ----------------------------------------------------------------------
 	// cleanup
 
-	checkResult(client.Query().Exec(ctx, `ALTER TABLE episodes ADD COLUMN viewers Uint64;`))
-	checkResult(client.Query().Exec(ctx, `ALTER TABLE episodes DROP COLUMN viewers;`))
-	checkResult(client.Query().Exec(ctx, `DROP TABLE series`))
-	checkResult(client.Query().Exec(ctx, `DROP TABLE seasons`))
-	checkResult(client.Query().Exec(ctx, `DROP TABLE episodes`))
+	checkResult(qCtx.Exec(ctx, `ALTER TABLE episodes ADD COLUMN viewers Uint64;`))
+	checkResult(qCtx.Exec(ctx, `ALTER TABLE episodes DROP COLUMN viewers;`))
+	checkResult(qCtx.Exec(ctx, `DROP TABLE series`))
+	checkResult(qCtx.Exec(ctx, `DROP TABLE seasons`))
+	checkResult(qCtx.Exec(ctx, `DROP TABLE episodes`))
 
-	// close client
-	client.Close() // blocks until all cleanup is finished
 }
 
 func checkResult(result *query.Result, err error) {

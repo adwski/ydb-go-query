@@ -7,11 +7,13 @@ import (
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
 	"github.com/adwski/ydb-go-query/v1/internal/logger/noop"
 	zerologger "github.com/adwski/ydb-go-query/v1/internal/logger/zerolog"
+	"github.com/adwski/ydb-go-query/v1/internal/query/txsettings"
 	"github.com/adwski/ydb-go-query/v1/internal/transport"
 	"github.com/adwski/ydb-go-query/v1/internal/transport/auth/yc"
 	transportCreds "github.com/adwski/ydb-go-query/v1/internal/transport/credentials"
 
 	"github.com/rs/zerolog"
+	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"
 	"google.golang.org/grpc/credentials"
 )
 
@@ -25,6 +27,8 @@ type (
 		logger               logger.Logger
 		transportCredentials credentials.TransportCredentials
 		auth                 transport.Authenticator
+
+		txSettings *Ydb_Query.TransactionSettings
 
 		DB           string
 		InitialNodes []string
@@ -40,6 +44,7 @@ func (cfg *Config) setDefaults() {
 	cfg.sessionCreateTimeout = defaultSessionCreateTimeout
 	cfg.poolSize = defaultSessionPoolSize
 	cfg.transportCredentials = transportCreds.Insecure()
+	cfg.txSettings = txsettings.SerializableReadWrite()
 }
 
 func WithLogger(log logger.Logger) Option {
@@ -107,6 +112,41 @@ func withYC(ycCfg yc.Config) Option {
 			return err //nolint:wrapcheck // unnecessary
 		}
 		cfg.auth = auth
+		return nil
+	}
+}
+
+func WithSerializableReadWrite() Option {
+	return func(ctx context.Context, cfg *Config) error {
+		cfg.txSettings = txsettings.SerializableReadWrite()
+		return nil
+	}
+}
+
+func WithOnlineReadOnly() Option {
+	return func(ctx context.Context, cfg *Config) error {
+		cfg.txSettings = txsettings.OnlineReadOnly()
+		return nil
+	}
+}
+
+func WithOnlineReadOnlyInconsistent() Option {
+	return func(ctx context.Context, cfg *Config) error {
+		cfg.txSettings = txsettings.OnlineReadOnlyInconsistent()
+		return nil
+	}
+}
+
+func WithStaleReadOnly() Option {
+	return func(ctx context.Context, cfg *Config) error {
+		cfg.txSettings = txsettings.StaleReadOnly()
+		return nil
+	}
+}
+
+func WithSnapshotReadOnly() Option {
+	return func(ctx context.Context, cfg *Config) error {
+		cfg.txSettings = txsettings.SnapshotReadOnly()
 		return nil
 	}
 }

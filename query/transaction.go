@@ -104,7 +104,7 @@ func (tx *Transaction) exec(
 
 	stream, cancel, err := tx.sess.Exec(ctx, query, params, txControl)
 	if err != nil {
-		return nil, errors.Join(ErrExec, err)
+		return nil, err //nolint:wrapcheck //unnecessary
 	}
 
 	res := newResult(stream, cancel, tx.logger, collectRowsFunc)

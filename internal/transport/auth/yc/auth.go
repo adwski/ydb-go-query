@@ -110,8 +110,12 @@ func New(ctx context.Context, log logger.Logger, cfg Config) (*YC, error) {
 }
 
 func (a *YC) Run(ctx context.Context, wg *sync.WaitGroup) {
-	defer wg.Done()
-	defer a.timer.Stop()
+	a.logger.Debug("auth renew started")
+	defer func() {
+		a.timer.Stop()
+		wg.Done()
+		a.logger.Debug("auth renew stopped")
+	}()
 
 renewTokenLoop:
 	for {
@@ -130,7 +134,7 @@ func (a *YC) getToken(ctx context.Context) {
 
 	tokenResp, err := a.yc.CreateIAMToken(callCtx)
 	if err != nil {
-		if a.authInd || a.err.Error() != err.Error() {
+		if a.authInd || a.err == nil || a.err.Error() != err.Error() {
 			a.logger.Error("unable to authenticate in YC", "error", err)
 			a.authInd = false
 		}
