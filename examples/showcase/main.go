@@ -7,7 +7,7 @@ import (
 	"os/signal"
 
 	ydb "github.com/adwski/ydb-go-query/v1"
-	"github.com/adwski/ydb-go-query/v1/query/result"
+	"github.com/adwski/ydb-go-query/v1/query"
 	"github.com/adwski/ydb-go-query/v1/types"
 
 	"github.com/rs/zerolog"
@@ -95,7 +95,7 @@ func main() {
 	checkResult(client.Query().New(episodesCreateTable).Exec(ctx))
 
 	// ----------------------------------------------------------------------
-	// Execute inside transaction.
+	// Execute several queries inside transaction.
 
 	// Tx() creates 'transaction' entity which allows to
 	// execute several queries in one transaction.
@@ -224,7 +224,7 @@ func main() {
 	client.Close() // blocks until all cleanup is finished
 }
 
-func checkResult(result *result.Result, err error) {
+func checkResult(result *query.Result, err error) {
 	fmt.Println("==============================")
 	// check result
 	switch {

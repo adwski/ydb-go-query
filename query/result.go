@@ -1,4 +1,4 @@
-package result
+package query
 
 import (
 	"context"
@@ -42,7 +42,7 @@ type Result struct {
 	done atomic.Bool
 }
 
-func NewResult(
+func newResult(
 	stream Ydb_Query_V1.QueryService_ExecuteQueryClient,
 	cancel context.CancelFunc,
 	logger logger.Logger,
@@ -57,9 +57,9 @@ func NewResult(
 	}
 }
 
-// Close closes result stream,
-// but result data is still available to be read.
-func (r *Result) Close() {
+// close closes result stream,
+// result data remains available.
+func (r *Result) close() {
 	r.cancel()
 	r.done.Store(true)
 }
@@ -86,10 +86,10 @@ func (r *Result) TxID() string {
 	return r.txID
 }
 
-// Recv reads all parts from result stream till completion.
+// recv reads all parts from result stream till completion.
 // It assumes that parts are arriving sequentially,
 // i.e. ConcurrentResultSets is false.
-func (r *Result) Recv() error {
+func (r *Result) recv() error {
 	if r.done.Load() {
 		return nil
 	}
@@ -142,7 +142,7 @@ func (r *Result) Recv() error {
 		}
 	}
 
-	r.Close()
+	r.close()
 
 	return nil
 }

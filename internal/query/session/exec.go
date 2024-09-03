@@ -5,8 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/adwski/ydb-go-query/v1/query/result"
-
+	"github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"
 )
@@ -59,10 +58,9 @@ func (s *Session) Exec(
 	query string,
 	params map[string]*Ydb.TypedValue,
 	txControl *Ydb_Query.TransactionControl,
-	collectRowsFunc func([]*Ydb.Value) error,
-) (*result.Result, error) {
+) (Ydb_Query_V1.QueryService_ExecuteQueryClient, context.CancelFunc, error) {
 	if s.shutdown.Load() {
-		return nil, ErrShutdown
+		return nil, nil, ErrShutdown
 	}
 
 	streamCtx, cancelStream := context.WithCancel(ctx)
@@ -84,8 +82,8 @@ func (s *Session) Exec(
 
 	if err != nil {
 		cancelStream()
-		return nil, errors.Join(ErrExec, err)
+		return nil, nil, errors.Join(ErrExec, err)
 	}
 
-	return result.NewResult(respExec, cancelStream, s.logger, collectRowsFunc), nil
+	return respExec, cancelStream, nil
 }

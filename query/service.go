@@ -9,7 +9,6 @@ import (
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
 	"github.com/adwski/ydb-go-query/v1/internal/query/pool"
 	"github.com/adwski/ydb-go-query/v1/internal/query/session"
-	"github.com/adwski/ydb-go-query/v1/query/result"
 
 	"github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
@@ -82,7 +81,7 @@ func (svc *Service) waitClose(ctx context.Context) {
 func (svc *Service) Exec(
 	ctx context.Context,
 	query string,
-) (*result.Result, error) {
+) (*Result, error) {
 	return svc.exec(ctx, query, nil, nil, nil)
 }
 
@@ -122,7 +121,7 @@ func (svc *Service) exec(
 	params map[string]*Ydb.TypedValue,
 	txSettings *Ydb_Query.TransactionSettings,
 	collectRows func([]*Ydb.Value) error,
-) (*result.Result, error) {
+) (*Result, error) {
 	sess := svc.pool.Get(ctx)
 	defer func() {
 		// get will return nil if canceled
@@ -145,14 +144,16 @@ func (svc *Service) exec(
 		}
 	}
 
-	res, err := sess.Exec(ctx, query, params, txControl, collectRows)
+	stream, cancel, err := sess.Exec(ctx, query, params, txControl)
 	if err != nil {
 		return nil, errors.Join(ErrExec, err)
 	}
 
+	res := newResult(stream, cancel, svc.logger, collectRows)
+
 	svc.logger.Trace("received result stream", "query", strip(query))
 
-	if err = res.Recv(); err != nil {
+	if err = res.recv(); err != nil {
 		return nil, errors.Join(ErrResult, err)
 	}
 

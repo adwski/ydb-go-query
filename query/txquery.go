@@ -3,8 +3,6 @@ package query
 import (
 	"context"
 
-	"github.com/adwski/ydb-go-query/v1/query/result"
-
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
 )
 
@@ -15,7 +13,7 @@ type (
 		map[string]*Ydb.TypedValue,
 		func([]*Ydb.Value) error,
 		bool,
-	) (*result.Result, error)
+	) (*Result, error)
 
 	TxQuery struct {
 		*Query
@@ -40,6 +38,6 @@ func (q *TxQuery) Commit() *TxQuery {
 	return q
 }
 
-func (q *TxQuery) Exec(ctx context.Context) (*result.Result, error) {
+func (q *TxQuery) Exec(ctx context.Context) (*Result, error) {
 	return q.txExecFunc(ctx, q.content, q.params, q.collectRowsFunc, q.commit)
 }
