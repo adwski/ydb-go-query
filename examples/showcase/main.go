@@ -164,24 +164,24 @@ func main() {
 			Param("$seriesId", types.Uint64(2)).
 			Param("$seasonId", types.Uint64(5)).
 
-			// Using user-defined function for result row collection.
+			// Using user-defined function to get result rows.
 			// This func will be called every time new result part is arrived.
 			// If nil, rows are collected internally and can be retrieved by result.Rows().
-			CollectRows(
-				func(rows []*Ydb.Value) error {
-					fmt.Println(">>> Collecting rows in user defined function.")
-					for _, row := range rows {
-						fmt.Print("row: ")
-						for idx, col := range row.Items {
-							fmt.Printf("col%d: %v ", idx, col.String())
-						}
-						fmt.Println()
+			Collect(func(rows []*Ydb.Value) error {
+				fmt.Println(">>> Collecting rows in user defined function.")
+				for _, row := range rows {
+					fmt.Print("row: ")
+					for idx, col := range row.Items {
+						fmt.Printf("col%d: %v ", idx, col.String())
 					}
+					fmt.Println()
+				}
 
-					// If this func returns error result parts collection will stop
-					// and result stream will be canceled.
-					return nil
-				}).Exec(ctx))
+				// If this func returns error result parts collection will stop
+				// and result stream will be canceled.
+				// This error is treated as result error ( retrieved with result.Err() )
+				return nil
+			}).Exec(ctx))
 	}
 	selectEpisodes()
 
@@ -216,10 +216,14 @@ func main() {
 	selectEpisodes()
 
 	// ----------------------------------------------------------------------
-	// cleanup
+	// DML examples
 
 	checkResult(qCtx.Exec(ctx, `ALTER TABLE episodes ADD COLUMN viewers Uint64;`))
 	checkResult(qCtx.Exec(ctx, `ALTER TABLE episodes DROP COLUMN viewers;`))
+
+	// ----------------------------------------------------------------------
+	// cleanup
+
 	checkResult(qCtx.Exec(ctx, `DROP TABLE series`))
 	checkResult(qCtx.Exec(ctx, `DROP TABLE seasons`))
 	checkResult(qCtx.Exec(ctx, `DROP TABLE episodes`))
