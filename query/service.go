@@ -10,7 +10,6 @@ import (
 	"github.com/adwski/ydb-go-query/v1/internal/query/pool"
 	"github.com/adwski/ydb-go-query/v1/internal/query/session"
 	"github.com/adwski/ydb-go-query/v1/query/result"
-	"github.com/adwski/ydb-go-query/v1/query/transaction"
 
 	"github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
@@ -23,21 +22,21 @@ const (
 )
 
 var (
-	ErrExec      = errors.New("query execution failed")
-	ErrResult    = errors.New("result fetch error")
 	ErrNoSession = errors.New("no session")
 
 	queryLogCut = []byte("...")
 )
 
-type Service struct {
-	logger logger.Logger
-	qsc    Ydb_Query_V1.QueryServiceClient
+type (
+	Service struct {
+		logger logger.Logger
+		qsc    Ydb_Query_V1.QueryServiceClient
 
-	wg *sync.WaitGroup
+		wg *sync.WaitGroup
 
-	pool *pool.Pool[*session.Session, session.Session]
-}
+		pool *pool.Pool[*session.Session, session.Session]
+	}
+)
 
 type Config struct {
 	Logger        logger.Logger
@@ -83,38 +82,46 @@ func (svc *Service) waitClose(ctx context.Context) {
 func (svc *Service) Exec(
 	ctx context.Context,
 	query string,
-	params map[string]*Ydb.TypedValue,
 ) (*result.Result, error) {
-	return svc.exec(ctx, query, params, nil)
+	return svc.exec(ctx, query, nil, nil, nil)
 }
 
-func (svc *Service) ExecDDL(
-	ctx context.Context,
-	query string,
-) (*result.Result, error) {
-	return svc.exec(ctx, query, nil, nil)
+func (svc *Service) New(queryContent string) *Query {
+	return newQuery(
+		queryContent,
+		svc.exec,
+	)
 }
 
-func (svc *Service) Tx() *transaction.Settings {
-	return transaction.New(
-		svc.logger,
-		func(ctx context.Context) (*session.Session, func(), error) {
-			sess := svc.pool.Get(ctx)
-			if sess == nil {
-				return nil, nil, ErrNoSession
-			}
+func (svc *Service) Tx(ctx context.Context) (*Transaction, error) {
+	sess := svc.pool.Get(ctx)
+	if sess == nil {
+		return nil, ErrNoSession
+	}
 
-			return sess, func() {
-				svc.pool.Put(sess)
-			}, nil
-		})
+	tx := &Transaction{
+		logger: svc.logger,
+		sess:   sess,
+		cleanup: func() {
+			svc.pool.Put(sess)
+		},
+		settings: &Ydb_Query.TransactionSettings{
+			TxMode: &Ydb_Query.TransactionSettings_SerializableReadWrite{
+				SerializableReadWrite: &Ydb_Query.SerializableModeSettings{},
+			},
+		},
+	}
+
+	return tx, nil
 }
 
+// exec provides low-level single query execution.
 func (svc *Service) exec(
 	ctx context.Context,
 	query string,
 	params map[string]*Ydb.TypedValue,
-	txControl *Ydb_Query.TransactionControl,
+	txSettings *Ydb_Query.TransactionSettings,
+	collectRows func([]*Ydb.Value) error,
 ) (*result.Result, error) {
 	sess := svc.pool.Get(ctx)
 	defer func() {
@@ -128,7 +135,17 @@ func (svc *Service) exec(
 		return nil, ErrNoSession
 	}
 
-	res, err := sess.Exec(ctx, query, params, txControl, nil)
+	var txControl *Ydb_Query.TransactionControl
+	if txSettings != nil {
+		txControl = &Ydb_Query.TransactionControl{
+			TxSelector: &Ydb_Query.TransactionControl_BeginTx{
+				BeginTx: txSettings,
+			},
+			CommitTx: true,
+		}
+	}
+
+	res, err := sess.Exec(ctx, query, params, txControl, collectRows)
 	if err != nil {
 		return nil, errors.Join(ErrExec, err)
 	}

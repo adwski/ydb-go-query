@@ -1,9 +1,8 @@
-package transaction
+package query
 
 import (
 	"context"
 	"errors"
-	"sync/atomic"
 
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
 	"github.com/adwski/ydb-go-query/v1/internal/query/session"
@@ -16,8 +15,6 @@ import (
 var (
 	ErrFinished = errors.New("transaction already finished")
 	ErrPrepare  = errors.New("unable to prepare transaction")
-	ErrResult   = errors.New("result fetch error")
-	ErrExec     = errors.New("query execution failed")
 	ErrCommited = errors.New("commited transaction")
 )
 
@@ -33,38 +30,61 @@ type (
 
 		id string
 
-		finish atomic.Bool
-
-		commit bool
+		finish bool // committed or rolled back
 	}
 )
 
 func (tx *Transaction) Rollback(ctx context.Context) error {
-	if tx.commit {
-		return ErrCommited
+	if tx.finish {
+		return ErrFinished
 	}
 
 	if err := tx.sess.RollbackTX(ctx, tx.id); err != nil {
-		return err
+		return err //nolint:wrapcheck // unnecessary
 	}
+
+	tx.finish = true
+	tx.cleanup()
 
 	return nil
 }
 
-func (tx *Transaction) Do(
+func (tx *Transaction) Commit(ctx context.Context) error {
+	if tx.finish {
+		return ErrFinished
+	}
+
+	if err := tx.sess.CommitTX(ctx, tx.id); err != nil {
+		return err //nolint:wrapcheck // unnecessary
+	}
+
+	tx.finish = true
+	tx.cleanup()
+
+	return nil
+}
+
+func (tx *Transaction) Query(queryContent string) *TxQuery {
+	return newTxQuery(
+		queryContent,
+		tx.exec,
+	)
+}
+
+func (tx *Transaction) exec(
 	ctx context.Context,
 	query string,
 	params map[string]*Ydb.TypedValue,
-	collectRowsFunc func([]*Ydb.Value),
+	collectRowsFunc func([]*Ydb.Value) error,
 	commit bool,
 ) (*result.Result, error) {
-	if tx.finish.Load() {
+	if tx.finish {
 		return nil, ErrFinished
 	}
 
 	if commit {
 		defer func() {
-			tx.finish.Store(true)
+			tx.finish = true
 			tx.cleanup()
 		}()
 	}
@@ -97,42 +117,6 @@ func (tx *Transaction) Do(
 
 	tx.id = res.TxID()
 	tx.logger.Trace("received tx result", "txID", tx.id)
-
-	return res, nil
-}
-
-func (tx *Transaction) exec(
-	ctx context.Context,
-	query string,
-	params map[string]*Ydb.TypedValue,
-	collectRowsFunc func([]*Ydb.Value),
-) (*result.Result, error) {
-	if tx.finish.Load() {
-		return nil, ErrFinished
-	}
-	defer func() {
-		tx.finish.Store(true)
-		tx.cleanup()
-	}()
-
-	// begin tx
-	txControl := &Ydb_Query.TransactionControl{
-		TxSelector: &Ydb_Query.TransactionControl_BeginTx{
-			BeginTx: tx.settings,
-		},
-		CommitTx: tx.commit,
-	}
-	res, err := tx.sess.Exec(ctx, query, params, txControl, collectRowsFunc)
-
-	if err != nil {
-		return nil, errors.Join(ErrExec, err)
-	}
-
-	if err = res.Recv(); err != nil {
-		return nil, errors.Join(ErrResult, err)
-	}
-
-	tx.id = res.TxID()
 
 	return res, nil
 }

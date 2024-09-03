@@ -33,7 +33,7 @@ type Result struct {
 
 	txID string
 
-	collectRowsFunc func([]*Ydb.Value)
+	collectRowsFunc func([]*Ydb.Value) error
 
 	issues []*Ydb_Issue.IssueMessage
 	cols   []*Ydb.Column
@@ -46,7 +46,7 @@ func NewResult(
 	stream Ydb_Query_V1.QueryService_ExecuteQueryClient,
 	cancel context.CancelFunc,
 	logger logger.Logger,
-	collectRowsFunc func([]*Ydb.Value),
+	collectRowsFunc func([]*Ydb.Value) error,
 ) *Result {
 	return &Result{
 		logger: logger,
@@ -112,8 +112,8 @@ func (r *Result) Recv() error {
 			r.txID = part.TxMeta.Id
 		}
 
-		if len(part.Issues) > 0 && r.err == nil {
-			r.err = ErrIssues
+		if len(part.Issues) > 0 {
+			r.err = errors.Join(ErrIssues, r.err)
 		}
 
 		if part.ResultSet != nil {
@@ -123,7 +123,11 @@ func (r *Result) Recv() error {
 
 			if len(part.ResultSet.Rows) > 0 {
 				if r.collectRowsFunc != nil {
-					r.collectRowsFunc(part.ResultSet.Rows)
+					err = r.collectRowsFunc(part.ResultSet.Rows)
+					if err != nil {
+						r.err = errors.Join(err, r.err)
+						break
+					}
 				} else {
 					r.rows = append(r.rows, part.ResultSet.Rows...)
 				}

@@ -20,6 +20,7 @@ const (
 var (
 	ErrExec       = errors.New("exec error")
 	ErrTxRollback = errors.New("transaction rollback error")
+	ErrTxCommit   = errors.New("transaction commit error")
 	ErrShutdown   = errors.New("session is shut down")
 )
 
@@ -38,12 +39,27 @@ func (s *Session) RollbackTX(ctx context.Context, txID string) error {
 	return nil
 }
 
+func (s *Session) CommitTX(ctx context.Context, txID string) error {
+	resp, err := s.qsc.CommitTransaction(ctx, &Ydb_Query.CommitTransactionRequest{
+		SessionId: s.id,
+		TxId:      txID,
+	})
+	if err != nil {
+		return errors.Join(ErrTxCommit, err)
+	}
+	if resp.Status != Ydb.StatusIds_SUCCESS {
+		return errors.Join(ErrTxCommit, fmt.Errorf("status: %s", resp.Status.String()))
+	}
+
+	return nil
+}
+
 func (s *Session) Exec(
 	ctx context.Context,
 	query string,
 	params map[string]*Ydb.TypedValue,
 	txControl *Ydb_Query.TransactionControl,
-	collectRowsFunc func([]*Ydb.Value),
+	collectRowsFunc func([]*Ydb.Value) error,
 ) (*result.Result, error) {
 	if s.shutdown.Load() {
 		return nil, ErrShutdown
