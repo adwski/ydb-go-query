@@ -70,7 +70,11 @@ func main() {
 		return
 	}
 
-	// run queries
+	// ----------------------------------------------------------------------
+	// Run queries
+
+	// ----------------------------------------------------------------------
+	// Simple query execution.
 
 	// Exec() executes query outside of transaction
 	// and without any parameters.
@@ -89,8 +93,12 @@ func main() {
 	// Read more about transactions here https://ydb.tech/docs/en/concepts/transactions.
 	checkResult(client.Query().New(episodesCreateTable).Exec(ctx))
 
-	// ExecMany allows to execute several queries in one transaction.
-	// This approach requires explicit transaction creation (which can lead to error).
+	// ----------------------------------------------------------------------
+	// Execute inside transaction.
+
+	// Tx() creates 'transaction' entity which allows to
+	// execute several queries in one transaction.
+	// Under the hood it will acquire and hold YDB session until transaction is finished.
 	tx, errTx := client.Query().Tx(ctx)
 	if errTx != nil {
 		logger.Error().Err(err).Msg("cannot create transaction")
@@ -103,11 +111,23 @@ func main() {
 	// Commit() will configure query to send inline commit flag.
 	// Only last query in transaction should have commit flag set to true.
 	// This flag also implies transaction cleanup (underlying session will be freed).
-	// You can also commit transaction with explicit tx.Commit() call
-	// which will result in +1 request to YDB.
 	checkResult(tx.Query(episodesData).Commit().Exec(ctx))
+
+	/*
+		// Or you can also commit transaction with explicit tx.Commit() call
+		// which will result in +1 request to YDB.
+		checkResult(tx.Query(episodesData).Exec(ctx)) // no commit flag
+		if err = tx.Commit(ctx); err != nil {
+			logger.Error().Err(err).Msg("cannot commit transaction")
+			defer os.Exit(1)
+			return
+		}
+	*/
 	// After transaction is commited any following calls to
 	// tx.Query().Exec(), tx.Rollback() or tx.Commit() will result in error.
+
+	// ----------------------------------------------------------------------
+	// Select with params
 
 	checkResult(client.Query().New(
 		`DECLARE $seriesId AS Uint64;
@@ -168,10 +188,15 @@ func main() {
 						fmt.Println()
 					}
 
+					// If this func returns error result parts collection will stop
+					// and result stream will be canceled.
 					return nil
 				}).Exec(ctx))
 	}
 	selectEpisodes()
+
+	// ----------------------------------------------------------------------
+	// Delete with params
 
 	checkResult(client.Query().New(`DECLARE $title AS Utf8;
 	DELETE FROM episodes WHERE title = $title;`).
@@ -186,6 +211,7 @@ func main() {
 
 	// ----------------------------------------------------------------------
 	// Create and rollback transaction.
+
 	if tx, err = client.Query().Tx(ctx); err != nil {
 		logger.Error().Err(err).Msg("cannot create transaction")
 		defer os.Exit(1)
@@ -206,6 +232,7 @@ func main() {
 
 	// ----------------------------------------------------------------------
 	// cleanup
+
 	checkResult(client.Query().Exec(ctx, `ALTER TABLE episodes ADD COLUMN viewers Uint64;`))
 	checkResult(client.Query().Exec(ctx, `ALTER TABLE episodes DROP COLUMN viewers;`))
 	checkResult(client.Query().Exec(ctx, `DROP TABLE series`))
@@ -217,7 +244,7 @@ func main() {
 }
 
 func checkResult(result *result.Result, err error) {
-	fmt.Println("==========")
+	fmt.Println("==============================")
 	// check result
 	switch {
 	case err != nil:
@@ -237,5 +264,5 @@ func checkResult(result *result.Result, err error) {
 			fmt.Printf("row %d: %v\n", rIdx, row)
 		}
 	}
-	fmt.Println("==========")
+	fmt.Println("==============================")
 }
