@@ -8,6 +8,7 @@ import (
 
 	ydb "github.com/adwski/ydb-go-query/v1"
 	"github.com/adwski/ydb-go-query/v1/query/result"
+	"github.com/adwski/ydb-go-query/v1/types"
 
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
@@ -143,14 +144,8 @@ func main() {
 	ON sa.series_id = sr.series_id
 	WHERE sa.series_id = $seriesId
 	ORDER BY sr.series_id, sa.season_id`).
-		OnlineReadOnly(). // Here tx mode is overwritten to online-read-only.
-		Params(           // Parameters for query declared with DECLARE
-			map[string]*Ydb.TypedValue{
-				"$seriesId": {
-					Type:  &Ydb.Type{Type: &Ydb.Type_TypeId{TypeId: Ydb.Type_UINT64}},
-					Value: &Ydb.Value{Value: &Ydb.Value_Uint64Value{Uint64Value: 1}},
-				},
-			}).
+		OnlineReadOnly().                    // Here tx mode is overwritten to online-read-only.
+		Param("$seriesId", types.Uint64(1)). // Parameters for query declared with DECLARE
 		Exec(ctx))
 
 	checkResult(client.Query().New(`UPSERT INTO episodes (
@@ -162,17 +157,8 @@ func main() {
 		checkResult(client.Query().New(`DECLARE $seriesId AS Uint64;
 	DECLARE $seasonId AS Uint64;
 	SELECT * FROM episodes WHERE series_id = $seriesId AND season_id = $seasonId;`).
-			Params(
-				map[string]*Ydb.TypedValue{
-					"$seriesId": {
-						Type:  &Ydb.Type{Type: &Ydb.Type_TypeId{TypeId: Ydb.Type_UINT64}},
-						Value: &Ydb.Value{Value: &Ydb.Value_Uint64Value{Uint64Value: 2}},
-					},
-					"$seasonId": {
-						Type:  &Ydb.Type{Type: &Ydb.Type_TypeId{TypeId: Ydb.Type_UINT64}},
-						Value: &Ydb.Value{Value: &Ydb.Value_Uint64Value{Uint64Value: 5}},
-					},
-				}).
+			Param("$seriesId", types.Uint64(2)).
+			Param("$seasonId", types.Uint64(5)).
 
 			// Using user-defined function for result row collection.
 			// This func will be called every time new result part is arrived.
@@ -200,13 +186,8 @@ func main() {
 
 	checkResult(client.Query().New(`DECLARE $title AS Utf8;
 	DELETE FROM episodes WHERE title = $title;`).
-		Params(
-			map[string]*Ydb.TypedValue{
-				"$title": {
-					Type:  &Ydb.Type{Type: &Ydb.Type_TypeId{TypeId: Ydb.Type_UTF8}},
-					Value: &Ydb.Value{Value: &Ydb.Value_TextValue{TextValue: "Test Episode"}},
-				},
-			}).Exec(ctx))
+		Param("$title", types.UTF8("Test Episode")).
+		Exec(ctx))
 	selectEpisodes()
 
 	// ----------------------------------------------------------------------

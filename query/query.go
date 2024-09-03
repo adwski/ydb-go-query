@@ -40,6 +40,15 @@ func (q *Query) Params(params map[string]*Ydb.TypedValue) *Query {
 	return q
 }
 
+func (q *Query) Param(name string, val *Ydb.TypedValue) *Query {
+	if q.params == nil {
+		q.params = make(map[string]*Ydb.TypedValue)
+	}
+	q.params[name] = val
+
+	return q
+}
+
 func (q *Query) CollectRows(collectRowsFunc func([]*Ydb.Value) error) *Query {
 	q.collectRowsFunc = collectRowsFunc
 
