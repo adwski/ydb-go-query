@@ -133,7 +133,7 @@ func New[PT item[T], T any](ctx context.Context, cfg Config[PT, T]) *Pool[PT, T]
 		go pool.recycleItems(runCtx)
 	}
 
-	pool.logger.Trace("pool created", "size", pool.size)
+	pool.logger.Debug("pool created", "size", pool.size)
 
 	return pool
 }
@@ -144,7 +144,7 @@ func (p *Pool[PT, T]) Close() error {
 		p.drain()
 		p.wg.Wait()
 
-		p.logger.Trace("pool closed")
+		p.logger.Debug("pool closed")
 	})
 
 	return nil
