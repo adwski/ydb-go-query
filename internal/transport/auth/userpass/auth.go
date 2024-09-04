@@ -33,7 +33,7 @@ type (
 	}
 )
 
-func NewUserPass(cfg Config) *UserPass {
+func New(cfg Config) *UserPass {
 	auth := &UserPass{
 		authSvc: Ydb_Auth_V1.NewAuthServiceClient(cfg.Transport),
 
