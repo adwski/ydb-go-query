@@ -60,7 +60,7 @@ func NewService(runCtx context.Context, cfg Config) *Service {
 }
 
 func (svc *Service) Close() error {
-	return svc.pool.Close()
+	return svc.pool.Close() //nolint:wrapcheck //unnecessary
 }
 
 func (svc *Service) AcquireSession(ctx context.Context) (*session.Session, func(), error) {

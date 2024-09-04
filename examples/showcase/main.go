@@ -227,7 +227,6 @@ func main() {
 	checkResult(qCtx.Exec(ctx, `DROP TABLE series`))
 	checkResult(qCtx.Exec(ctx, `DROP TABLE seasons`))
 	checkResult(qCtx.Exec(ctx, `DROP TABLE episodes`))
-
 }
 
 func checkResult(result *query.Result, err error) {
