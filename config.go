@@ -78,7 +78,7 @@ func WithSessionPoolSize(size uint) Option {
 	}
 }
 
-func WithTransportSecurity(credentials credentials.TransportCredentials) Option {
+func withTransportSecurity(credentials credentials.TransportCredentials) Option {
 	return func(ctx context.Context, cfg *Config) error {
 		cfg.transportCredentials = credentials
 		return nil
@@ -86,7 +86,7 @@ func WithTransportSecurity(credentials credentials.TransportCredentials) Option 
 }
 
 func WithTransportTLS() Option {
-	return WithTransportSecurity(transportCreds.TLS())
+	return withTransportSecurity(transportCreds.TLS())
 }
 
 func WithYCAuthFile(filename string) Option {

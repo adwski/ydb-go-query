@@ -17,8 +17,7 @@ type (
 	Provider interface {
 		GetToken(ctx context.Context) (string, time.Time, error)
 	}
-	renewer interface{}
-	Auth    struct {
+	Auth struct {
 		logger   logger.Logger
 		provider Provider
 
@@ -29,17 +28,21 @@ type (
 		expires time.Time
 
 		token string
+
+		renewDisable bool
 	}
 	Config struct {
-		Logger   logger.Logger
-		Provider Provider
+		Logger       logger.Logger
+		Provider     Provider
+		RenewDisable bool
 	}
 )
 
 func New(ctx context.Context, cfg Config) *Auth {
 	auth := &Auth{
-		provider: cfg.Provider,
-		logger:   cfg.Logger,
+		provider:     cfg.Provider,
+		logger:       cfg.Logger,
+		renewDisable: cfg.RenewDisable,
 
 		mx: &sync.RWMutex{},
 	}
@@ -99,7 +102,7 @@ func (a *Auth) getTokenTick(ctx context.Context) error {
 func (a *Auth) Run(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	if _, ok := a.provider.(renewer); !ok {
+	if a.renewDisable {
 		return
 	}
 
