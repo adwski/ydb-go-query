@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
-	"github.com/adwski/ydb-go-query/v1/internal/query/pool"
+	"github.com/adwski/ydb-go-query/v1/internal/pool"
 	"github.com/adwski/ydb-go-query/v1/internal/query/session"
 
 	"github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
@@ -60,7 +60,7 @@ func NewService(runCtx context.Context, cfg Config) *Service {
 }
 
 func (svc *Service) Close() error {
-	return svc.pool.Close()
+	return svc.pool.Close() //nolint:wrapcheck //unnecessary
 }
 
 func (svc *Service) AcquireSession(ctx context.Context) (*session.Session, func(), error) {

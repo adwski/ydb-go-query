@@ -8,6 +8,7 @@ import (
 
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
 	"github.com/adwski/ydb-go-query/v1/internal/query"
+	"github.com/adwski/ydb-go-query/v1/internal/transport"
 	"github.com/adwski/ydb-go-query/v1/internal/transport/balancing/grid"
 	"github.com/adwski/ydb-go-query/v1/internal/transport/dispatcher"
 	qq "github.com/adwski/ydb-go-query/v1/query"
@@ -49,16 +50,16 @@ func Open(ctx context.Context, cfg Config, opts ...Option) (*Client, error) {
 	client.wg.Add(1)
 	go client.dispatcher.Run(runCtx, client.wg)
 
-	if secRunner, ok := cfg.auth.(runner); ok {
-		client.wg.Add(1)
-		go secRunner.Run(runCtx, client.wg)
-	}
+	client.wg.Add(1)
+	go cfg.auth.Run(runCtx, client.wg)
 
 	return client, nil
 }
 
 type (
-	runner interface {
+	authRunner interface {
+		transport.Authenticator
+
 		Run(ctx context.Context, wg *sync.WaitGroup)
 	}
 	Client struct {

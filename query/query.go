@@ -44,7 +44,7 @@ func (q *Query) Param(name string, val *Ydb.TypedValue) *Query {
 	return q
 }
 
-func (q *Query) CollectRows(collectRowsFunc func([]*Ydb.Value) error) *Query {
+func (q *Query) Collect(collectRowsFunc func([]*Ydb.Value) error) *Query {
 	q.collectRowsFunc = collectRowsFunc
 
 	return q

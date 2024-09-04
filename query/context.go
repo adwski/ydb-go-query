@@ -3,12 +3,12 @@ package query
 import (
 	"context"
 	"errors"
-	"github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
 
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
 	"github.com/adwski/ydb-go-query/v1/internal/query"
 	"github.com/adwski/ydb-go-query/v1/internal/query/txsettings"
 
+	"github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"
 )

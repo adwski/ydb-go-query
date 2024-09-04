@@ -2,6 +2,7 @@ package ydbgoquery
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
@@ -9,6 +10,8 @@ import (
 	zerologger "github.com/adwski/ydb-go-query/v1/internal/logger/zerolog"
 	"github.com/adwski/ydb-go-query/v1/internal/query/txsettings"
 	"github.com/adwski/ydb-go-query/v1/internal/transport"
+	"github.com/adwski/ydb-go-query/v1/internal/transport/auth"
+	"github.com/adwski/ydb-go-query/v1/internal/transport/auth/userpass"
 	"github.com/adwski/ydb-go-query/v1/internal/transport/auth/yc"
 	transportCreds "github.com/adwski/ydb-go-query/v1/internal/transport/credentials"
 
@@ -26,7 +29,7 @@ type (
 	Config struct {
 		logger               logger.Logger
 		transportCredentials credentials.TransportCredentials
-		auth                 transport.Authenticator
+		auth                 authRunner
 
 		txSettings *Ydb_Query.TransactionSettings
 
@@ -86,13 +89,6 @@ func WithTransportTLS() Option {
 	return WithTransportSecurity(transportCreds.TLS())
 }
 
-func WithAuth(auth transport.Authenticator) Option {
-	return func(ctx context.Context, cfg *Config) error {
-		cfg.auth = auth
-		return nil
-	}
-}
-
 func WithYCAuthFile(filename string) Option {
 	return withYC(yc.Config{
 		IamKeyFile: filename,
@@ -107,11 +103,36 @@ func WithYCAuthBytes(iamKeyBytes []byte) Option {
 
 func withYC(ycCfg yc.Config) Option {
 	return func(ctx context.Context, cfg *Config) error {
-		auth, err := yc.New(ctx, cfg.logger, ycCfg)
+		ycAuth, err := yc.New(ctx, ycCfg)
 		if err != nil {
 			return err //nolint:wrapcheck // unnecessary
 		}
-		cfg.auth = auth
+		cfg.auth = auth.New(ctx, auth.Config{
+			Logger:   cfg.logger,
+			Provider: ycAuth,
+		})
+
+		return nil
+	}
+}
+
+var ErrAuthTransport = errors.New("unable to create auth transport")
+
+func WithUserPass(username, password string) Option {
+	return func(ctx context.Context, cfg *Config) error {
+		tr, err := transport.NewConnection(ctx, cfg.InitialNodes[0], cfg.transportCredentials, nil, cfg.DB)
+		if err != nil {
+			return errors.Join(ErrAuthTransport, err)
+		}
+		cfg.auth = auth.New(ctx, auth.Config{
+			Logger: cfg.logger,
+			Provider: userpass.New(userpass.Config{
+				Transport: tr,
+				Username:  username,
+				Password:  password,
+			}),
+		})
+
 		return nil
 	}
 }
