@@ -10,6 +10,7 @@ import (
 	"github.com/adwski/ydb-go-query/v1/internal/xcontext"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 const (
@@ -19,6 +20,7 @@ const (
 var (
 	ErrCreate        = errors.New("unable to initialize grid")
 	ErrNoConnections = errors.New("no alive connections available")
+	ErrGridEndpoint  = errors.New("error adding static endpoint")
 )
 
 type (
@@ -59,6 +61,35 @@ func NewWithOneEndpoint(cfg OneEndpointConfig) *Grid {
 	})
 
 	return grid
+}
+
+func NewWithStaticEndpoints(
+	ctx context.Context,
+	endpoints []string,
+	creds credentials.TransportCredentials,
+	auth transport.Authenticator,
+	db string,
+) (*Grid, error) {
+	tr := NewWithTwoLevels(Config{ConnectionsPerEndpoint: 1})
+
+	for _, addr := range endpoints {
+		err := tr.AddPath(balancing.Path[*transport.Connection, transport.Connection]{
+			IDs: []string{addr},
+			ConnectionConfig: balancing.ConnectionConfig[*transport.Connection, transport.Connection]{
+				ConnFunc: func() (*transport.Connection, error) {
+					return transport.NewConnection(ctx, addr, creds, auth, db)
+				},
+				ConnNumber: 1,
+			},
+		})
+
+		if err != nil {
+			return nil, errors.Join(ErrGridEndpoint, err)
+		}
+
+	}
+
+	return tr, nil
 }
 
 func NewWithTwoLevels(cfg Config) *Grid {

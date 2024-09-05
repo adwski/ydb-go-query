@@ -92,7 +92,7 @@ func (r *Dispatcher) Run(ctx context.Context, wg *sync.WaitGroup) {
 }
 
 func (r *Dispatcher) Init(ctx context.Context) error {
-	discoveryTr, err := transport.NewConnection(ctx, r.initNodes[0], r.transportCredentials, r.auth, r.db)
+	tr, err := grid.NewWithStaticEndpoints(ctx, r.initNodes, r.transportCredentials, r.auth, r.db)
 	if err != nil {
 		return errors.Join(ErrDiscoveryTransportCreate, err)
 	}
@@ -100,7 +100,7 @@ func (r *Dispatcher) Init(ctx context.Context) error {
 	r.discoverySvc = discovery.NewService(discovery.Config{
 		Logger:     r.logger,
 		DB:         r.db,
-		Transport:  discoveryTr,
+		Transport:  tr,
 		DoAnnounce: true,
 	})
 

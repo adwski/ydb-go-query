@@ -9,10 +9,10 @@ import (
 	"github.com/adwski/ydb-go-query/v1/internal/logger/noop"
 	zerologger "github.com/adwski/ydb-go-query/v1/internal/logger/zerolog"
 	"github.com/adwski/ydb-go-query/v1/internal/query/txsettings"
-	"github.com/adwski/ydb-go-query/v1/internal/transport"
 	"github.com/adwski/ydb-go-query/v1/internal/transport/auth"
 	"github.com/adwski/ydb-go-query/v1/internal/transport/auth/userpass"
 	"github.com/adwski/ydb-go-query/v1/internal/transport/auth/yc"
+	"github.com/adwski/ydb-go-query/v1/internal/transport/balancing/grid"
 	transportCreds "github.com/adwski/ydb-go-query/v1/internal/transport/credentials"
 
 	"github.com/rs/zerolog"
@@ -120,7 +120,7 @@ var ErrAuthTransport = errors.New("unable to create auth transport")
 
 func WithUserPass(username, password string) Option {
 	return func(ctx context.Context, cfg *Config) error {
-		tr, err := transport.NewConnection(ctx, cfg.InitialNodes[0], cfg.transportCredentials, nil, cfg.DB)
+		tr, err := grid.NewWithStaticEndpoints(ctx, cfg.InitialNodes, cfg.transportCredentials, nil, cfg.DB)
 		if err != nil {
 			return errors.Join(ErrAuthTransport, err)
 		}
