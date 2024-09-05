@@ -5,6 +5,10 @@ import (
 )
 
 type (
+	// RoundRobin returns next alive egress node. It keeps track
+	// of previously chosen node index, so it can determine next one.
+	//
+	// Node index is atomic.
 	RoundRobin[PT Egress[T], T any] struct {
 		idx atomic.Uint32
 	}
@@ -25,7 +29,7 @@ func (c *RoundRobin[PT, T]) Get(egresses []PT) PT {
 	}()
 
 	// get next alive egress
-	for i := 1; i < len(egresses); i++ {
+	for i := 0; i < len(egresses); i++ {
 		eg := egresses[c.idx.Add(1)%uint32(len(egresses))]
 		if eg.Alive() {
 			return eg
