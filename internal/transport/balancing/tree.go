@@ -11,6 +11,7 @@ const (
 var (
 	ErrLevelsEmpty               = errors.New("empty levels")
 	ErrPathLen                   = errors.New("path length is not equal to levels length")
+	ErrPathExists                = errors.New("full path exists")
 	ErrConnectionConfigMisplaced = errors.New("connection config must be provided only for connection level")
 )
 
@@ -123,7 +124,7 @@ func (t *Tree[PT, T]) AddPath(path Path[PT, T]) error {
 	if idx == len(path.IDs) {
 		// full path already exists
 		// return silently for now
-		return nil
+		return ErrPathExists
 	}
 
 	// store current node pointer
