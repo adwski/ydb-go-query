@@ -25,6 +25,67 @@ func (c *conn) Close() error {
 	return nil
 }
 
+func TestAddDel(t *testing.T) {
+	type args struct {
+		lvl     int
+		path    []string
+		connNum int
+		alive   bool
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantNil bool
+	}{
+		{
+			name: "alive",
+			args: args{
+				lvl:     3,
+				path:    []string{"1", "2"},
+				connNum: 1,
+				alive:   true,
+			},
+			wantNil: false,
+		},
+		{
+			name: "not alive",
+			args: args{
+				lvl:     3,
+				path:    []string{"1", "2"},
+				connNum: 10,
+				alive:   false,
+			},
+			wantNil: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tree, err := createTree(t, tt.args.lvl)
+			require.NoError(t, err)
+
+			err = tree.AddPath(Path[*conn, conn]{
+				IDs: tt.args.path,
+				ConnectionConfig: ConnectionConfig[*conn, conn]{
+					ConnFunc: func() (*conn, error) {
+						return &conn{alive: tt.args.alive}, nil
+					},
+					ConnNumber: tt.args.connNum,
+				},
+			})
+			require.NoError(t, err)
+
+			got := tree.GetConn()
+			require.Equal(t, tt.wantNil, got == nil)
+
+			err = tree.DeletePath(Path[*conn, conn]{IDs: []string{"1", "2"}})
+			require.NoError(t, err)
+
+			got = tree.GetConn()
+			require.Nil(t, got)
+		})
+	}
+}
+
 func TestTreeFillAndGet(t *testing.T) {
 	type args struct {
 		lvl        int

@@ -123,7 +123,6 @@ func (t *Tree[PT, T]) AddPath(path Path[PT, T]) error {
 
 	if idx == len(path.IDs) {
 		// full path already exists
-		// return silently for now
 		return ErrPathExists
 	}
 
