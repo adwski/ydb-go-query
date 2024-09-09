@@ -1,12 +1,15 @@
 package balancing
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"math/rand"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -28,34 +31,122 @@ func (c *conn) Close() error {
 func TestAddDel(t *testing.T) {
 	type args struct {
 		lvl     int
-		path    []string
+		addPath []string
+		delPath []string
 		connNum int
 		alive   bool
 	}
 	tests := []struct {
-		name    string
-		args    args
-		wantNil bool
+		name        string
+		args        args
+		addErr      error
+		delErr      error
+		nilAfterAdd bool
+		nilAfterDel bool
 	}{
 		{
 			name: "alive",
 			args: args{
 				lvl:     3,
-				path:    []string{"1", "2"},
+				addPath: []string{"1", "2"},
+				delPath: []string{"1", "2"},
 				connNum: 1,
 				alive:   true,
 			},
-			wantNil: false,
+			nilAfterAdd: false,
+			nilAfterDel: true,
 		},
 		{
 			name: "not alive",
 			args: args{
 				lvl:     3,
-				path:    []string{"1", "2"},
+				addPath: []string{"1", "2"},
+				delPath: []string{"1", "2"},
 				connNum: 10,
 				alive:   false,
 			},
-			wantNil: true,
+			nilAfterAdd: true,
+			nilAfterDel: true,
+		},
+		{
+			name: "del wrong path",
+			args: args{
+				lvl:     3,
+				addPath: []string{"1", "2"},
+				delPath: []string{"3", "4"},
+				connNum: 10,
+				alive:   true,
+			},
+			nilAfterAdd: false,
+			nilAfterDel: false,
+			delErr:      ErrPathDoesNotExist,
+		},
+		{
+			name: "del wrong path 2",
+			args: args{
+				lvl:     3,
+				addPath: []string{"1", "2"},
+				delPath: []string{"1", "3"},
+				connNum: 10,
+				alive:   true,
+			},
+			nilAfterAdd: false,
+			nilAfterDel: false,
+			delErr:      ErrPathDoesNotExist,
+		},
+		{
+			name: "del incomplete path",
+			args: args{
+				lvl:     3,
+				addPath: []string{"1", "2"},
+				delPath: []string{"1"},
+				connNum: 10,
+				alive:   true,
+			},
+			nilAfterAdd: false,
+			nilAfterDel: false,
+			delErr:      ErrPathLen,
+		},
+		{
+			name: "del too long path",
+			args: args{
+				lvl:     3,
+				addPath: []string{"1", "2"},
+				delPath: []string{"1", "2", "3"},
+				connNum: 10,
+				alive:   true,
+			},
+			nilAfterAdd: false,
+			nilAfterDel: false,
+			delErr:      ErrPathLen,
+		},
+		{
+			name: "add incomplete path",
+			args: args{
+				lvl:     3,
+				addPath: []string{"1"},
+				delPath: []string{"1", "2"},
+				connNum: 10,
+				alive:   true,
+			},
+			nilAfterAdd: true,
+			nilAfterDel: true,
+			addErr:      ErrPathLen,
+			delErr:      ErrPathDoesNotExist,
+		},
+		{
+			name: "add too long path",
+			args: args{
+				lvl:     3,
+				addPath: []string{"1", "2", "3"},
+				delPath: []string{"1", "2"},
+				connNum: 10,
+				alive:   true,
+			},
+			nilAfterAdd: true,
+			nilAfterDel: true,
+			addErr:      ErrPathLen,
+			delErr:      ErrPathDoesNotExist,
 		},
 	}
 	for _, tt := range tests {
@@ -64,7 +155,7 @@ func TestAddDel(t *testing.T) {
 			require.NoError(t, err)
 
 			err = tree.AddPath(Path[*conn, conn]{
-				IDs: tt.args.path,
+				IDs: tt.args.addPath,
 				ConnectionConfig: ConnectionConfig[*conn, conn]{
 					ConnFunc: func() (*conn, error) {
 						return &conn{alive: tt.args.alive}, nil
@@ -72,16 +163,16 @@ func TestAddDel(t *testing.T) {
 					ConnNumber: tt.args.connNum,
 				},
 			})
-			require.NoError(t, err)
+			require.ErrorIs(t, err, tt.addErr)
 
 			got := tree.GetConn()
-			require.Equal(t, tt.wantNil, got == nil)
+			require.Equal(t, tt.nilAfterAdd, got == nil)
 
-			err = tree.DeletePath(Path[*conn, conn]{IDs: []string{"1", "2"}})
-			require.NoError(t, err)
+			err = tree.DeletePath(Path[*conn, conn]{IDs: tt.args.delPath})
+			require.ErrorIs(t, err, tt.delErr)
 
 			got = tree.GetConn()
-			require.Nil(t, got)
+			require.Equal(t, tt.nilAfterDel, got == nil)
 		})
 	}
 }
@@ -180,6 +271,85 @@ func TestTreeFillAndGet(t *testing.T) {
 			t.Log("min hit:", mn, "max hit:", mx, "unique:", len(stats))
 		})
 	}
+}
+
+func TestTreeGetAddDelConcurrent(t *testing.T) {
+	const (
+		delAfter    = 2000 * time.Millisecond
+		delInterval = 1000 // msecs
+		addInterval = time.Second
+
+		testDuration = 10 * time.Second
+
+		workerCount = 100
+	)
+
+	tree, err := createTree(t, 3)
+	require.NoError(t, err)
+
+	addDel := func(IDs ...string) {
+		path := Path[*conn, conn]{
+			IDs: IDs,
+			ConnectionConfig: ConnectionConfig[*conn, conn]{
+				ConnFunc: func() (*conn, error) {
+					return &conn{alive: true}, nil
+				},
+			},
+		}
+		errA := tree.AddPath(path)
+		require.NoError(t, errA)
+
+		go func() {
+			deletingAfter := delAfter - delInterval + time.Duration(rand.Intn(2*delInterval))*time.Millisecond
+			//fmt.Println("deletingAfter:", deletingAfter)
+			time.Sleep(deletingAfter)
+			errD := tree.DeletePath(path)
+			require.NoError(t, errD)
+		}()
+	}
+
+	addDel("a", "b")
+
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(testDuration))
+	defer cancel()
+
+	wg := &sync.WaitGroup{}
+
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(addInterval):
+				addDel(strconv.Itoa(rand.Int()), strconv.Itoa(rand.Int()))
+			}
+		}
+	}()
+
+	gotConns := &atomic.Uint64{}
+	for wkr := 0; wkr < workerCount; wkr++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					conn_ := tree.GetConn()
+					require.NotNil(t, conn_)
+					gotConns.Add(1)
+				}
+			}
+		}()
+	}
+
+	wg.Wait()
+	t.Log("got connections: ", gotConns.Load())
 }
 
 func createTree(t *testing.T, lvl int) (*Tree[*conn, conn], error) {
