@@ -47,7 +47,8 @@ type (
 		connPolicy balancingPolicy[PT, T]
 
 		mx     *sync.RWMutex
-		closed atomic.Bool
+		alive  atomic.Bool
+		closed bool
 	}
 
 	nodeConfig[PT connection[T], T any] struct {
@@ -90,19 +91,20 @@ func newNode[PT connection[T], T any](cfg nodeConfig[PT, T]) (*node[PT, T], erro
 		}
 		nNode.conns = append(nNode.conns, conn)
 	}
+	nNode.alive.Store(true) // mark alive because node has connections
 
 	return &nNode, nil
 }
 
 func (n *node[PT, T]) Alive() bool {
-	return true
+	return n.alive.Load()
 }
 
 func (n *node[PT, T]) Close() error {
 	n.mx.Lock()
 	defer n.mx.Unlock()
 
-	n.closed.Store(true)
+	n.closed = true
 
 	for _, egress := range n.egresses {
 		_ = egress.Close()
@@ -124,6 +126,7 @@ func (n *node[PT, T]) lookup(id string) (int, *node[PT, T]) {
 			return i, chNode
 		}
 	}
+
 	return -1, nil
 }
 
@@ -136,47 +139,31 @@ func (n *node[PT, T]) detach(idx int) {
 	n.egresses[last] = nil
 	n.egresses = n.egresses[:last]
 
+	if len(n.egresses) == 0 && len(n.conns) == 0 {
+		n.alive.Store(false)
+	}
+
 	return
 }
 
 func (n *node[PT, T]) addEgress(e *node[PT, T]) error {
-	if n.closed.Load() {
+	n.mx.Lock()
+	defer n.mx.Unlock()
+
+	if n.closed {
 		return ErrNodeClosed
 	}
 	n.egresses = append(n.egresses, e)
+	n.alive.Store(true)
+
 	return nil
 }
 
 func (n *node[PT, T]) getBalanced() PT {
-	if n.closed.Load() {
-		return nil
-	}
+	n.mx.RLock()
+	defer n.mx.RUnlock()
 
-	if len(n.egresses) > 0 {
-		if len(n.egresses) == 1 {
-			if n.egresses[0].Alive() {
-				return n.egresses[0].getBalanced()
-			}
-			return nil
-		}
-		return n.egressPolicy.Get(n.egresses).getBalanced()
-	}
-
-	if len(n.conns) > 0 {
-		if len(n.conns) == 1 {
-			if n.conns[0].Alive() {
-				return n.conns[0]
-			}
-			return nil
-		}
-		return n.connPolicy.Get(n.conns)
-	}
-
-	return nil
-}
-
-func (n *node[PT, T]) getBalancedPath() PT {
-	if n.closed.Load() {
+	if n.closed {
 		return nil
 	}
 
