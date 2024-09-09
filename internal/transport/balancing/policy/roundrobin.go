@@ -1,16 +1,17 @@
 package policy
 
 import (
-	"sync/atomic"
+	"sync"
 )
 
 type (
 	// RoundRobin returns next alive egress node. It keeps track
 	// of previously chosen node index, so it can determine next one.
 	//
-	// Node index is atomic.
+	// Node index is guarded by mutex.
 	RoundRobin[PT Egress[T], T any] struct {
-		idx atomic.Uint32
+		mx  sync.Mutex
+		idx int
 	}
 )
 
@@ -19,21 +20,17 @@ func NewRoundRobin[PT Egress[T], T any]() *RoundRobin[PT, T] {
 }
 
 func (c *RoundRobin[PT, T]) Get(egresses []PT) PT {
-	defer func() {
-		// ensure rr index is in bounds
-		for old := c.idx.Load(); old >= uint32(len(egresses)); old = c.idx.Load() {
-			if c.idx.CompareAndSwap(old, old%uint32(len(egresses))) {
-				break
-			}
-		}
-	}()
+	c.mx.Lock()
+	defer c.mx.Unlock()
 
 	// get next alive egress
 	for i := 0; i < len(egresses); i++ {
-		eg := egresses[c.idx.Add(1)%uint32(len(egresses))]
+		c.idx = (c.idx + 1) % len(egresses)
+		eg := egresses[c.idx]
 		if eg.Alive() {
 			return eg
 		}
 	}
+
 	return nil
 }
