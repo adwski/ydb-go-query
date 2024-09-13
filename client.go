@@ -21,7 +21,6 @@ const (
 
 var (
 	ErrNoInitialNodes           = errors.New("no initial nodes was provided")
-	ErrCfgDispatcher            = errors.New("unable to configure dispatcher")
 	ErrDBEmpty                  = errors.New("db is empty")
 	ErrDiscoveryTransportCreate = errors.New("discovery transport create error")
 )
