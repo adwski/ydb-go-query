@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/adwski/ydb-go-query/v1/internal/endpoints"
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
 	"github.com/adwski/ydb-go-query/v1/internal/transport"
 	"github.com/adwski/ydb-go-query/v1/internal/transport/balancing/grid"
-	"github.com/adwski/ydb-go-query/v1/internal/transport/endpoints"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
