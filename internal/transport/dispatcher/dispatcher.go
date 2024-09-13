@@ -105,7 +105,7 @@ func (r *Dispatcher) processAnnounce(ctx context.Context, ann endpoints.Announce
 	}
 
 	for _, epDel := range ann.Del {
-		addr := endpointFullAddress(epDel)
+		addr := endpointFullAddress(&epDel)
 
 		if err := r.balancer.DeleteEndpoint([]string{epDel.Location, addr}); err != nil {
 			r.logger.Error("unable to delete endpoint", "error", err)

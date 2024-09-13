@@ -15,37 +15,25 @@ type (
 		Del    []InfoShort // contains endpoints that are no longer present in YDB cluster
 	}
 
-	// InfoShort uniquely identifies YDB endpoint.
-	InfoShort struct {
-		Address  string
-		Location string
-		NodeID   uint32
-		Port     uint32
-	}
-
+	// Map stores endpoints as kay-value structure.
 	Map map[InfoShort]*Ydb_Discovery.EndpointInfo
 
+	// DB is thread safe in-memory storage for endpoints.
 	DB struct {
 		mx  *sync.RWMutex
 		dbm Map
 	}
 )
 
-func (eis InfoShort) GetAddress() string {
-	return eis.Address
-}
-
-func (eis InfoShort) GetPort() uint32 {
-	return eis.Port
-}
-
-func NewEndpointDB() DB {
+// NewDB creates endpoints DB.
+func NewDB() DB {
 	return DB{
 		mx:  &sync.RWMutex{},
 		dbm: make(Map),
 	}
 }
 
+// GetAll returns copy of internal endpoints Map.
 func (db *DB) GetAll() Map {
 	db.mx.RLock()
 	defer db.mx.RUnlock()
@@ -57,6 +45,27 @@ func (db *DB) GetAll() Map {
 	return eps
 }
 
+// Compare takes current state of endpoints and compares it
+// with internal endpoints Map. It returns true if incoming state
+// is identical to internal or false otherwise.
+func (db *DB) Compare(endpoints []*Ydb_Discovery.EndpointInfo) bool {
+	db.mx.RLock()
+	defer db.mx.RUnlock()
+
+	ctr := len(db.dbm)
+	for _, ep := range endpoints {
+		if _, ok := db.dbm[NewInfoShort(ep)]; !ok {
+			return false
+		}
+		ctr--
+	}
+
+	return ctr == 0
+}
+
+// Update takes current state of endpoints and
+// - updates internal DB accordingly
+// - constructs endpoints announcement that reflects performed changes.
 func (db *DB) Update(endpoints []*Ydb_Discovery.EndpointInfo) (Announce, int, int) {
 	oldDB := db.GetAll()
 	newDB := make(Map, len(endpoints))
@@ -99,24 +108,4 @@ func (db *DB) swap(dbm Map) {
 	defer db.mx.Unlock()
 
 	db.dbm = dbm
-}
-
-func (db *DB) Compare(endpoints []*Ydb_Discovery.EndpointInfo) bool {
-	db.mx.RLock()
-	defer db.mx.RUnlock()
-
-	ctr := len(db.dbm)
-	for _, ep := range endpoints {
-		if _, ok := db.dbm[InfoShort{
-			NodeID:   ep.NodeId,
-			Location: ep.Location,
-			Address:  ep.Address,
-			Port:     ep.Port,
-		}]; !ok {
-			return false
-		}
-		ctr--
-	}
-
-	return ctr == 0
 }

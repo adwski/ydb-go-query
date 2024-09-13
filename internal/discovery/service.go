@@ -52,7 +52,7 @@ func NewService(cfg Config) *Service {
 		logger: cfg.Logger,
 		filter: NewFilter().WithQueryService(),
 		dsc:    Ydb_Discovery_V1.NewDiscoveryServiceClient(cfg.Transport),
-		epDB:   endpoints.NewEndpointDB(),
+		epDB:   endpoints.NewDB(),
 	}
 	if cfg.DoAnnounce {
 		svc.ann = make(chan endpoints.Announce)
