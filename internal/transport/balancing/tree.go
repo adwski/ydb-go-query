@@ -11,6 +11,8 @@ const (
 var (
 	ErrLevelsEmpty               = errors.New("empty levels")
 	ErrPathLen                   = errors.New("path length is not equal to levels length")
+	ErrPathExists                = errors.New("full path exists")
+	ErrPathDoesNotExist          = errors.New("path does not exist")
 	ErrConnectionConfigMisplaced = errors.New("connection config must be provided only for connection level")
 )
 
@@ -113,7 +115,9 @@ func (t *Tree[PT, T]) AddPath(path Path[PT, T]) error {
 	// traverse existing nodes
 	for ; idx < len(path.IDs); idx++ {
 		nodeID := path.IDs[idx]
+		nNode.mx.RLock()
 		_, nextNode = nNode.lookup(nodeID)
+		nNode.mx.RUnlock()
 		if nextNode == nil {
 			break
 		}
@@ -122,8 +126,7 @@ func (t *Tree[PT, T]) AddPath(path Path[PT, T]) error {
 
 	if idx == len(path.IDs) {
 		// full path already exists
-		// return silently for now
-		return nil
+		return ErrPathExists
 	}
 
 	// store current node pointer
@@ -144,16 +147,14 @@ func (t *Tree[PT, T]) AddPath(path Path[PT, T]) error {
 		if newBranch == nil {
 			newBranch = nextNode
 		} else {
-			_ = nNode.addEgress(nextNode) // node is not yet attached and therefore should not be closed
+			_ = nNode.addEgress(nextNode) // nNode is not yet attached and therefore should not be closed
 		}
 		nNode = nextNode
 	}
 
 	if newBranch != nil {
 		// attach new branch
-		root.mx.Lock()
 		err = root.addEgress(newBranch)
-		root.mx.Unlock()
 
 		if err != nil {
 			_ = newBranch.Close()
@@ -171,21 +172,40 @@ func (t *Tree[PT, T]) DeletePath(path Path[PT, T]) error {
 
 	var (
 		nNode    = t.node
+		delRoot  *node[PT, T]
+		prev     *node[PT, T]
 		nextNode *node[PT, T]
 		idx      int
+		prevIdx  int
+		delIdx   int
 	)
 
 	for i, nodeID := range path.IDs {
+		nNode.mx.RLock()
+		if len(nNode.egresses) == 1 {
+			delRoot = prev
+			delIdx = prevIdx
+		}
+
 		idx, nextNode = nNode.lookup(nodeID)
 		if nextNode == nil {
 			// path to not-existing node
-			// return silently for now
-			return nil
+			return ErrPathDoesNotExist
 		}
 		if i == len(path.IDs)-1 {
-			nNode.detach(idx)
+			nNode.mx.RUnlock()
+			if delRoot != nil {
+				delRoot.detach(delIdx)
+			} else {
+				nNode.detach(idx)
+			}
+
+			break
 		}
-		nNode = nextNode
+
+		nNode.mx.RUnlock()
+		nNode, prev = nextNode, nNode
+		prevIdx = idx
 	}
 
 	return nNode.Close()

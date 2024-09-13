@@ -4,6 +4,8 @@ import (
 	"math/rand"
 )
 
+// Random returns random egress node if it's alive.
+// If chosen randomly node is not alive, it falls to FirstReady behaviour.
 type Random[PT Egress[T], T any] struct {
 	*FirstReady[PT, T]
 }

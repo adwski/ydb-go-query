@@ -1,5 +1,7 @@
 package policy
 
+// FirstReady returns first alive egress node starting from beginning.
+// If no nodes are alive, it returns nil.
 type FirstReady[PT Egress[T], T any] struct {
 }
 
