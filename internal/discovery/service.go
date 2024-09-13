@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
+	"github.com/adwski/ydb-go-query/v1/internal/transport/endpoints"
 
 	"github.com/ydb-platform/ydb-go-genproto/Ydb_Discovery_V1"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
@@ -28,20 +29,12 @@ const (
 )
 
 type (
-	// Announce is helpful message for consumers of this service about changes in YDB endpoints.
-	// For example dispatcher uses it to adjust balancing tree.
-	Announce struct {
-		Add    EndpointMap         // contains newly discovered endpoints
-		Update EndpointMap         // contains endpoints with changes (reserved for later use with load factor)
-		Del    []EndpointInfoShort // contains endpoints that are no longer present in YDB cluster
-	}
-
 	Service struct {
 		logger logger.Logger
 		dsc    Ydb_Discovery_V1.DiscoveryServiceClient
-		ann    chan Announce
+		ann    chan endpoints.Announce
 		filter *Filter
-		epDB   EndpointDB
+		epDB   endpoints.DB
 		dbName string
 	}
 
@@ -59,21 +52,21 @@ func NewService(cfg Config) *Service {
 		logger: cfg.Logger,
 		filter: NewFilter().WithQueryService(),
 		dsc:    Ydb_Discovery_V1.NewDiscoveryServiceClient(cfg.Transport),
-		epDB:   NewEndpointDB(),
+		epDB:   endpoints.NewEndpointDB(),
 	}
 	if cfg.DoAnnounce {
-		svc.ann = make(chan Announce)
+		svc.ann = make(chan endpoints.Announce)
 	}
 
 	return svc
 }
 
-func (svc *Service) EndpointsAnn() <-chan Announce {
+func (svc *Service) EndpointsChan() <-chan endpoints.Announce {
 	return svc.ann
 }
 
-func (svc *Service) GetAllEndpoints() EndpointMap {
-	return svc.epDB.getAll()
+func (svc *Service) GetAllEndpoints() endpoints.Map {
+	return svc.epDB.GetAll()
 }
 
 func (svc *Service) Run(ctx context.Context, wg *sync.WaitGroup) {
@@ -116,12 +109,12 @@ func (svc *Service) endpointsTick(ctx context.Context, waitTimer *time.Timer) *t
 }
 
 func (svc *Service) updateAndAnnounce(ctx context.Context, endpoints []*Ydb_Discovery.EndpointInfo) {
-	if svc.epDB.compare(endpoints) {
+	if svc.epDB.Compare(endpoints) {
 		// endpoints did not change
 		return
 	}
 
-	announce, oldLen, newLen := svc.epDB.update(endpoints)
+	announce, oldLen, newLen := svc.epDB.Update(endpoints)
 
 	svc.logger.Info("endpoints changed",
 		"was", oldLen,
@@ -151,12 +144,12 @@ func (svc *Service) getEndpoints(ctx context.Context) ([]*Ydb_Discovery.Endpoint
 		return nil, errors.Join(ErrOperationUnsuccessful,
 			fmt.Errorf("%s", resp.GetOperation().String()))
 	}
-	var endpoints Ydb_Discovery.ListEndpointsResult
-	if err = resp.GetOperation().GetResult().UnmarshalTo(&endpoints); err != nil {
+	var epRes Ydb_Discovery.ListEndpointsResult
+	if err = resp.GetOperation().GetResult().UnmarshalTo(&epRes); err != nil {
 		return nil, errors.Join(ErrEndpointsUnmarshal, err)
 	}
 
-	preferred, requiredButNotPreferred := svc.filter.filter(endpoints.Endpoints)
+	preferred, requiredButNotPreferred := svc.filter.filter(epRes.Endpoints)
 	if len(preferred) == 0 {
 		return requiredButNotPreferred, nil
 	}

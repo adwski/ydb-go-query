@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/adwski/ydb-go-query/v1/internal/discovery"
 	"github.com/adwski/ydb-go-query/v1/internal/logger"
 	"github.com/adwski/ydb-go-query/v1/internal/query"
 	"github.com/adwski/ydb-go-query/v1/internal/transport"
@@ -19,9 +20,10 @@ const (
 )
 
 var (
-	ErrNoInitialNodes = errors.New("no initial nodes was provided")
-	ErrCfgDispatcher  = errors.New("unable to configure dispatcher")
-	ErrDBEmpty        = errors.New("db is empty")
+	ErrNoInitialNodes           = errors.New("no initial nodes was provided")
+	ErrCfgDispatcher            = errors.New("unable to configure dispatcher")
+	ErrDBEmpty                  = errors.New("db is empty")
+	ErrDiscoveryTransportCreate = errors.New("discovery transport create error")
 )
 
 func Open(ctx context.Context, cfg Config, opts ...Option) (*Client, error) {
@@ -32,11 +34,6 @@ func Open(ctx context.Context, cfg Config, opts ...Option) (*Client, error) {
 
 	var runCtx context.Context
 	runCtx, client.cancel = context.WithCancel(ctx)
-
-	if err = client.dispatcher.Init(runCtx); err != nil {
-		client.cancel()
-		return nil, errors.Join(ErrCfgDispatcher, err)
-	}
 
 	client.querySvc = query.NewService(runCtx, query.Config{
 		Logger:        client.logger,
@@ -49,6 +46,9 @@ func Open(ctx context.Context, cfg Config, opts ...Option) (*Client, error) {
 
 	client.wg.Add(1)
 	go client.dispatcher.Run(runCtx, client.wg)
+
+	client.wg.Add(1)
+	go client.discoverySvc.Run(runCtx, client.wg)
 
 	client.wg.Add(1)
 	go cfg.auth.Run(runCtx, client.wg)
@@ -66,7 +66,9 @@ type (
 		logger logger.Logger
 
 		dispatcher *dispatcher.Dispatcher
-		querySvc   *query.Service
+
+		discoverySvc *discovery.Service
+		querySvc     *query.Service
 
 		queryCtx *qq.Ctx
 
@@ -104,7 +106,19 @@ func newClient(ctx context.Context, cfg *Config, opts ...Option) (*Client, error
 		}
 	}
 
-	crdCfg := dispatcher.Config{
+	tr, err := grid.NewWithStaticEndpoints(ctx, cfg.InitialNodes, cfg.transportCredentials, cfg.auth, cfg.DB)
+	if err != nil {
+		return nil, errors.Join(ErrDiscoveryTransportCreate, err)
+	}
+
+	discoverySvc := discovery.NewService(discovery.Config{
+		Logger:     cfg.logger,
+		DB:         cfg.DB,
+		Transport:  tr,
+		DoAnnounce: true,
+	})
+
+	dispatcherCfg := dispatcher.Config{
 		Logger:    cfg.logger,
 		InitNodes: cfg.InitialNodes,
 		DB:        cfg.DB,
@@ -113,17 +127,19 @@ func newClient(ctx context.Context, cfg *Config, opts ...Option) (*Client, error
 		},
 		TransportCredentials: cfg.transportCredentials,
 		Auth:                 cfg.auth,
-	}
 
-	crd := dispatcher.New(crdCfg)
+		EndpointsProvider: discoverySvc,
+	}
 
 	c := &Client{
 		logger:               cfg.logger,
 		sessionCreateTimeout: cfg.sessionCreateTimeout,
 		poolSize:             cfg.poolSize,
 
-		dispatcher: crd,
-		wg:         &sync.WaitGroup{},
+		dispatcher:   dispatcher.New(dispatcherCfg),
+		discoverySvc: discoverySvc,
+
+		wg: &sync.WaitGroup{},
 	}
 
 	return c, nil
