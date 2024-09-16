@@ -7,6 +7,7 @@ import (
 
 	"github.com/adwski/ydb-go-query/internal/logger"
 	"github.com/adwski/ydb-go-query/internal/logger/noop"
+	zaplogger "github.com/adwski/ydb-go-query/internal/logger/zap"
 	zerologger "github.com/adwski/ydb-go-query/internal/logger/zerolog"
 	"github.com/adwski/ydb-go-query/internal/query/txsettings"
 	"github.com/adwski/ydb-go-query/internal/transport/auth"
@@ -17,6 +18,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/credentials"
 )
 
@@ -60,6 +62,13 @@ func WithLogger(log logger.Logger) Option {
 func WithZeroLogger(log zerolog.Logger) Option {
 	return func(ctx context.Context, cfg *Config) error {
 		cfg.logger = zerologger.NewLogger(log)
+		return nil
+	}
+}
+
+func WithZapLogger(log *zap.Logger) Option {
+	return func(ctx context.Context, cfg *Config) error {
+		cfg.logger = zaplogger.NewLogger(log)
 		return nil
 	}
 }
