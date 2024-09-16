@@ -1,3 +1,4 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/adwski/ydb-go-query)](https://goreportcard.com/report/github.com/adwski/ydb-go-query)
 [![CI](https://github.com/adwski/ydb-go-query/actions/workflows/tests.yml/badge.svg)](https://github.com/adwski/ydb-go-query/actions/workflows/tests.yml)
 ![Coverage](https://img.shields.io/badge/Coverage-18.5%25-red)
 
