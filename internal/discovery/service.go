@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/adwski/ydb-go-query/v1/internal/endpoints"
-	"github.com/adwski/ydb-go-query/v1/internal/logger"
+	"github.com/adwski/ydb-go-query/internal/endpoints"
+	"github.com/adwski/ydb-go-query/internal/logger"
 
 	"github.com/ydb-platform/ydb-go-genproto/Ydb_Discovery_V1"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"

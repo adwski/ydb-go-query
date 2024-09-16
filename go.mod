@@ -1,4 +1,4 @@
-module github.com/adwski/ydb-go-query/v1
+module github.com/adwski/ydb-go-query
 
 go 1.23
 

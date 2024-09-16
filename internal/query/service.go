@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/adwski/ydb-go-query/v1/internal/logger"
-	"github.com/adwski/ydb-go-query/v1/internal/pool"
-	"github.com/adwski/ydb-go-query/v1/internal/query/session"
+	"github.com/adwski/ydb-go-query/internal/logger"
+	"github.com/adwski/ydb-go-query/internal/pool"
+	"github.com/adwski/ydb-go-query/internal/query/session"
 
 	"github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"

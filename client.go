@@ -6,13 +6,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/adwski/ydb-go-query/v1/internal/discovery"
-	"github.com/adwski/ydb-go-query/v1/internal/logger"
-	"github.com/adwski/ydb-go-query/v1/internal/query"
-	"github.com/adwski/ydb-go-query/v1/internal/transport"
-	"github.com/adwski/ydb-go-query/v1/internal/transport/balancing/grid"
-	"github.com/adwski/ydb-go-query/v1/internal/transport/dispatcher"
-	qq "github.com/adwski/ydb-go-query/v1/query"
+	"github.com/adwski/ydb-go-query/internal/discovery"
+	"github.com/adwski/ydb-go-query/internal/logger"
+	"github.com/adwski/ydb-go-query/internal/query"
+	"github.com/adwski/ydb-go-query/internal/transport"
+	"github.com/adwski/ydb-go-query/internal/transport/balancing/grid"
+	"github.com/adwski/ydb-go-query/internal/transport/dispatcher"
+	qq "github.com/adwski/ydb-go-query/query"
 )
 
 const (

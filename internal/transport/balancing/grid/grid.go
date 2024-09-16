@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 
-	localErrs "github.com/adwski/ydb-go-query/v1/internal/errors"
-	"github.com/adwski/ydb-go-query/v1/internal/transport"
-	"github.com/adwski/ydb-go-query/v1/internal/transport/balancing"
-	"github.com/adwski/ydb-go-query/v1/internal/xcontext"
+	localErrs "github.com/adwski/ydb-go-query/internal/errors"
+	"github.com/adwski/ydb-go-query/internal/transport"
+	"github.com/adwski/ydb-go-query/internal/transport/balancing"
+	"github.com/adwski/ydb-go-query/internal/xcontext"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

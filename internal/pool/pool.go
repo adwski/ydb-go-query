@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	localErrs "github.com/adwski/ydb-go-query/v1/internal/errors"
-	"github.com/adwski/ydb-go-query/v1/internal/logger"
+	localErrs "github.com/adwski/ydb-go-query/internal/errors"
+	"github.com/adwski/ydb-go-query/internal/logger"
 )
 
 const (
