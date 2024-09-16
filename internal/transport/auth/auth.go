@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/adwski/ydb-go-query/v1/internal/logger"
+	"github.com/adwski/ydb-go-query/internal/logger"
 )
 
 const (

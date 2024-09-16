@@ -5,7 +5,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/adwski/ydb-go-query/v1/internal/transport/balancing/policy"
+	"github.com/adwski/ydb-go-query/internal/transport/balancing/policy"
 )
 
 const (

@@ -6,9 +6,9 @@ import (
 	"os"
 	"os/signal"
 
-	ydb "github.com/adwski/ydb-go-query/v1"
-	"github.com/adwski/ydb-go-query/v1/query"
-	"github.com/adwski/ydb-go-query/v1/types"
+	ydb "github.com/adwski/ydb-go-query"
+	"github.com/adwski/ydb-go-query/query"
+	"github.com/adwski/ydb-go-query/types"
 
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
