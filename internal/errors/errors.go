@@ -4,7 +4,7 @@ const (
 	errLocalFailure = "local failure"
 )
 
-// LocalFailureError error is used globally to identify locally originated
+// LocalFailureError error is used globally to distinguish locally originated
 // request errors from io errors or remote side errors.
 type LocalFailureError struct {
 }
