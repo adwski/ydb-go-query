@@ -127,7 +127,7 @@ func main() {
 			return
 		}
 	*/
-	// After transaction is commited any following calls to
+	// After transaction is committed any following calls to
 	// tx.QueryCtx().Exec(), tx.Rollback() or tx.Commit() will result in error.
 
 	// ----------------------------------------------------------------------
