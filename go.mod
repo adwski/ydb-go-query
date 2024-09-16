@@ -1,6 +1,6 @@
 module github.com/adwski/ydb-go-query
 
-go 1.23
+go 1.23.1
 
 require (
 	github.com/rs/zerolog v1.33.0
