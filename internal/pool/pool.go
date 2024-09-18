@@ -17,6 +17,8 @@ const (
 	minCreateTimeout     = time.Second
 	minItemLifetime      = 5 * time.Minute
 
+	minPoolSize = 1
+
 	defaultCreateRetryDelayOnLocalErrors = time.Second
 )
 
@@ -83,25 +85,32 @@ type (
 
 		// PoolSize specifies amount of items in pool.
 		PoolSize uint
+
+		test bool
 	}
 )
 
 func New[PT item[T], T any](ctx context.Context, cfg Config[PT, T]) *Pool[PT, T] {
 	runCtx, cancel := context.WithCancel(ctx)
 
-	if cfg.CreateTimeout < minCreateTimeout {
-		cfg.CreateTimeout = defaultCreateTimeout
-	}
-	if cfg.Lifetime < minItemLifetime {
-		cfg.Lifetime = 0 // infinite lifetime
+	if !cfg.test { // bypass min value checks
+		if cfg.CreateTimeout < minCreateTimeout {
+			cfg.CreateTimeout = defaultCreateTimeout
+		}
+		if cfg.Lifetime < minItemLifetime {
+			cfg.Lifetime = 0 // infinite lifetime
+		}
+		if cfg.PoolSize < minPoolSize {
+			cfg.PoolSize = minPoolSize
+		}
 	}
 
 	pool := &Pool[PT, T]{
 		logger:        cfg.Logger,
 		size:          cfg.PoolSize,
 		createTimeout: cfg.CreateTimeout,
-		itemLifetime:  cfg.Lifetime.Microseconds() / 1000,
-		recycleWindow: cfg.RecycleWindow.Microseconds() / 1000,
+		itemLifetime:  cfg.Lifetime.Milliseconds() / 1000,
+		recycleWindow: cfg.RecycleWindow.Milliseconds() / 1000,
 
 		itemRecycling: cfg.Lifetime != 0,
 

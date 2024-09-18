@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	localErrs "github.com/adwski/ydb-go-query/internal/errors"
 	"github.com/adwski/ydb-go-query/internal/logger/noop"
 )
 
@@ -206,5 +207,74 @@ func TestPool_GetPutConcurrent(t *testing.T) {
 		if closedCalls := itm_.closed.Load(); closedCalls != 1 {
 			t.Fatal("itm has incorrect close ctr:", closedCalls)
 		}
+	}
+}
+
+func TestPool_Recycle(t *testing.T) {
+	runCtx, runCancel := context.WithCancel(context.Background())
+	defer runCancel()
+
+	itmMx := &sync.Mutex{}
+	itms := make([]*itm, 0, 10)
+
+	pool := New[*itm, itm](runCtx, Config[*itm, itm]{
+		Logger: noop.NewLogger(),
+		CreateFunc: func(ctx context.Context, createTimeout time.Duration) (*itm, error) {
+			itm_ := &itm{
+				mx:    &sync.RWMutex{},
+				id:    rand.Uint64(),
+				alive: true,
+			}
+
+			itmMx.Lock()
+			itms = append(itms, itm_)
+			itmMx.Unlock()
+
+			return itm_, nil
+		},
+		CreateTimeout: time.Second,
+		RecycleWindow: time.Second,
+		Lifetime:      5 * time.Second,
+		PoolSize:      1,
+
+		test: true,
+	})
+
+	time.Sleep(7 * time.Second)
+	if err := pool.Close(); err != nil {
+		t.Fatal("close must not return error", err.Error())
+	}
+
+	t.Log("items created total:", len(itms))
+	if len(itms) != 2 {
+		t.Error("looks like first item was not recycled")
+	}
+	for _, itm_ := range itms {
+		if closedCalls := itm_.closed.Load(); closedCalls != 1 {
+			t.Fatal("itm has incorrect close ctr:", closedCalls)
+		}
+	}
+}
+
+func TestPool_LocalErrorCreateRetry(t *testing.T) {
+	runCtx, runCancel := context.WithCancel(context.Background())
+	defer runCancel()
+
+	ctr := 0
+
+	pool := New[*itm, itm](runCtx, Config[*itm, itm]{
+		Logger: noop.NewLogger(),
+		CreateFunc: func(ctx context.Context, createTimeout time.Duration) (*itm, error) {
+			ctr++
+			return nil, localErrs.LocalFailureError{}
+		}})
+
+	time.Sleep(2500 * time.Millisecond)
+	if err := pool.Close(); err != nil {
+		t.Fatal("close must not return error", err.Error())
+	}
+
+	if ctr != 3 {
+		t.Error("something wrong with create retry delay, ctr:", ctr)
 	}
 }
