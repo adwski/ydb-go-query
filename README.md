@@ -1,8 +1,8 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/adwski/ydb-go-query)](https://goreportcard.com/report/github.com/adwski/ydb-go-query)
 [![CI](https://github.com/adwski/ydb-go-query/actions/workflows/tests.yml/badge.svg)](https://github.com/adwski/ydb-go-query/actions/workflows/tests.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/adwski/ydb-go-query)](https://goreportcard.com/report/github.com/adwski/ydb-go-query)
 [![Coverage](https://adwski.github.io/ydb-go-query/badges/coverage.svg)](https://adwski.github.io/ydb-go-query/coverage/coverage.html)
 [![Go version](https://img.shields.io/github/go-mod/go-version/adwski/ydb-go-query.svg)](https://github.com/adwski/ydb-go-query)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/License-Apache_2.0-brightgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # ydb-go-query
 
