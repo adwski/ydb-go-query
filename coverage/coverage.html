@@ -1,0 +1,3995 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>ydb-go-query: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/adwski/ydb-go-query/client.go (0.0%)</option>
+				
+				<option value="file1">github.com/adwski/ydb-go-query/config.go (0.0%)</option>
+				
+				<option value="file2">github.com/adwski/ydb-go-query/examples/showcase/main.go (0.0%)</option>
+				
+				<option value="file3">github.com/adwski/ydb-go-query/internal/discovery/filter.go (0.0%)</option>
+				
+				<option value="file4">github.com/adwski/ydb-go-query/internal/discovery/service.go (0.0%)</option>
+				
+				<option value="file5">github.com/adwski/ydb-go-query/internal/endpoints/db.go (100.0%)</option>
+				
+				<option value="file6">github.com/adwski/ydb-go-query/internal/endpoints/info.go (100.0%)</option>
+				
+				<option value="file7">github.com/adwski/ydb-go-query/internal/errors/errors.go (0.0%)</option>
+				
+				<option value="file8">github.com/adwski/ydb-go-query/internal/logger/noop/noop.go (100.0%)</option>
+				
+				<option value="file9">github.com/adwski/ydb-go-query/internal/logger/zap/zap.go (0.0%)</option>
+				
+				<option value="file10">github.com/adwski/ydb-go-query/internal/logger/zerolog/zerolog.go (0.0%)</option>
+				
+				<option value="file11">github.com/adwski/ydb-go-query/internal/pool/pool.go (61.3%)</option>
+				
+				<option value="file12">github.com/adwski/ydb-go-query/internal/query/service.go (0.0%)</option>
+				
+				<option value="file13">github.com/adwski/ydb-go-query/internal/query/session/exec.go (0.0%)</option>
+				
+				<option value="file14">github.com/adwski/ydb-go-query/internal/query/session/session.go (0.0%)</option>
+				
+				<option value="file15">github.com/adwski/ydb-go-query/internal/query/txsettings/txsettings.go (0.0%)</option>
+				
+				<option value="file16">github.com/adwski/ydb-go-query/internal/transport/auth/auth.go (0.0%)</option>
+				
+				<option value="file17">github.com/adwski/ydb-go-query/internal/transport/auth/userpass/auth.go (0.0%)</option>
+				
+				<option value="file18">github.com/adwski/ydb-go-query/internal/transport/auth/yc/auth.go (0.0%)</option>
+				
+				<option value="file19">github.com/adwski/ydb-go-query/internal/transport/balancing/grid/grid.go (0.0%)</option>
+				
+				<option value="file20">github.com/adwski/ydb-go-query/internal/transport/balancing/node.go (88.6%)</option>
+				
+				<option value="file21">github.com/adwski/ydb-go-query/internal/transport/balancing/policy/firstready.go (80.0%)</option>
+				
+				<option value="file22">github.com/adwski/ydb-go-query/internal/transport/balancing/policy/random.go (80.0%)</option>
+				
+				<option value="file23">github.com/adwski/ydb-go-query/internal/transport/balancing/policy/roundrobin.go (100.0%)</option>
+				
+				<option value="file24">github.com/adwski/ydb-go-query/internal/transport/balancing/policyconfig.go (50.0%)</option>
+				
+				<option value="file25">github.com/adwski/ydb-go-query/internal/transport/balancing/tree.go (84.3%)</option>
+				
+				<option value="file26">github.com/adwski/ydb-go-query/internal/transport/connection.go (0.0%)</option>
+				
+				<option value="file27">github.com/adwski/ydb-go-query/internal/transport/credentials/credentials.go (0.0%)</option>
+				
+				<option value="file28">github.com/adwski/ydb-go-query/internal/transport/dispatcher/dispatcher.go (0.0%)</option>
+				
+				<option value="file29">github.com/adwski/ydb-go-query/internal/xcontext/context.go (0.0%)</option>
+				
+				<option value="file30">github.com/adwski/ydb-go-query/query/context.go (0.0%)</option>
+				
+				<option value="file31">github.com/adwski/ydb-go-query/query/query.go (0.0%)</option>
+				
+				<option value="file32">github.com/adwski/ydb-go-query/query/result.go (0.0%)</option>
+				
+				<option value="file33">github.com/adwski/ydb-go-query/query/transaction.go (0.0%)</option>
+				
+				<option value="file34">github.com/adwski/ydb-go-query/query/txquery.go (0.0%)</option>
+				
+				<option value="file35">github.com/adwski/ydb-go-query/types/types.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">no coverage</span>
+				<span class="cov1">low coverage</span>
+				<span class="cov2">*</span>
+				<span class="cov3">*</span>
+				<span class="cov4">*</span>
+				<span class="cov5">*</span>
+				<span class="cov6">*</span>
+				<span class="cov7">*</span>
+				<span class="cov8">*</span>
+				<span class="cov9">*</span>
+				<span class="cov10">high coverage</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package ydbgoquery
+
+import (
+        "context"
+        "errors"
+        "sync"
+        "time"
+
+        "github.com/adwski/ydb-go-query/internal/discovery"
+        "github.com/adwski/ydb-go-query/internal/logger"
+        "github.com/adwski/ydb-go-query/internal/query"
+        "github.com/adwski/ydb-go-query/internal/transport"
+        "github.com/adwski/ydb-go-query/internal/transport/balancing/grid"
+        "github.com/adwski/ydb-go-query/internal/transport/dispatcher"
+        qq "github.com/adwski/ydb-go-query/query"
+)
+
+const (
+        defaultConnectionsPerEndpoint = 2
+)
+
+var (
+        ErrNoInitialNodes           = errors.New("no initial nodes was provided")
+        ErrDBEmpty                  = errors.New("db is empty")
+        ErrDiscoveryTransportCreate = errors.New("discovery transport create error")
+)
+
+func Open(ctx context.Context, cfg Config, opts ...Option) (*Client, error) <span class="cov0" title="0">{
+        client, err := newClient(ctx, &amp;cfg, opts...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">var runCtx context.Context
+        runCtx, client.cancel = context.WithCancel(ctx)
+
+        client.querySvc = query.NewService(runCtx, query.Config{
+                Logger:        client.logger,
+                Transport:     client.dispatcher.Transport(),
+                CreateTimeout: client.sessionCreateTimeout,
+                PoolSize:      client.poolSize,
+        })
+
+        client.queryCtx = qq.NewCtx(client.logger, client.querySvc, cfg.txSettings)
+
+        client.wg.Add(1)
+        go client.dispatcher.Run(runCtx, client.wg)
+
+        client.wg.Add(1)
+        go client.discoverySvc.Run(runCtx, client.wg)
+
+        client.wg.Add(1)
+        go cfg.auth.Run(runCtx, client.wg)
+
+        return client, nil</span>
+}
+
+type (
+        authRunner interface {
+                transport.Authenticator
+
+                Run(ctx context.Context, wg *sync.WaitGroup)
+        }
+        Client struct {
+                logger logger.Logger
+
+                dispatcher *dispatcher.Dispatcher
+
+                discoverySvc *discovery.Service
+                querySvc     *query.Service
+
+                queryCtx *qq.Ctx
+
+                wg     *sync.WaitGroup
+                cancel context.CancelFunc
+
+                sessionCreateTimeout time.Duration
+                poolSize             uint
+        }
+)
+
+func (c *Client) QueryCtx() *qq.Ctx <span class="cov0" title="0">{
+        return c.queryCtx
+}</span>
+
+func (c *Client) Close() <span class="cov0" title="0">{
+        c.cancel()
+        _ = c.querySvc.Close()
+        c.wg.Wait()
+}</span>
+
+func newClient(ctx context.Context, cfg *Config, opts ...Option) (*Client, error) <span class="cov0" title="0">{
+        if len(cfg.InitialNodes) == 0 </span><span class="cov0" title="0">{
+                return nil, ErrNoInitialNodes
+        }</span>
+        <span class="cov0" title="0">if len(cfg.DB) == 0 </span><span class="cov0" title="0">{
+                return nil, ErrDBEmpty
+        }</span>
+
+        <span class="cov0" title="0">cfg.setDefaults()
+
+        for _, opt := range opts </span><span class="cov0" title="0">{
+                if err := opt(ctx, cfg); err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+        }
+
+        <span class="cov0" title="0">tr, err := grid.NewWithStaticEndpoints(ctx, cfg.InitialNodes, cfg.transportCredentials, cfg.auth, cfg.DB)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Join(ErrDiscoveryTransportCreate, err)
+        }</span>
+
+        <span class="cov0" title="0">discoverySvc := discovery.NewService(discovery.Config{
+                Logger:     cfg.logger,
+                DB:         cfg.DB,
+                Transport:  tr,
+                DoAnnounce: true,
+        })
+
+        dispatcherCfg := dispatcher.Config{
+                Logger:    cfg.logger,
+                InitNodes: cfg.InitialNodes,
+                DB:        cfg.DB,
+                GridConfig: grid.Config{
+                        ConnectionsPerEndpoint: defaultConnectionsPerEndpoint,
+                },
+                TransportCredentials: cfg.transportCredentials,
+                Auth:                 cfg.auth,
+
+                EndpointsProvider: discoverySvc,
+        }
+
+        c := &amp;Client{
+                logger:               cfg.logger,
+                sessionCreateTimeout: cfg.sessionCreateTimeout,
+                poolSize:             cfg.poolSize,
+
+                dispatcher:   dispatcher.New(dispatcherCfg),
+                discoverySvc: discoverySvc,
+
+                wg: &amp;sync.WaitGroup{},
+        }
+
+        return c, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package ydbgoquery
+
+import (
+        "context"
+        "errors"
+        "time"
+
+        "github.com/adwski/ydb-go-query/internal/logger"
+        "github.com/adwski/ydb-go-query/internal/logger/noop"
+        zaplogger "github.com/adwski/ydb-go-query/internal/logger/zap"
+        zerologger "github.com/adwski/ydb-go-query/internal/logger/zerolog"
+        "github.com/adwski/ydb-go-query/internal/query/txsettings"
+        "github.com/adwski/ydb-go-query/internal/transport/auth"
+        "github.com/adwski/ydb-go-query/internal/transport/auth/userpass"
+        "github.com/adwski/ydb-go-query/internal/transport/auth/yc"
+        "github.com/adwski/ydb-go-query/internal/transport/balancing/grid"
+        transportCreds "github.com/adwski/ydb-go-query/internal/transport/credentials"
+
+        "github.com/rs/zerolog"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"
+        "go.uber.org/zap"
+        "google.golang.org/grpc/credentials"
+)
+
+const (
+        defaultSessionCreateTimeout = 3 * time.Second
+        defaultSessionPoolSize      = 10
+)
+
+type (
+        Config struct {
+                logger               logger.Logger
+                transportCredentials credentials.TransportCredentials
+                auth                 authRunner
+
+                txSettings *Ydb_Query.TransactionSettings
+
+                DB           string
+                InitialNodes []string
+
+                poolSize             uint
+                sessionCreateTimeout time.Duration
+        }
+        Option func(context.Context, *Config) error
+)
+
+func (cfg *Config) setDefaults() <span class="cov0" title="0">{
+        cfg.logger = noop.NewLogger()
+        cfg.sessionCreateTimeout = defaultSessionCreateTimeout
+        cfg.poolSize = defaultSessionPoolSize
+        cfg.transportCredentials = transportCreds.Insecure()
+        cfg.txSettings = txsettings.SerializableReadWrite()
+}</span>
+
+func WithLogger(log logger.Logger) Option <span class="cov0" title="0">{
+        return func(ctx context.Context, cfg *Config) error </span><span class="cov0" title="0">{
+                cfg.logger = log
+                return nil
+        }</span>
+}
+
+func WithZeroLogger(log zerolog.Logger) Option <span class="cov0" title="0">{
+        return func(ctx context.Context, cfg *Config) error </span><span class="cov0" title="0">{
+                cfg.logger = zerologger.NewLogger(log)
+                return nil
+        }</span>
+}
+
+func WithZapLogger(log *zap.Logger) Option <span class="cov0" title="0">{
+        return func(ctx context.Context, cfg *Config) error </span><span class="cov0" title="0">{
+                cfg.logger = zaplogger.NewLogger(log)
+                return nil
+        }</span>
+}
+
+func WithSessionCreateTimeout(timeout time.Duration) Option <span class="cov0" title="0">{
+        return func(ctx context.Context, cfg *Config) error </span><span class="cov0" title="0">{
+                cfg.sessionCreateTimeout = timeout
+                return nil
+        }</span>
+}
+
+func WithSessionPoolSize(size uint) Option <span class="cov0" title="0">{
+        return func(ctx context.Context, cfg *Config) error </span><span class="cov0" title="0">{
+                cfg.poolSize = size
+                return nil
+        }</span>
+}
+
+func withTransportSecurity(credentials credentials.TransportCredentials) Option <span class="cov0" title="0">{
+        return func(ctx context.Context, cfg *Config) error </span><span class="cov0" title="0">{
+                cfg.transportCredentials = credentials
+                return nil
+        }</span>
+}
+
+func WithTransportTLS() Option <span class="cov0" title="0">{
+        return withTransportSecurity(transportCreds.TLS())
+}</span>
+
+func WithYCAuthFile(filename string) Option <span class="cov0" title="0">{
+        return withYC(yc.Config{
+                IamKeyFile: filename,
+        })
+}</span>
+
+func WithYCAuthBytes(iamKeyBytes []byte) Option <span class="cov0" title="0">{
+        return withYC(yc.Config{
+                IamKey: iamKeyBytes,
+        })
+}</span>
+
+func withYC(ycCfg yc.Config) Option <span class="cov0" title="0">{
+        return func(ctx context.Context, cfg *Config) error </span><span class="cov0" title="0">{
+                ycAuth, err := yc.New(ctx, ycCfg)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err //nolint:wrapcheck // unnecessary
+                }</span>
+                <span class="cov0" title="0">cfg.auth = auth.New(ctx, auth.Config{
+                        Logger:   cfg.logger,
+                        Provider: ycAuth,
+                })
+
+                return nil</span>
+        }
+}
+
+var ErrAuthTransport = errors.New("unable to create auth transport")
+
+func WithUserPass(username, password string) Option <span class="cov0" title="0">{
+        return func(ctx context.Context, cfg *Config) error </span><span class="cov0" title="0">{
+                tr, err := grid.NewWithStaticEndpoints(ctx, cfg.InitialNodes, cfg.transportCredentials, nil, cfg.DB)
+                if err != nil </span><span class="cov0" title="0">{
+                        return errors.Join(ErrAuthTransport, err)
+                }</span>
+                <span class="cov0" title="0">cfg.auth = auth.New(ctx, auth.Config{
+                        Logger: cfg.logger,
+                        Provider: userpass.New(userpass.Config{
+                                Transport: tr,
+                                Username:  username,
+                                Password:  password,
+                        }),
+                })
+
+                return nil</span>
+        }
+}
+
+func WithSerializableReadWrite() Option <span class="cov0" title="0">{
+        return func(ctx context.Context, cfg *Config) error </span><span class="cov0" title="0">{
+                cfg.txSettings = txsettings.SerializableReadWrite()
+                return nil
+        }</span>
+}
+
+func WithOnlineReadOnly() Option <span class="cov0" title="0">{
+        return func(ctx context.Context, cfg *Config) error </span><span class="cov0" title="0">{
+                cfg.txSettings = txsettings.OnlineReadOnly()
+                return nil
+        }</span>
+}
+
+func WithOnlineReadOnlyInconsistent() Option <span class="cov0" title="0">{
+        return func(ctx context.Context, cfg *Config) error </span><span class="cov0" title="0">{
+                cfg.txSettings = txsettings.OnlineReadOnlyInconsistent()
+                return nil
+        }</span>
+}
+
+func WithStaleReadOnly() Option <span class="cov0" title="0">{
+        return func(ctx context.Context, cfg *Config) error </span><span class="cov0" title="0">{
+                cfg.txSettings = txsettings.StaleReadOnly()
+                return nil
+        }</span>
+}
+
+func WithSnapshotReadOnly() Option <span class="cov0" title="0">{
+        return func(ctx context.Context, cfg *Config) error </span><span class="cov0" title="0">{
+                cfg.txSettings = txsettings.SnapshotReadOnly()
+                return nil
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package main
+
+import (
+        "context"
+        "fmt"
+        "os"
+        "os/signal"
+
+        ydb "github.com/adwski/ydb-go-query"
+        "github.com/adwski/ydb-go-query/query"
+        "github.com/adwski/ydb-go-query/types"
+
+        "github.com/rs/zerolog"
+        "github.com/spf13/pflag"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
+)
+
+func main() <span class="cov0" title="0">{
+        // create logger
+        logger := zerolog.New(zerolog.NewConsoleWriter()).
+                Level(zerolog.TraceLevel).
+                With().Timestamp().Logger()
+
+        // parse command line args
+        var (
+                fs        = pflag.NewFlagSet("", pflag.ContinueOnError)
+                addr      = fs.StringP("address", "a", "127.0.0.1:12136", "YDB server address")
+                db        = fs.StringP("database", "d", "/local", "YDB database path")
+                poolSize  = fs.UintP("pool-size", "p", 10, "YDB session pool size")
+                ycIamFile = fs.StringP("yc-iam-key-file", "y", "", "Yandex Cloud IAM key file")
+                logLevel  = fs.StringP("log-level", "l", "error", "Log level: error|info|debug|trace")
+        )
+
+        err := fs.Parse(os.Args[1:])
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Error().Err(err).Msg("cannot parse command line args")
+                os.Exit(1)
+        }</span>
+
+        <span class="cov0" title="0">lvl, err := zerolog.ParseLevel(*logLevel)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Error().Err(err).Msg("incorrect log level")
+                os.Exit(1)
+        }</span>
+        <span class="cov0" title="0">logger = logger.Level(lvl)
+
+        // configure ydb client
+        options := []ydb.Option{
+                ydb.WithZeroLogger(logger.With().Str("component", "ydb").Logger()),
+                ydb.WithSessionPoolSize(*poolSize)}
+
+        if *ycIamFile != "" </span><span class="cov0" title="0">{
+                // Enable Yandex Cloud authentication &amp; authorization.
+                options = append(options,
+                        ydb.WithTransportTLS(),         // use TLS
+                        ydb.WithYCAuthFile(*ycIamFile)) // use YC authorization with service acc IAM key
+        }</span>
+
+        // create run context
+        <span class="cov0" title="0">ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+        defer cancel()
+
+        // create client
+        client, err := ydb.Open(ctx, ydb.Config{
+                InitialNodes: []string{*addr}, // address:port endpoints used for discovery
+                DB:           *db,             // database path
+        }, options...)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Error().Err(err).Msg("cannot create ydb client")
+                defer os.Exit(1)
+                return
+        }</span>
+        <span class="cov0" title="0">defer client.Close() // blocks until all cleanup is finished
+
+        // ----------------------------------------------------------------------
+        // Run queries
+
+        // client.QueryCtx() returns query execution context which holds
+        // global configuration that all queries use.
+        // At the moment it controls transaction mode only.
+        qCtx := client.QueryCtx()
+
+        // ----------------------------------------------------------------------
+        // Simple query execution.
+
+        // Exec() executes query outside of transaction
+        // and with no parameters.
+        // It blocks until it fetches result completely.
+        // It also provides basic execution stats.
+        checkResult(qCtx.Exec(ctx, `SELECT 1`))
+
+        checkResult(qCtx.Exec(ctx, seriesCreateTable))
+        checkResult(qCtx.Exec(ctx, seasonsCreateTable))
+        checkResult(qCtx.Exec(ctx, episodesCreateTable))
+
+        // ----------------------------------------------------------------------
+        // Execute several queries inside transaction.
+
+        // Tx() creates 'transaction' entity which allows to
+        // execute several queries in one transaction.
+        // Under the hood it will acquire and hold YDB session until transaction is finished.
+        // Default tx mode is serializable read/write.
+        // Read more about transactions here https://ydb.tech/docs/en/concepts/transactions.
+        tx, errTx := qCtx.Tx(ctx)
+        if errTx != nil </span><span class="cov0" title="0">{
+                logger.Error().Err(err).Msg("cannot create transaction")
+                defer os.Exit(1)
+                return
+        }</span>
+        // exec queries inside this transaction
+        // Query() creates 'query' entity which can be configured
+        // and then executed with Exec(ctx).
+        <span class="cov0" title="0">checkResult(tx.Query(seasonsData).Exec(ctx))
+        checkResult(tx.Query(seriesData).Exec(ctx))
+        // Commit() will configure query to send inline commit flag.
+        // Only last query in transaction should have commit flag set to true.
+        // This flag also implies transaction cleanup (underlying session will be freed).
+        checkResult(tx.Query(episodesData).Commit().Exec(ctx))
+
+        /*
+                // Or you can also commit transaction with explicit tx.Commit() call
+                // which will result in +1 request to YDB.
+                checkResult(tx.QueryCtx(episodesData).Exec(ctx)) // no commit flag
+                if err = tx.Commit(ctx); err != nil {
+                        logger.Error().Err(err).Msg("cannot commit transaction")
+                        defer os.Exit(1)
+                        return
+                }
+        */
+        // After transaction is committed any following calls to
+        // tx.QueryCtx().Exec(), tx.Rollback() or tx.Commit() will result in error.
+
+        // ----------------------------------------------------------------------
+        // Select with params
+
+        // qCtx.Query() also uses transaction settings which means
+        // every call will be executed in its own transaction.
+        checkResult(qCtx.Query(
+                `DECLARE $seriesId AS Uint64;
+        SELECT
+            sa.title AS season_title,
+            sr.title AS series_title,
+            sr.series_id,
+            sa.season_id
+        FROM
+            seasons AS sa
+        INNER JOIN
+            series AS sr
+        ON sa.series_id = sr.series_id
+        WHERE sa.series_id = $seriesId
+        ORDER BY sr.series_id, sa.season_id`).
+                Param("$seriesId", types.Uint64(1)). // Parameters for query declared with DECLARE
+                Exec(ctx))
+
+        checkResult(qCtx.Query(`UPSERT INTO episodes (
+                series_id, season_id, episode_id, title, air_date
+        ) VALUES (
+    2, 5, 13, "Test Episode", CAST(Date("2018-08-27") AS Uint64))`).Exec(ctx))
+
+        selectEpisodes := func() </span><span class="cov0" title="0">{
+                checkResult(qCtx.Query(`DECLARE $seriesId AS Uint64;
+        DECLARE $seasonId AS Uint64;
+        SELECT * FROM episodes WHERE series_id = $seriesId AND season_id = $seasonId;`).
+                        Param("$seriesId", types.Uint64(2)).
+                        Param("$seasonId", types.Uint64(5)).
+
+                        // Using user-defined function to get result rows.
+                        // This func will be called every time new result part is arrived.
+                        // If nil, rows are collected internally and can be retrieved by result.Rows().
+                        Collect(func(rows []*Ydb.Value) error </span><span class="cov0" title="0">{
+                                fmt.Println("&gt;&gt;&gt; Collecting rows in user defined function.")
+                                for _, row := range rows </span><span class="cov0" title="0">{
+                                        fmt.Print("row: ")
+                                        for idx, col := range row.Items </span><span class="cov0" title="0">{
+                                                fmt.Printf("col%d: %v ", idx, col.String())
+                                        }</span>
+                                        <span class="cov0" title="0">fmt.Println()</span>
+                                }
+
+                                // If this func returns error result parts collection will stop
+                                // and result stream will be canceled.
+                                // This error is treated as result error ( retrieved with result.Err() )
+                                <span class="cov0" title="0">return nil</span>
+                        }).Exec(ctx))
+        }
+        <span class="cov0" title="0">selectEpisodes()
+
+        // ----------------------------------------------------------------------
+        // Delete with params
+
+        checkResult(qCtx.Query(`DECLARE $title AS Utf8;
+        DELETE FROM episodes WHERE title = $title;`).
+                Param("$title", types.UTF8("Test Episode")).
+                Exec(ctx))
+        selectEpisodes()
+
+        // ----------------------------------------------------------------------
+        // Create and rollback transaction.
+
+        if tx, err = qCtx.Tx(ctx); err != nil </span><span class="cov0" title="0">{
+                logger.Error().Err(err).Msg("cannot create transaction")
+                defer os.Exit(1)
+                return
+        }</span>
+        <span class="cov0" title="0">checkResult(tx.Query(`UPSERT INTO episodes (
+                series_id, season_id, episode_id, title, air_date
+        ) VALUES (
+    2, 5, 13, "Test Episode", CAST(Date("2018-08-27") AS Uint64))`).Exec(ctx))
+
+        // Only uncommitted transaction can be rolled back.
+        if err = tx.Rollback(ctx); err != nil </span><span class="cov0" title="0">{
+                logger.Error().Err(err).Msg("cannot rollback transaction")
+                defer os.Exit(1)
+                return
+        }</span>
+        <span class="cov0" title="0">selectEpisodes()
+
+        // ----------------------------------------------------------------------
+        // DML examples
+
+        checkResult(qCtx.Exec(ctx, `ALTER TABLE episodes ADD COLUMN viewers Uint64;`))
+        checkResult(qCtx.Exec(ctx, `ALTER TABLE episodes DROP COLUMN viewers;`))
+
+        // ----------------------------------------------------------------------
+        // cleanup
+
+        checkResult(qCtx.Exec(ctx, `DROP TABLE series`))
+        checkResult(qCtx.Exec(ctx, `DROP TABLE seasons`))
+        checkResult(qCtx.Exec(ctx, `DROP TABLE episodes`))</span>
+}
+
+func checkResult(result *query.Result, err error) <span class="cov0" title="0">{
+        fmt.Println("==============================")
+        // check result
+        switch </span>{
+        case err != nil:<span class="cov0" title="0">
+                // ydb interaction error (most likely io error)
+                fmt.Printf("YDB error: %v\n", err)</span>
+
+        case result.Err() != nil:<span class="cov0" title="0">
+                // query execution error (syntax, etc...)
+                fmt.Printf("Query returned error: %v\nIssues: \n%v\n",
+                        result.Err(), result.Issues())</span>
+
+        default:<span class="cov0" title="0">
+                // all fine here
+                fmt.Printf("Query executed successfully!\nstats: %v\ncols: %v\n",
+                        result.Stats(), result.Cols())
+                for rIdx, row := range result.Rows() </span><span class="cov0" title="0">{
+                        fmt.Printf("row %d: %v\n", rIdx, row)
+                }</span>
+        }
+        <span class="cov0" title="0">fmt.Println("==============================")</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package discovery
+
+import (
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Discovery"
+)
+
+const (
+        ServiceNameQuery = "query_service"
+)
+
+type (
+        Filter struct {
+                Require *Require
+                Prefer  *Prefer
+        }
+
+        Require struct {
+                Services  []string
+                Locations []string
+        }
+
+        Prefer struct {
+                Locations []string
+        }
+)
+
+func NewFilter() *Filter <span class="cov0" title="0">{
+        return &amp;Filter{}
+}</span>
+
+func (f *Filter) WithQueryService() *Filter <span class="cov0" title="0">{
+        if f.Require == nil </span><span class="cov0" title="0">{
+                f.Require = &amp;Require{}
+        }</span>
+        <span class="cov0" title="0">f.Require.Services = []string{ServiceNameQuery}
+
+        return f</span>
+}
+
+func (f *Filter) matchRequired(ep *Ydb_Discovery.EndpointInfo) bool <span class="cov0" title="0">{
+        if f.Require == nil </span><span class="cov0" title="0">{
+                return true
+        }</span>
+
+        <span class="cov0" title="0">if !matchServices(ep, f.Require.Services) </span><span class="cov0" title="0">{
+                return false
+        }</span>
+
+        <span class="cov0" title="0">return matchLocation(ep, f.Require.Locations)</span>
+}
+
+func (f *Filter) matchPreferred(ep *Ydb_Discovery.EndpointInfo) bool <span class="cov0" title="0">{
+        if f.Prefer == nil </span><span class="cov0" title="0">{
+                return true
+        }</span>
+
+        <span class="cov0" title="0">return matchLocation(ep, f.Prefer.Locations)</span>
+}
+
+func (f *Filter) filter(endpoints []*Ydb_Discovery.EndpointInfo) (
+        preferred []*Ydb_Discovery.EndpointInfo,
+        notPreferred []*Ydb_Discovery.EndpointInfo,
+) <span class="cov0" title="0">{
+        for _, ep := range endpoints </span><span class="cov0" title="0">{
+                if f.matchRequired(ep) </span><span class="cov0" title="0">{
+                        if f.matchPreferred(ep) </span><span class="cov0" title="0">{
+                                preferred = append(preferred, ep)
+                        }</span> else<span class="cov0" title="0"> {
+                                notPreferred = append(notPreferred, ep)
+                        }</span>
+                }
+        }
+
+        <span class="cov0" title="0">return</span>
+}
+
+func matchServices(ep *Ydb_Discovery.EndpointInfo, services []string) bool <span class="cov0" title="0">{
+        srvs := make(map[string]struct{})
+        for _, srv := range ep.Service </span><span class="cov0" title="0">{
+                srvs[srv] = struct{}{}
+        }</span>
+        <span class="cov0" title="0">for _, srv := range services </span><span class="cov0" title="0">{
+                if _, ok := srvs[srv]; !ok </span><span class="cov0" title="0">{
+                        return false
+                }</span>
+        }
+
+        <span class="cov0" title="0">return true</span>
+}
+
+func matchLocation(ep *Ydb_Discovery.EndpointInfo, locations []string) bool <span class="cov0" title="0">{
+        if len(locations) == 0 </span><span class="cov0" title="0">{
+                return true
+        }</span>
+
+        <span class="cov0" title="0">matchLoc := false
+        for _, loc := range locations </span><span class="cov0" title="0">{
+                if loc == ep.Location </span><span class="cov0" title="0">{
+                        matchLoc = true
+                }</span>
+        }
+
+        <span class="cov0" title="0">return matchLoc</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package discovery
+
+import (
+        "context"
+        "errors"
+        "fmt"
+        "sync"
+        "time"
+
+        "github.com/adwski/ydb-go-query/internal/endpoints"
+        "github.com/adwski/ydb-go-query/internal/logger"
+
+        "github.com/ydb-platform/ydb-go-genproto/Ydb_Discovery_V1"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Discovery"
+        "google.golang.org/grpc"
+)
+
+var (
+        ErrEndpointsList         = errors.New("unable to get endpoints")
+        ErrEndpointsUnmarshal    = errors.New("unable to unmarshal endpoints")
+        ErrOperationUnsuccessful = errors.New("operation unsuccessful")
+)
+
+const (
+        discoveryTimeout  = 3 * time.Second
+        discoveryInterval = 30 * time.Second
+        discoveryErrRetry = 2 * time.Second
+)
+
+type (
+        Service struct {
+                logger logger.Logger
+                dsc    Ydb_Discovery_V1.DiscoveryServiceClient
+                ann    chan endpoints.Announce
+                filter *Filter
+                epDB   endpoints.DB
+                dbName string
+        }
+
+        Config struct {
+                Logger     logger.Logger
+                Transport  grpc.ClientConnInterface
+                DB         string
+                DoAnnounce bool
+        }
+)
+
+func NewService(cfg Config) *Service <span class="cov0" title="0">{
+        svc := &amp;Service{
+                dbName: cfg.DB,
+                logger: cfg.Logger,
+                filter: NewFilter().WithQueryService(),
+                dsc:    Ydb_Discovery_V1.NewDiscoveryServiceClient(cfg.Transport),
+                epDB:   endpoints.NewDB(),
+        }
+        if cfg.DoAnnounce </span><span class="cov0" title="0">{
+                svc.ann = make(chan endpoints.Announce)
+        }</span>
+
+        <span class="cov0" title="0">return svc</span>
+}
+
+func (svc *Service) EndpointsChan() &lt;-chan endpoints.Announce <span class="cov0" title="0">{
+        return svc.ann
+}</span>
+
+func (svc *Service) GetAllEndpoints() endpoints.Map <span class="cov0" title="0">{
+        return svc.epDB.GetAll()
+}</span>
+
+func (svc *Service) Run(ctx context.Context, wg *sync.WaitGroup) <span class="cov0" title="0">{
+        defer wg.Done()
+
+        waitTimer := svc.endpointsTick(ctx, nil)
+        defer waitTimer.Stop()
+
+runLoop:
+        for </span><span class="cov0" title="0">{
+                select </span>{
+                case &lt;-ctx.Done():<span class="cov0" title="0">
+                        break runLoop</span>
+                case &lt;-waitTimer.C:<span class="cov0" title="0">
+                        svc.endpointsTick(ctx, waitTimer)</span>
+                }
+        }
+}
+
+func (svc *Service) endpointsTick(ctx context.Context, waitTimer *time.Timer) *time.Timer <span class="cov0" title="0">{
+        ctxEp, cancelEp := context.WithDeadline(ctx, time.Now().Add(discoveryTimeout))
+        defer cancelEp()
+
+        timerInterval := discoveryInterval
+
+        if eps, err := svc.getEndpoints(ctxEp); err != nil </span><span class="cov0" title="0">{
+                svc.logger.Error("getEndpoints failed", "error", err, "db", svc.dbName)
+                timerInterval = discoveryErrRetry
+        }</span> else<span class="cov0" title="0"> {
+                svc.logger.Debug("getEndpoints succeeded", "count", len(eps))
+                svc.updateAndAnnounce(ctx, eps)
+        }</span>
+
+        <span class="cov0" title="0">if waitTimer == nil </span><span class="cov0" title="0">{
+                return time.NewTimer(timerInterval)
+        }</span>
+        <span class="cov0" title="0">waitTimer.Reset(timerInterval)
+
+        return nil</span>
+}
+
+func (svc *Service) updateAndAnnounce(ctx context.Context, endpoints []*Ydb_Discovery.EndpointInfo) <span class="cov0" title="0">{
+        if svc.epDB.Compare(endpoints) </span><span class="cov0" title="0">{
+                // endpoints did not change
+                return
+        }</span>
+
+        <span class="cov0" title="0">announce, oldLen, newLen := svc.epDB.Update(endpoints)
+
+        svc.logger.Info("endpoints changed",
+                "was", oldLen,
+                "now", newLen,
+                "new", len(announce.Add),
+                "old", len(announce.Del))
+
+        if svc.ann == nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov0" title="0">select </span>{
+        case &lt;-ctx.Done():<span class="cov0" title="0"></span>
+        case svc.ann &lt;- announce:<span class="cov0" title="0"></span>
+        }
+}
+
+func (svc *Service) getEndpoints(ctx context.Context) ([]*Ydb_Discovery.EndpointInfo, error) <span class="cov0" title="0">{
+        resp, err := svc.dsc.ListEndpoints(ctx, &amp;Ydb_Discovery.ListEndpointsRequest{
+                Database: svc.dbName,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Join(ErrEndpointsList, err)
+        }</span>
+        <span class="cov0" title="0">status := resp.GetOperation().GetStatus()
+        if status != Ydb.StatusIds_SUCCESS </span><span class="cov0" title="0">{
+                return nil, errors.Join(ErrOperationUnsuccessful,
+                        fmt.Errorf("%s", resp.GetOperation().String()))
+        }</span>
+        <span class="cov0" title="0">var epRes Ydb_Discovery.ListEndpointsResult
+        if err = resp.GetOperation().GetResult().UnmarshalTo(&amp;epRes); err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Join(ErrEndpointsUnmarshal, err)
+        }</span>
+
+        <span class="cov0" title="0">preferred, requiredButNotPreferred := svc.filter.filter(epRes.Endpoints)
+        if len(preferred) == 0 </span><span class="cov0" title="0">{
+                return requiredButNotPreferred, nil
+        }</span>
+
+        <span class="cov0" title="0">return preferred, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package endpoints
+
+import (
+        "sync"
+
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Discovery"
+)
+
+type (
+        // Announce is helpful message for consumers of this service about changes in YDB endpoints.
+        // For example dispatcher uses it to adjust balancing tree.
+        Announce struct {
+                Add    Map         // contains newly discovered endpoints
+                Update Map         // contains endpoints with changes (reserved for later use with load factor)
+                Del    []InfoShort // contains endpoints that are no longer present in YDB cluster
+        }
+
+        // Map stores endpoints as kay-value structure.
+        Map map[InfoShort]*Ydb_Discovery.EndpointInfo
+
+        // DB is thread safe in-memory storage for endpoints.
+        DB struct {
+                mx  *sync.RWMutex
+                dbm Map
+        }
+)
+
+// NewDB creates endpoints DB.
+func NewDB() DB <span class="cov8" title="5">{
+        return DB{
+                mx:  &amp;sync.RWMutex{},
+                dbm: make(Map),
+        }
+}</span>
+
+// GetAll returns copy of internal endpoints Map.
+func (db *DB) GetAll() Map <span class="cov8" title="5">{
+        db.mx.RLock()
+        defer db.mx.RUnlock()
+
+        eps := make(Map, len(db.dbm))
+        for k, v := range db.dbm </span><span class="cov6" title="3">{
+                eps[k] = v
+        }</span>
+        <span class="cov8" title="5">return eps</span>
+}
+
+// Compare takes current state of endpoints and compares it
+// with internal endpoints Map. It returns true if incoming state
+// is identical to internal or false otherwise.
+func (db *DB) Compare(endpoints []*Ydb_Discovery.EndpointInfo) bool <span class="cov8" title="5">{
+        db.mx.RLock()
+        defer db.mx.RUnlock()
+
+        ctr := len(db.dbm)
+        for _, ep := range endpoints </span><span class="cov9" title="6">{
+                if _, ok := db.dbm[NewInfoShort(ep)]; !ok </span><span class="cov7" title="4">{
+                        return false
+                }</span>
+                <span class="cov4" title="2">ctr--</span>
+        }
+
+        <span class="cov1" title="1">return ctr == 0</span>
+}
+
+// Update takes current state of endpoints and
+// - updates internal DB accordingly
+// - constructs endpoints announcement that reflects performed changes.
+func (db *DB) Update(endpoints []*Ydb_Discovery.EndpointInfo) (Announce, int, int) <span class="cov8" title="5">{
+        oldDB := db.GetAll()
+        newDB := make(Map, len(endpoints))
+
+        prev := len(oldDB)
+        length := len(endpoints)
+
+        ann := Announce{
+                Add: make(Map, length),
+                // Update: make(Map, length), // TODO
+                Del: make([]InfoShort, 0, length),
+        }
+
+        for _, ep := range endpoints </span><span class="cov10" title="7">{
+                key := InfoShort{
+                        NodeID:   ep.NodeId,
+                        Location: ep.Location,
+                        Address:  ep.Address,
+                        Port:     ep.Port,
+                }
+                if _, ok := db.dbm[key]; !ok </span><span class="cov8" title="5">{
+                        ann.Add[key] = ep
+                }</span>
+                <span class="cov10" title="7">newDB[key] = ep</span>
+        }
+
+        <span class="cov8" title="5">for k := range oldDB </span><span class="cov6" title="3">{
+                if _, ok := newDB[k]; !ok </span><span class="cov1" title="1">{
+                        ann.Del = append(ann.Del, k)
+                }</span>
+        }
+
+        <span class="cov8" title="5">db.swap(newDB)
+
+        return ann, prev, length</span>
+}
+
+func (db *DB) swap(dbm Map) <span class="cov8" title="5">{
+        db.mx.Lock()
+        defer db.mx.Unlock()
+
+        db.dbm = dbm
+}</span>
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package endpoints
+
+import "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Discovery"
+
+type (
+        // InfoShort uniquely identifies YDB endpoint.
+        InfoShort struct {
+                Address  string
+                Location string
+                NodeID   uint32
+                Port     uint32
+        }
+)
+
+func NewInfoShort(ep *Ydb_Discovery.EndpointInfo) InfoShort <span class="cov10" title="6">{
+        return InfoShort{
+                NodeID:   ep.NodeId,
+                Location: ep.Location,
+                Address:  ep.Address,
+                Port:     ep.Port,
+        }
+}</span>
+
+func (eis *InfoShort) GetAddress() string <span class="cov6" title="3">{
+        return eis.Address
+}</span>
+
+func (eis *InfoShort) GetPort() uint32 <span class="cov6" title="3">{
+        return eis.Port
+}</span>
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package errors
+
+const (
+        errLocalFailure = "local failure"
+)
+
+// LocalFailureError error is used globally to distinguish locally originated
+// request errors from io errors or remote side errors.
+type LocalFailureError struct {
+}
+
+func (e LocalFailureError) Error() string <span class="cov0" title="0">{
+        return errLocalFailure
+}</span>
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package noop
+
+type Logger struct {
+}
+
+func NewLogger() *Logger <span class="cov1" title="2">{
+        return &amp;Logger{}
+}</span>
+
+func (l *Logger) Error(string, ...any) {<span class="cov0" title="0">
+}</span>
+
+func (l *Logger) Info(string, ...any) {<span class="cov0" title="0">
+}</span>
+
+func (l *Logger) Debug(string, ...any) {<span class="cov1" title="4">
+}</span>
+
+func (l *Logger) Trace(string, ...any) {<span class="cov10" title="2907082">
+}</span>
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package zap
+
+import (
+        "fmt"
+
+        "go.uber.org/zap"
+)
+
+type Logger struct {
+        *zap.Logger
+}
+
+func NewLogger(logger *zap.Logger) *Logger <span class="cov0" title="0">{
+        return &amp;Logger{
+                Logger: logger.WithOptions(zap.AddCallerSkip(1)),
+        }
+}</span>
+
+func (l *Logger) Error(msg string, fields ...any) <span class="cov0" title="0">{
+        l.Logger.Error(msg, zapFields(fields...)...)
+}</span>
+
+func (l *Logger) Info(msg string, fields ...any) <span class="cov0" title="0">{
+        l.Logger.Info(msg, zapFields(fields...)...)
+}</span>
+
+func (l *Logger) Debug(msg string, fields ...any) <span class="cov0" title="0">{
+        l.Logger.Debug(msg, zapFields(fields...)...)
+}</span>
+
+func (l *Logger) Trace(msg string, fields ...any) <span class="cov0" title="0">{
+        l.Logger.Debug(msg, zapFields(fields...)...)
+}</span>
+
+func zapFields(fields ...any) []zap.Field <span class="cov0" title="0">{
+        zfs := make([]zap.Field, 0, len(fields)/2)
+
+        for i := 0; i &lt; len(fields); i += 2 </span><span class="cov0" title="0">{
+                key, ok := fields[i].(string)
+                if !ok </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+                <span class="cov0" title="0">switch val := fields[i+1].(type) </span>{
+                case fmt.Stringer:<span class="cov0" title="0">
+                        zfs = append(zfs, zap.String(key, val.String()))</span>
+                case error:<span class="cov0" title="0">
+                        zfs = append(zfs, zap.String(key, val.Error()))</span>
+                default:<span class="cov0" title="0">
+                        zfs = append(zfs, zap.Any(key, val))</span>
+                }
+        }
+
+        <span class="cov0" title="0">return zfs</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package zerolog
+
+import (
+        "fmt"
+
+        "github.com/rs/zerolog"
+)
+
+type Logger struct {
+        zerolog.Logger
+}
+
+func NewLogger(logger zerolog.Logger) *Logger <span class="cov0" title="0">{
+        return &amp;Logger{
+                Logger: logger,
+        }
+}</span>
+
+func (l *Logger) Error(msg string, fields ...any) <span class="cov0" title="0">{
+        emit(l.Logger.Error(), msg, fields...)
+}</span>
+
+func (l *Logger) Info(msg string, fields ...any) <span class="cov0" title="0">{
+        emit(l.Logger.Info(), msg, fields...)
+}</span>
+
+func (l *Logger) Debug(msg string, fields ...any) <span class="cov0" title="0">{
+        emit(l.Logger.Debug(), msg, fields...)
+}</span>
+
+func (l *Logger) Trace(msg string, fields ...any) <span class="cov0" title="0">{
+        emit(l.Logger.Trace(), msg, fields...)
+}</span>
+
+func emit(ev *zerolog.Event, msg string, fields ...any) <span class="cov0" title="0">{
+        if len(fields)%2 != 0 </span><span class="cov0" title="0">{
+                fields = fields[:len(fields)-1]
+        }</span>
+        <span class="cov0" title="0">for i := 0; i &lt; len(fields); i += 2 </span><span class="cov0" title="0">{
+                key, ok := fields[i].(string)
+                if !ok </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+                <span class="cov0" title="0">switch val := fields[i+1].(type) </span>{
+                case fmt.Stringer:<span class="cov0" title="0">
+                        ev = ev.Str(key, val.String())</span>
+                case error:<span class="cov0" title="0">
+                        ev = ev.Err(val)</span>
+                default:<span class="cov0" title="0">
+                        ev = ev.Any(key, val)</span>
+                }
+        }
+        <span class="cov0" title="0">ev.Msg(msg)</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package pool
+
+import (
+        "context"
+        "errors"
+        "math/rand"
+        "sync"
+        "time"
+
+        localErrs "github.com/adwski/ydb-go-query/internal/errors"
+        "github.com/adwski/ydb-go-query/internal/logger"
+)
+
+const (
+        defaultCreateTimeout = 3 * time.Second
+        defaultRecycleTick   = 2 * time.Second
+        minCreateTimeout     = time.Second
+        minItemLifetime      = 5 * time.Minute
+
+        defaultCreateRetryDelayOnLocalErrors = time.Second
+)
+
+type (
+        item[T any] interface {
+                *T
+
+                ID() uint64
+                Alive() bool
+                Close() error
+        }
+
+        Pool[PT item[T], T any] struct {
+                logger logger.Logger
+
+                createFunc func(context.Context, time.Duration) (PT, error)
+                cancelFunc context.CancelFunc
+
+                wg        *sync.WaitGroup
+                closeOnce *sync.Once
+
+                queue  chan PT
+                tokens chan struct{}
+
+                itemsExpire map[uint64]int64
+                itemsMx     *sync.RWMutex
+
+                createTimeout time.Duration
+                itemLifetime  int64 // seconds
+                recycleWindow int64 // seconds
+
+                size uint
+
+                itemRecycling bool
+        }
+
+        // Config holds pool configuration.
+        Config[PT item[T], T any] struct {
+                Logger logger.Logger
+
+                // CreateFunc is used to create pool item.
+                // Timeout is not set as context.WithTimeout
+                // because this is running context for long-lived item.
+                // Timeout itself should limit only creation steps,
+                // and it is responsibility of CreateFunc to handle it appropriately.
+                CreateFunc func(ctx context.Context, createTimeout time.Duration) (PT, error)
+
+                // CreateTimeout limits runtime for CreateFunc.
+                // This timeout cannot be less than a second (minCreateTimeout).
+                // Default is 3 seconds (defaultCreateTimeout).
+                CreateTimeout time.Duration
+
+                // Lifetime specifies item lifetime after which it will be closed
+                // and new item will be created instead.
+                // 0 lifetime means item has infinite lifetime and item recycling
+                // is not running.
+                // Lifetime cannot be greater than 0 and less than 5 seconds (minItemLifetime).
+                Lifetime time.Duration
+
+                // RecycleWindow specifies time interval for item recycling:
+                // [Lifetime-RecycleWindow;Lifetime+RecycleWindow]
+                // This prevents items to all be recycled in the same time.
+                RecycleWindow time.Duration
+
+                // PoolSize specifies amount of items in pool.
+                PoolSize uint
+        }
+)
+
+func New[PT item[T], T any](ctx context.Context, cfg Config[PT, T]) *Pool[PT, T] <span class="cov1" title="2">{
+        runCtx, cancel := context.WithCancel(ctx)
+
+        if cfg.CreateTimeout &lt; minCreateTimeout </span><span class="cov0" title="0">{
+                cfg.CreateTimeout = defaultCreateTimeout
+        }</span>
+        <span class="cov1" title="2">if cfg.Lifetime &lt; minItemLifetime </span><span class="cov1" title="2">{
+                cfg.Lifetime = 0 // infinite lifetime
+        }</span>
+
+        <span class="cov1" title="2">pool := &amp;Pool[PT, T]{
+                logger:        cfg.Logger,
+                size:          cfg.PoolSize,
+                createTimeout: cfg.CreateTimeout,
+                itemLifetime:  cfg.Lifetime.Microseconds() / 1000,
+                recycleWindow: cfg.RecycleWindow.Microseconds() / 1000,
+
+                itemRecycling: cfg.Lifetime != 0,
+
+                createFunc: cfg.CreateFunc,
+                cancelFunc: cancel,
+
+                wg:        &amp;sync.WaitGroup{},
+                closeOnce: &amp;sync.Once{},
+
+                itemsExpire: make(map[uint64]int64),
+                itemsMx:     &amp;sync.RWMutex{},
+
+                queue:  make(chan PT, cfg.PoolSize),
+                tokens: make(chan struct{}, cfg.PoolSize),
+        }
+
+        // fill tokens
+        for i := 0; i &lt; int(cfg.PoolSize); i++ </span><span class="cov3" title="101">{
+                pool.tokens &lt;- struct{}{}
+        }</span>
+
+        // start spawner
+        <span class="cov1" title="2">pool.wg.Add(1)
+        go pool.spawnItems(runCtx)
+
+        if pool.itemRecycling </span><span class="cov0" title="0">{
+                // start recycler
+                pool.wg.Add(1)
+                go pool.recycleItems(runCtx)
+        }</span>
+
+        <span class="cov1" title="2">pool.logger.Debug("pool created", "size", pool.size)
+
+        return pool</span>
+}
+
+func (p *Pool[PT, T]) Close() error <span class="cov1" title="3">{
+        p.closeOnce.Do(func() </span><span class="cov1" title="2">{
+                p.cancelFunc()
+                p.drain()
+                p.wg.Wait()
+
+                p.logger.Debug("pool closed")
+        }</span>)
+
+        <span class="cov1" title="3">return nil</span>
+}
+
+func (p *Pool[PT, T]) Get(rCtx context.Context) PT <span class="cov9" title="1453540">{
+getLoop:
+        for </span><span class="cov10" title="1454111">{
+                select </span>{
+                case itm := &lt;-p.queue:<span class="cov9" title="1454110">
+                        if itm.Alive() </span><span class="cov9" title="1453539">{
+                                p.logger.Trace("item retrieved from pool", "id", itm.ID())
+                                return itm
+                        }</span>
+                        <span class="cov5" title="571">_ = itm.Close()
+
+                        select </span>{
+                        case p.tokens &lt;- struct{}{}:<span class="cov5" title="571"></span>
+                        case &lt;-rCtx.Done():<span class="cov0" title="0">
+                                break getLoop</span>
+                        }
+                case &lt;-rCtx.Done():<span class="cov1" title="1">
+                        break getLoop</span>
+                }
+        }
+
+        <span class="cov1" title="1">return nil</span>
+}
+
+func (p *Pool[PT, T]) Put(itm PT) <span class="cov9" title="1453539">{
+        // check if alive
+        if itm.Alive() </span><span class="cov9" title="1453523">{
+                if !p.itemRecycling || !p.itemExpired(itm) </span><span class="cov9" title="1453523">{
+                        // alive and not expired
+                        // push item back and finish iteration
+                        p.queue &lt;- itm // ignoring ctx.Done(), should never block here
+                        p.logger.Trace("item returned to pool", "id", itm.ID())
+                        return
+                }</span>
+        }
+        <span class="cov2" title="16">p.logger.Trace("item recycled on returning", "id", itm.ID())
+        // recycle
+        _ = itm.Close()
+        // push token
+        p.tokens &lt;- struct{}{}</span> // ignoring ctx.Done(), should never block here
+}
+
+func (p *Pool[PT, T]) spawnItems(ctx context.Context) <span class="cov1" title="2">{
+        p.logger.Trace("pool spawner started")
+        defer func() </span><span class="cov1" title="2">{
+                p.wg.Done()
+                p.logger.Trace("pool spawner exited")
+        }</span>()
+
+<span class="cov1" title="2">spawnLoop:
+        for </span><span class="cov5" title="689">{
+                select </span>{
+                case &lt;-ctx.Done():<span class="cov1" title="2">
+                        break spawnLoop</span>
+                case &lt;-p.tokens:<span class="cov5" title="687">
+                createLoop:
+                        for </span><span class="cov5" title="687">{
+                                p.wg.Add(1)
+                                itm, err := p.spawnItem(ctx)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        if errors.Is(err, localErrs.LocalFailureError{}) </span><span class="cov0" title="0">{
+                                                // Local errors return instantly.
+                                                // Sleep here a bit to prevent unnecessary flood of create attempts.
+                                                time.Sleep(defaultCreateRetryDelayOnLocalErrors)
+                                        }</span>
+                                        <span class="cov0" title="0">select </span>{
+                                        case &lt;-ctx.Done():<span class="cov0" title="0">
+                                                break spawnLoop</span>
+                                        default:<span class="cov0" title="0">
+                                                continue createLoop</span>
+                                        }
+                                }
+
+                                // Ignoring ctx.Done() here and put item in queue anyway,
+                                // so it can be closed later by drain().
+                                <span class="cov5" title="687">p.queue &lt;- itm
+
+                                break</span>
+                        }
+                }
+        }
+}
+
+func (p *Pool[PT, T]) drain() <span class="cov1" title="2">{
+drainLoop:
+        for </span><span class="cov3" title="101">{
+                select </span>{
+                case itm := &lt;-p.queue:<span class="cov3" title="99">
+                        _ = itm.Close()</span>
+                default:<span class="cov1" title="2">
+                        break drainLoop</span>
+                }
+        }
+}
+
+func (p *Pool[PT, T]) spawnItem(ctx context.Context) (PT, error) <span class="cov5" title="687">{
+        defer p.wg.Done()
+
+        itm, err := p.createFunc(ctx, p.createTimeout)
+        if err != nil </span><span class="cov0" title="0">{
+                p.logger.Debug("pool item create error", "error", err)
+
+                return nil, err
+        }</span>
+
+        <span class="cov5" title="687">if p.itemRecycling </span><span class="cov0" title="0">{
+                p.setItemExpire(itm.ID())
+        }</span>
+
+        <span class="cov5" title="687">return itm, nil</span>
+}
+
+func (p *Pool[PT, T]) setItemExpire(id uint64) <span class="cov0" title="0">{
+        p.itemsMx.Lock()
+        defer p.itemsMx.Unlock()
+
+        p.itemsExpire[id] = time.Now().Unix() + p.itemLifetime
+}</span>
+
+func (p *Pool[PT, T]) getItemExpire(id uint64) int64 <span class="cov0" title="0">{
+        p.itemsMx.RLock()
+        defer p.itemsMx.RUnlock()
+
+        return p.itemsExpire[id]
+}</span>
+
+func (p *Pool[PT, T]) itemExpired(itm PT) bool <span class="cov0" title="0">{
+        return p.getItemExpire(itm.ID())-p.recycleWindow+rand.Int63n(2*p.recycleWindow) &lt; time.Now().Unix()
+}</span>
+
+func (p *Pool[PT, T]) recycleItems(ctx context.Context) <span class="cov0" title="0">{
+        p.logger.Trace("pool recycler started")
+        defer func() </span><span class="cov0" title="0">{
+                p.wg.Done()
+                p.logger.Trace("pool recycler exited")
+        }</span>()
+
+        <span class="cov0" title="0">ticker := time.NewTicker(defaultRecycleTick)
+        defer ticker.Stop()
+
+recycleLoop:
+        for </span><span class="cov0" title="0">{
+                // wait for tick
+                select </span>{
+                case &lt;-ctx.Done():<span class="cov0" title="0">
+                        break recycleLoop</span>
+                case &lt;-ticker.C:<span class="cov0" title="0"></span>
+                }
+
+                // get item from queue
+                <span class="cov0" title="0">select </span>{
+                case &lt;-ctx.Done():<span class="cov0" title="0">
+                        break recycleLoop</span>
+                case itm := &lt;-p.queue:<span class="cov0" title="0">
+                        // check if alive
+                        if itm.Alive() &amp;&amp; !p.itemExpired(itm) </span><span class="cov0" title="0">{
+                                // alive and not expired
+                                // push item back and finish iteration
+                                p.queue &lt;- itm // ignoring ctx.Done(), should never block here
+                                break</span>
+                        }
+                        // recycle
+                        <span class="cov0" title="0">_ = itm.Close()
+                        p.logger.Trace("item recycled", "id", itm.ID())
+                        // push token
+                        p.tokens &lt;- struct{}{}</span> // ignoring ctx.Done(), should never block here
+                }
+        }
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package query
+
+import (
+        "context"
+        "errors"
+        "time"
+
+        "github.com/adwski/ydb-go-query/internal/logger"
+        "github.com/adwski/ydb-go-query/internal/pool"
+        "github.com/adwski/ydb-go-query/internal/query/session"
+
+        "github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"
+        "google.golang.org/grpc"
+)
+
+var (
+        ErrNoSession = errors.New("no session")
+        ErrExec      = errors.New("exec failed")
+)
+
+type (
+        Service struct {
+                logger logger.Logger
+                qsc    Ydb_Query_V1.QueryServiceClient
+
+                pool *pool.Pool[*session.Session, session.Session]
+        }
+)
+
+type Config struct {
+        Logger        logger.Logger
+        Transport     grpc.ClientConnInterface
+        CreateTimeout time.Duration
+        PoolSize      uint
+}
+
+func NewService(runCtx context.Context, cfg Config) *Service <span class="cov0" title="0">{
+        qsc := Ydb_Query_V1.NewQueryServiceClient(cfg.Transport)
+
+        sessionPool := pool.New[*session.Session, session.Session](
+                runCtx,
+                pool.Config[*session.Session, session.Session]{
+                        Logger:        cfg.Logger,
+                        CreateTimeout: cfg.CreateTimeout,
+                        PoolSize:      cfg.PoolSize,
+                        CreateFunc: func(sessCtx context.Context, timeout time.Duration) (*session.Session, error) </span><span class="cov0" title="0">{
+                                return session.CreateSession(sessCtx, qsc, cfg.Logger, timeout)
+                        }</span>,
+                })
+
+        <span class="cov0" title="0">svc := &amp;Service{
+                logger: cfg.Logger,
+                qsc:    qsc,
+                pool:   sessionPool,
+        }
+
+        return svc</span>
+}
+
+func (svc *Service) Close() error <span class="cov0" title="0">{
+        return svc.pool.Close() //nolint:wrapcheck //unnecessary
+}</span>
+
+func (svc *Service) AcquireSession(ctx context.Context) (*session.Session, func(), error) <span class="cov0" title="0">{
+        sess := svc.pool.Get(ctx)
+        if sess == nil </span><span class="cov0" title="0">{
+                return nil, nil, ErrNoSession
+        }</span>
+
+        <span class="cov0" title="0">return sess, func() </span><span class="cov0" title="0">{ svc.pool.Put(sess) }</span>, nil
+}
+
+// Exec provides low-level single query execution.
+func (svc *Service) Exec(
+        ctx context.Context,
+        query string,
+        params map[string]*Ydb.TypedValue,
+        txSettings *Ydb_Query.TransactionSettings,
+) (Ydb_Query_V1.QueryService_ExecuteQueryClient, context.CancelFunc, error) <span class="cov0" title="0">{
+        sess, cleanup, err := svc.AcquireSession(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, err
+        }</span>
+        <span class="cov0" title="0">defer cleanup()
+
+        var txControl *Ydb_Query.TransactionControl
+        if txSettings != nil </span><span class="cov0" title="0">{
+                txControl = &amp;Ydb_Query.TransactionControl{
+                        TxSelector: &amp;Ydb_Query.TransactionControl_BeginTx{
+                                BeginTx: txSettings,
+                        },
+                        CommitTx: true,
+                }
+        }</span>
+
+        <span class="cov0" title="0">stream, cancel, err := sess.Exec(ctx, query, params, txControl)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, nil, errors.Join(ErrExec, err)
+        }</span>
+
+        <span class="cov0" title="0">return stream, cancel, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package session
+
+import (
+        "context"
+        "errors"
+        "fmt"
+
+        "github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"
+)
+
+const (
+        defaultStatsMode   = Ydb_Query.StatsMode_STATS_MODE_BASIC
+        defaultQuerySyntax = Ydb_Query.Syntax_SYNTAX_YQL_V1
+        defaultExecMode    = Ydb_Query.ExecMode_EXEC_MODE_EXECUTE
+)
+
+var (
+        ErrExec       = errors.New("exec error")
+        ErrTxRollback = errors.New("transaction rollback error")
+        ErrTxCommit   = errors.New("transaction commit error")
+        ErrShutdown   = errors.New("session is shut down")
+)
+
+func (s *Session) RollbackTX(ctx context.Context, txID string) error <span class="cov0" title="0">{
+        resp, err := s.qsc.RollbackTransaction(ctx, &amp;Ydb_Query.RollbackTransactionRequest{
+                SessionId: s.id,
+                TxId:      txID,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.Join(ErrTxRollback, err)
+        }</span>
+        <span class="cov0" title="0">if resp.Status != Ydb.StatusIds_SUCCESS </span><span class="cov0" title="0">{
+                return errors.Join(ErrTxRollback, fmt.Errorf("status: %s", resp.Status.String()))
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (s *Session) CommitTX(ctx context.Context, txID string) error <span class="cov0" title="0">{
+        resp, err := s.qsc.CommitTransaction(ctx, &amp;Ydb_Query.CommitTransactionRequest{
+                SessionId: s.id,
+                TxId:      txID,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.Join(ErrTxCommit, err)
+        }</span>
+        <span class="cov0" title="0">if resp.Status != Ydb.StatusIds_SUCCESS </span><span class="cov0" title="0">{
+                return errors.Join(ErrTxCommit, fmt.Errorf("status: %s", resp.Status.String()))
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (s *Session) Exec(
+        ctx context.Context,
+        query string,
+        params map[string]*Ydb.TypedValue,
+        txControl *Ydb_Query.TransactionControl,
+) (Ydb_Query_V1.QueryService_ExecuteQueryClient, context.CancelFunc, error) <span class="cov0" title="0">{
+        if s.shutdown.Load() </span><span class="cov0" title="0">{
+                return nil, nil, ErrShutdown
+        }</span>
+
+        <span class="cov0" title="0">streamCtx, cancelStream := context.WithCancel(ctx)
+
+        respExec, err := s.qsc.ExecuteQuery(streamCtx, &amp;Ydb_Query.ExecuteQueryRequest{
+                SessionId: s.id,
+                ExecMode:  defaultExecMode,
+                TxControl: txControl,
+                Query: &amp;Ydb_Query.ExecuteQueryRequest_QueryContent{
+                        QueryContent: &amp;Ydb_Query.QueryContent{
+                                Syntax: defaultQuerySyntax,
+                                Text:   query,
+                        },
+                },
+                Parameters:           params,
+                StatsMode:            defaultStatsMode,
+                ConcurrentResultSets: false,
+        })
+
+        if err != nil </span><span class="cov0" title="0">{
+                cancelStream()
+                return nil, nil, errors.Join(ErrExec, err)
+        }</span>
+
+        <span class="cov0" title="0">return respExec, cancelStream, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package session
+
+import (
+        "context"
+        "errors"
+        "fmt"
+        "hash/maphash"
+        "io"
+        "sync/atomic"
+        "time"
+
+        "github.com/adwski/ydb-go-query/internal/logger"
+        "github.com/adwski/ydb-go-query/internal/xcontext"
+
+        "github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"
+        "google.golang.org/grpc"
+        "google.golang.org/grpc/codes"
+        "google.golang.org/grpc/status"
+)
+
+const (
+        cleanupTimeout = 3 * time.Second
+)
+
+var (
+        ErrSessionCreate    = errors.New("session create failed")
+        ErrSessionTransport = errors.New("session transport was not provided")
+        ErrSessionAttach    = errors.New("session attach failed")
+        ErrSessionDelete    = errors.New("session delete failed")
+)
+
+var (
+        hashSeed maphash.Seed
+)
+
+func init() <span class="cov0" title="0">{
+        hashSeed = maphash.MakeSeed()
+}</span>
+
+type (
+        Session struct {
+                logger logger.Logger
+
+                transport grpc.ClientConnInterface
+
+                qsc    Ydb_Query_V1.QueryServiceClient
+                stream Ydb_Query_V1.QueryService_AttachSessionClient
+
+                cancelFunc context.CancelFunc
+                done       chan struct{}
+
+                state *Ydb_Query.SessionState
+                err   error
+                id    string
+                id_   uint64
+                node  int64
+
+                shutdown atomic.Bool
+        }
+
+        Config struct {
+                Logger         logger.Logger
+                Transport      grpc.ClientConnInterface
+                CreateResponse *Ydb_Query.CreateSessionResponse
+        }
+)
+
+func CreateSession(
+        ctx context.Context,
+        qsc Ydb_Query_V1.QueryServiceClient,
+        logger logger.Logger,
+        timeout time.Duration,
+) (*Session, error) <span class="cov0" title="0">{
+        var transport grpc.ClientConnInterface
+        sessCtx := xcontext.WithTransportPtr(ctx, &amp;transport)
+
+        createCtx, cancel := context.WithTimeout(sessCtx, timeout)
+        defer cancel()
+
+        respCreate, err := qsc.CreateSession(createCtx, &amp;Ydb_Query.CreateSessionRequest{})
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Join(ErrSessionCreate, err)
+        }</span>
+        <span class="cov0" title="0">if status := respCreate.Status; status != Ydb.StatusIds_SUCCESS </span><span class="cov0" title="0">{
+                return nil, errors.Join(ErrSessionCreate, fmt.Errorf("status: %s", status))
+        }</span>
+
+        <span class="cov0" title="0">if transport == nil </span><span class="cov0" title="0">{
+                return nil, ErrSessionTransport
+        }</span>
+
+        <span class="cov0" title="0">sess := &amp;Session{
+                logger:    logger,
+                transport: transport,
+                qsc:       Ydb_Query_V1.NewQueryServiceClient(transport),
+                id:        respCreate.GetSessionId(),
+                id_:       maphash.String(hashSeed, respCreate.GetSessionId()),
+                node:      respCreate.GetNodeId(),
+                done:      make(chan struct{}),
+        }
+
+        if err = sess.attachStream(ctx); err != nil </span><span class="cov0" title="0">{
+                go func() </span><span class="cov0" title="0">{ _ = sess.Close() }</span>()
+                <span class="cov0" title="0">return nil, err</span>
+        }
+
+        <span class="cov0" title="0">return sess, nil</span>
+}
+
+func (s *Session) ID() uint64 <span class="cov0" title="0">{
+        return s.id_
+}</span>
+
+func (s *Session) Alive() bool <span class="cov0" title="0">{
+        return !s.shutdown.Load()
+}</span>
+
+func (s *Session) Close() error <span class="cov0" title="0">{
+        s.shutdown.Store(true)
+
+        if s.cancelFunc != nil </span><span class="cov0" title="0">{
+                // cancel stream
+                s.cancelFunc()
+        }</span>
+
+        // ensure stream is canceled
+        <span class="cov0" title="0">&lt;-s.done
+
+        // cleanup session
+        ctx, cancel := context.WithTimeout(context.Background(), cleanupTimeout)
+        defer cancel()
+        err := errors.Join(s.err, s.cleanup(ctx))
+
+        s.logger.Trace("session closed", "id", s.id)
+        return err</span>
+}
+
+func (s *Session) attachStream(ctx context.Context) error <span class="cov0" title="0">{
+        attachCtx, streamCancel := context.WithCancel(ctx)
+
+        respAttach, err := s.qsc.AttachSession(attachCtx, &amp;Ydb_Query.AttachSessionRequest{
+                SessionId: s.id,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                streamCancel()
+                s.err = err
+                close(s.done)
+                return errors.Join(ErrSessionAttach, err)
+        }</span>
+
+        <span class="cov0" title="0">s.stream = respAttach
+        s.cancelFunc = streamCancel
+
+        go s.spin()
+
+        return nil</span>
+}
+
+func (s *Session) spin() <span class="cov0" title="0">{
+        for </span><span class="cov0" title="0">{
+                state, err := s.stream.Recv()
+                if err != nil </span><span class="cov0" title="0">{
+                        switch </span>{
+                        case errors.Is(err, io.EOF):<span class="cov0" title="0">
+                                s.logger.Trace("session stream ended", "id", s.id)</span>
+                        case status.Code(err) == codes.Canceled:<span class="cov0" title="0">
+                                s.logger.Trace("session stream context canceled", "id", s.id)</span>
+                        default:<span class="cov0" title="0">
+                                s.logger.Debug("session stream error", "id", s.id, "err", err)
+                                s.err = err</span>
+                        }
+
+                        <span class="cov0" title="0">break</span>
+                }
+                <span class="cov0" title="0">if s.state != state </span><span class="cov0" title="0">{
+                        // TODO: Check state (which states can we expect here?)
+                        s.logger.Trace("session state changed",
+                                "id", s.id, "node", s.node, "state", state)
+                        s.state = state
+                }</span>
+        }
+        <span class="cov0" title="0">s.shutdown.Store(true)
+        close(s.done)</span>
+}
+
+func (s *Session) cleanup(ctx context.Context) error <span class="cov0" title="0">{
+        respDelete, err := s.qsc.DeleteSession(ctx, &amp;Ydb_Query.DeleteSessionRequest{
+                SessionId: s.id,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.Join(ErrSessionDelete, err)
+        }</span>
+        <span class="cov0" title="0">if respDelete.Status != Ydb.StatusIds_SUCCESS </span><span class="cov0" title="0">{
+                return errors.Join(ErrSessionDelete,
+                        fmt.Errorf("status: %s", respDelete.Status))
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package txsettings
+
+import "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"
+
+func OnlineReadOnly() *Ydb_Query.TransactionSettings <span class="cov0" title="0">{
+        return &amp;Ydb_Query.TransactionSettings{
+                TxMode: &amp;Ydb_Query.TransactionSettings_OnlineReadOnly{
+                        OnlineReadOnly: &amp;Ydb_Query.OnlineModeSettings{},
+                },
+        }
+}</span>
+
+func OnlineReadOnlyInconsistent() *Ydb_Query.TransactionSettings <span class="cov0" title="0">{
+        return &amp;Ydb_Query.TransactionSettings{
+                TxMode: &amp;Ydb_Query.TransactionSettings_OnlineReadOnly{
+                        OnlineReadOnly: &amp;Ydb_Query.OnlineModeSettings{
+                                AllowInconsistentReads: true,
+                        },
+                },
+        }
+}</span>
+
+func SnapshotReadOnly() *Ydb_Query.TransactionSettings <span class="cov0" title="0">{
+        return &amp;Ydb_Query.TransactionSettings{
+                TxMode: &amp;Ydb_Query.TransactionSettings_SnapshotReadOnly{
+                        SnapshotReadOnly: &amp;Ydb_Query.SnapshotModeSettings{},
+                },
+        }
+}</span>
+
+func StaleReadOnly() *Ydb_Query.TransactionSettings <span class="cov0" title="0">{
+        return &amp;Ydb_Query.TransactionSettings{
+                TxMode: &amp;Ydb_Query.TransactionSettings_StaleReadOnly{
+                        StaleReadOnly: &amp;Ydb_Query.StaleModeSettings{},
+                },
+        }
+}</span>
+
+func SerializableReadWrite() *Ydb_Query.TransactionSettings <span class="cov0" title="0">{
+        return &amp;Ydb_Query.TransactionSettings{
+                TxMode: &amp;Ydb_Query.TransactionSettings_SerializableReadWrite{
+                        SerializableReadWrite: &amp;Ydb_Query.SerializableModeSettings{},
+                },
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package auth
+
+import (
+        "context"
+        "sync"
+        "time"
+
+        "github.com/adwski/ydb-go-query/internal/logger"
+)
+
+const (
+        defaultTokenCallTimeout       = 5 * time.Second
+        defaultTokenRenewFailInterval = 10 * time.Second
+)
+
+type (
+        Provider interface {
+                GetToken(ctx context.Context) (string, time.Time, error)
+        }
+        Auth struct {
+                logger   logger.Logger
+                provider Provider
+
+                mx *sync.RWMutex
+
+                timer *time.Timer
+
+                expires time.Time
+
+                token string
+
+                renewDisable bool
+        }
+        Config struct {
+                Logger       logger.Logger
+                Provider     Provider
+                RenewDisable bool
+        }
+)
+
+func New(ctx context.Context, cfg Config) *Auth <span class="cov0" title="0">{
+        auth := &amp;Auth{
+                provider:     cfg.Provider,
+                logger:       cfg.Logger,
+                renewDisable: cfg.RenewDisable,
+
+                mx: &amp;sync.RWMutex{},
+        }
+
+        auth.mustGetToken(ctx)
+
+        return auth
+}</span>
+
+func (a *Auth) GetToken() string <span class="cov0" title="0">{
+        a.mx.RLock()
+        defer a.mx.RUnlock()
+
+        return a.token
+}</span>
+
+func (a *Auth) mustGetToken(ctx context.Context) <span class="cov0" title="0">{
+getTokenLoop:
+        for </span><span class="cov0" title="0">{
+                select </span>{
+                case &lt;-ctx.Done():<span class="cov0" title="0"></span>
+                default:<span class="cov0" title="0">
+                        if a.getTokenTick(ctx) == nil </span><span class="cov0" title="0">{
+                                break getTokenLoop</span>
+                        }
+                }
+        }
+}
+
+func (a *Auth) getTokenTick(ctx context.Context) error <span class="cov0" title="0">{
+        ctxCall, cancel := context.WithTimeout(ctx, defaultTokenCallTimeout)
+        defer cancel()
+
+        token, expires, err := a.provider.GetToken(ctxCall)
+        if err != nil </span><span class="cov0" title="0">{
+                a.logger.Error("token renew error", "error", err)
+                a.setTimer(defaultTokenRenewFailInterval)
+
+                return err //nolint:wrapcheck //unnecessary
+        }</span>
+
+        <span class="cov0" title="0">a.mx.Lock()
+        a.token = token
+        a.expires = expires
+        a.mx.Unlock()
+
+        renew := a.expires.Sub(time.Now().UTC()) / 2
+        a.setTimer(renew)
+
+        a.logger.Info("token retrieved successfully",
+                "expiresAt", a.expires.Format(time.RFC3339),
+                "renewIn", renew.Truncate(time.Second))
+
+        return nil</span>
+}
+
+func (a *Auth) Run(ctx context.Context, wg *sync.WaitGroup) <span class="cov0" title="0">{
+        defer wg.Done()
+
+        if a.renewDisable </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov0" title="0">a.logger.Debug("auth token renew started")
+        defer func() </span><span class="cov0" title="0">{
+                a.timer.Stop()
+                a.logger.Debug("auth token renew stopped")
+        }</span>()
+
+<span class="cov0" title="0">renewLoop:
+        for </span><span class="cov0" title="0">{
+                select </span>{
+                case &lt;-ctx.Done():<span class="cov0" title="0">
+                        break renewLoop</span>
+                case &lt;-a.timer.C:<span class="cov0" title="0">
+                        _ = a.getTokenTick(ctx)</span>
+                }
+        }
+}
+
+func (a *Auth) setTimer(dur time.Duration) <span class="cov0" title="0">{
+        if a.timer == nil </span><span class="cov0" title="0">{
+                a.timer = time.NewTimer(dur)
+        }</span> else<span class="cov0" title="0"> {
+                a.timer.Reset(dur)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file17" style="display: none">package userpass
+
+import (
+        "context"
+        "errors"
+        "time"
+
+        "github.com/ydb-platform/ydb-go-genproto/Ydb_Auth_V1"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Auth"
+        "google.golang.org/grpc"
+)
+
+const (
+        defaultYDBAuthExpire = 12 * time.Hour
+)
+
+var (
+        ErrLogin           = errors.New("login request failed")
+        ErrLoginUnmarshall = errors.New("login response unmarshall failed")
+)
+
+type (
+        UserPass struct {
+                authSvc Ydb_Auth_V1.AuthServiceClient
+
+                user string
+                pass string
+        }
+        Config struct {
+                Transport grpc.ClientConnInterface
+                Username  string
+                Password  string
+        }
+)
+
+func New(cfg Config) *UserPass <span class="cov0" title="0">{
+        auth := &amp;UserPass{
+                authSvc: Ydb_Auth_V1.NewAuthServiceClient(cfg.Transport),
+
+                user: cfg.Username,
+                pass: cfg.Password,
+        }
+
+        return auth
+}</span>
+
+func (up *UserPass) GetToken(ctx context.Context) (token string, expires time.Time, err error) <span class="cov0" title="0">{
+        resp, err := up.authSvc.Login(ctx, &amp;Ydb_Auth.LoginRequest{
+                User:     up.user,
+                Password: up.pass,
+        })
+
+        if err != nil </span><span class="cov0" title="0">{
+                err = errors.Join(ErrLogin, err)
+                return
+        }</span>
+        <span class="cov0" title="0">var result Ydb_Auth.LoginResult
+        if err = resp.GetOperation().Result.UnmarshalTo(&amp;result); err != nil </span><span class="cov0" title="0">{
+                err = errors.Join(ErrLoginUnmarshall, err)
+                return
+        }</span>
+
+        <span class="cov0" title="0">token = result.Token
+        expires = time.Now().Add(defaultYDBAuthExpire)
+
+        return</span>
+}
+</pre>
+		
+		<pre class="file" id="file18" style="display: none">package yc
+
+import (
+        "context"
+        "errors"
+        "time"
+
+        ycsdk "github.com/yandex-cloud/go-sdk"
+        "github.com/yandex-cloud/go-sdk/iamkey"
+)
+
+var (
+        ErrIAMKeyUnspecified   = errors.New("either IAMKey or IAMKeyFile must be provided")
+        ErrIAMKey              = errors.New("error reading IAM key")
+        ErrIAMKeyFile          = errors.New("error reading IAM key file")
+        ErrIAMTokenCreate      = errors.New("error creating IAM token")
+        ErrServiceAccountCreds = errors.New("error reading service account credentials")
+        ErrYCSDK               = errors.New("error reading YC SDK client")
+)
+
+type (
+        // YC is Yandex Cloud authenticator.
+        YC struct {
+                sdk *ycsdk.SDK
+        }
+
+        // Config is Yandex CLoud authenticator config.
+        Config struct {
+                // IamKeyFile specifies file path to IAM key file in jsom format.
+                IamKeyFile string
+
+                // IamKey specifies service account IAM key (usually in json format).
+                // This param (if not empty) takes precedence over IamKeyFile.
+                IamKey []byte
+        }
+)
+
+func New(ctx context.Context, cfg Config) (*YC, error) <span class="cov0" title="0">{
+        if cfg.IamKeyFile == "" &amp;&amp; len(cfg.IamKey) == 0 </span><span class="cov0" title="0">{
+                return nil, ErrIAMKeyUnspecified
+        }</span>
+        <span class="cov0" title="0">var (
+                key *iamkey.Key
+                err error
+        )
+        if len(cfg.IamKey) &gt; 0 </span><span class="cov0" title="0">{
+                if key, err = iamkey.ReadFromJSONBytes(cfg.IamKey); err != nil </span><span class="cov0" title="0">{
+                        return nil, errors.Join(ErrIAMKey, err)
+                }</span>
+        } else<span class="cov0" title="0"> {
+                if key, err = iamkey.ReadFromJSONFile(cfg.IamKeyFile); err != nil </span><span class="cov0" title="0">{
+                        return nil, errors.Join(ErrIAMKeyFile, err)
+                }</span>
+        }
+
+        <span class="cov0" title="0">creds, err := ycsdk.ServiceAccountKey(key)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Join(ErrServiceAccountCreds, err)
+        }</span>
+
+        <span class="cov0" title="0">yc, err := ycsdk.Build(ctx, ycsdk.Config{ // seems like Build() doesn't use context
+                Credentials: creds,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Join(ErrYCSDK, err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;YC{sdk: yc}, nil</span>
+}
+
+func (a *YC) GetToken(ctx context.Context) (token string, expires time.Time, err error) <span class="cov0" title="0">{
+        tokenResp, err := a.sdk.CreateIAMToken(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                err = errors.Join(ErrIAMTokenCreate, err)
+
+                return
+        }</span>
+
+        <span class="cov0" title="0">token = tokenResp.GetIamToken()
+        expires = tokenResp.GetExpiresAt().AsTime()
+
+        return</span>
+}
+</pre>
+		
+		<pre class="file" id="file19" style="display: none">package grid
+
+import (
+        "context"
+        "errors"
+
+        localErrs "github.com/adwski/ydb-go-query/internal/errors"
+        "github.com/adwski/ydb-go-query/internal/transport"
+        "github.com/adwski/ydb-go-query/internal/transport/balancing"
+        "github.com/adwski/ydb-go-query/internal/xcontext"
+
+        "google.golang.org/grpc"
+        "google.golang.org/grpc/credentials"
+)
+
+const (
+        defaultConnectionsPerEndpoint = 2
+)
+
+var (
+        ErrCreate        = errors.New("unable to initialize grid")
+        ErrNoConnections = errors.New("no alive connections available")
+        ErrGridEndpoint  = errors.New("error adding static endpoint")
+)
+
+type (
+        Grid struct {
+                *balancing.Tree[*transport.Connection, transport.Connection]
+                connsPerEndpoint int
+        }
+        Config struct {
+                ConnectionsPerEndpoint int
+        }
+        OneEndpointConfig struct {
+                ConnFunc          func() (*transport.Connection, error)
+                ConnectionsNumber int
+        }
+)
+
+func (c *Config) check() <span class="cov0" title="0">{
+        if c.ConnectionsPerEndpoint &lt; 1 </span><span class="cov0" title="0">{
+                c.ConnectionsPerEndpoint = defaultConnectionsPerEndpoint
+        }</span>
+}
+
+func NewWithOneEndpoint(cfg OneEndpointConfig) *Grid <span class="cov0" title="0">{
+        if cfg.ConnectionsNumber &lt; 1 </span><span class="cov0" title="0">{
+                cfg.ConnectionsNumber = defaultConnectionsPerEndpoint
+        }</span>
+        <span class="cov0" title="0">grid, _ := newGrid(Config{}, balancing.TreeConfig[*transport.Connection, transport.Connection]{
+                Levels: []balancing.Level{
+                        {
+                                Kind:   balancing.LevelKindConnection,
+                                Policy: balancing.PolicyKindRoundRobin,
+                        },
+                },
+                ConnectionConfig: &amp;balancing.ConnectionConfig[*transport.Connection, transport.Connection]{
+                        ConnNumber: cfg.ConnectionsNumber,
+                        ConnFunc:   cfg.ConnFunc,
+                },
+        })
+
+        return grid</span>
+}
+
+func NewWithStaticEndpoints(
+        ctx context.Context,
+        endpoints []string,
+        creds credentials.TransportCredentials,
+        auth transport.Authenticator,
+        db string,
+) (*Grid, error) <span class="cov0" title="0">{
+        tr := NewWithTwoLevels(Config{ConnectionsPerEndpoint: 1})
+
+        for _, addr := range endpoints </span><span class="cov0" title="0">{
+                err := tr.AddPath(balancing.Path[*transport.Connection, transport.Connection]{
+                        IDs: []string{addr},
+                        ConnectionConfig: balancing.ConnectionConfig[*transport.Connection, transport.Connection]{
+                                ConnFunc: func() (*transport.Connection, error) </span><span class="cov0" title="0">{
+                                        return transport.NewConnection(ctx, addr, creds, auth, db)
+                                }</span>,
+                                ConnNumber: 1,
+                        },
+                })
+
+                <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                        return nil, errors.Join(ErrGridEndpoint, err)
+                }</span>
+
+        }
+
+        <span class="cov0" title="0">return tr, nil</span>
+}
+
+func NewWithTwoLevels(cfg Config) *Grid <span class="cov0" title="0">{
+        cfg.check()
+        grid, _ := newGrid(cfg, balancing.TreeConfig[*transport.Connection, transport.Connection]{
+                Levels: []balancing.Level{
+                        {
+                                Kind:   balancing.LevelKindEndpoint,
+                                Policy: balancing.PolicyKindRoundRobin,
+                        },
+                        {
+                                Kind:   balancing.LevelKindConnection,
+                                Policy: balancing.PolicyKindRoundRobin,
+                        },
+                },
+        })
+
+        return grid
+}</span>
+
+func NewWithThreeLevels(cfg Config) *Grid <span class="cov0" title="0">{
+        grid, _ := newGrid(cfg, balancing.TreeConfig[*transport.Connection, transport.Connection]{
+                Levels: []balancing.Level{
+                        {
+                                Kind:   balancing.LevelKindLocation,
+                                Policy: balancing.PolicyKindFirstReady,
+                        },
+                        {
+                                Kind:   balancing.LevelKindEndpoint,
+                                Policy: balancing.PolicyKindRoundRobin,
+                        },
+                        {
+                                Kind:   balancing.LevelKindConnection,
+                                Policy: balancing.PolicyKindRoundRobin,
+                        },
+                },
+        })
+
+        return grid
+}</span>
+
+func newGrid(gridCfg Config, treeCfg balancing.TreeConfig[*transport.Connection, transport.Connection]) (*Grid, error) <span class="cov0" title="0">{
+        gridCfg.check()
+        tree, err := balancing.NewTree[
+                *transport.Connection,
+                transport.Connection,
+        ](treeCfg)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Join(ErrCreate, err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;Grid{
+                Tree:             tree,
+                connsPerEndpoint: gridCfg.ConnectionsPerEndpoint,
+        }, nil</span>
+}
+
+func (g *Grid) AddEndpoint(path []string, connFunc func() (*transport.Connection, error)) error <span class="cov0" title="0">{
+        return g.AddPath(balancing.Path[*transport.Connection, transport.Connection]{
+                IDs: path,
+                ConnectionConfig: balancing.ConnectionConfig[*transport.Connection, transport.Connection]{
+                        ConnFunc:   connFunc,
+                        ConnNumber: g.connsPerEndpoint,
+                },
+        })
+}</span>
+
+func (g *Grid) DeleteEndpoint(path []string) error <span class="cov0" title="0">{
+        return g.DeletePath(balancing.Path[*transport.Connection, transport.Connection]{
+                IDs: path,
+        })
+}</span>
+
+func (g *Grid) Invoke(ctx context.Context, method string, args any, reply any, opts ...grpc.CallOption) error <span class="cov0" title="0">{
+        trPtr := xcontext.GetTransportPtr(ctx)
+        if conn := g.GetConn(); conn != nil </span><span class="cov0" title="0">{
+                if trPtr != nil </span><span class="cov0" title="0">{
+                        *trPtr = conn
+                }</span>
+
+                <span class="cov0" title="0">return conn.Invoke(ctx, method, args, reply, opts...)</span>
+        }
+
+        <span class="cov0" title="0">return errors.Join(localErrs.LocalFailureError{}, ErrNoConnections)</span>
+}
+
+func (g *Grid) NewStream(
+        ctx context.Context,
+        desc *grpc.StreamDesc,
+        method string,
+        opts ...grpc.CallOption,
+) (grpc.ClientStream, error) <span class="cov0" title="0">{
+        if conn := g.GetConn(); conn != nil </span><span class="cov0" title="0">{
+                return conn.NewStream(ctx, desc, method, opts...)
+        }</span>
+
+        <span class="cov0" title="0">return nil, errors.Join(localErrs.LocalFailureError{}, ErrNoConnections)</span>
+}
+</pre>
+		
+		<pre class="file" id="file20" style="display: none">package balancing
+
+import (
+        "errors"
+        "sync"
+        "sync/atomic"
+
+        "github.com/adwski/ydb-go-query/internal/transport/balancing/policy"
+)
+
+const (
+        defaultConnectionsNumber = 2
+        defaultEgressesPrealloc  = 32
+)
+
+var (
+        ErrConnectionCreate = errors.New("connection create failed")
+        ErrNodeClosed       = errors.New("node is closed")
+)
+
+type (
+        balancingPolicy[PT policy.Egress[T], T any] interface {
+                Get([]PT) PT
+        }
+
+        connection[T any] interface {
+                *T
+
+                policy.Egress[T]
+
+                Close() error
+        }
+
+        connFunc[PT connection[T], T any] func() (PT, error)
+
+        node[PT connection[T], T any] struct {
+                id string
+
+                // intermediate levels balancing
+                egresses     []*node[PT, T]
+                egressPolicy balancingPolicy[*node[PT, T], node[PT, T]]
+
+                // connection level balancing
+                // TODO: may be egressPolicy and connPolicy can be unified?
+                conns      []PT
+                connFunc   connFunc[PT, T]
+                connPolicy balancingPolicy[PT, T]
+
+                mx     *sync.RWMutex
+                alive  atomic.Bool
+                closed bool
+        }
+
+        nodeConfig[PT connection[T], T any] struct {
+                ID               string
+                Policy           string
+                ConnectionConfig *ConnectionConfig[PT, T]
+        }
+)
+
+func newNode[PT connection[T], T any](cfg nodeConfig[PT, T]) (*node[PT, T], error) <span class="cov6" title="30437">{
+        if err := validatePolicyKind(cfg.Policy); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov6" title="30437">nNode := node[PT, T]{
+                id: cfg.ID,
+                mx: &amp;sync.RWMutex{},
+        }
+
+        if cfg.ConnectionConfig == nil </span><span class="cov5" title="10032">{
+                // not leaf
+                nNode.egresses = make([]*node[PT, T], 0, defaultEgressesPrealloc)
+                nNode.egressPolicy, _ = newPolicy[*node[PT, T], node[PT, T]](cfg.Policy)
+                return &amp;nNode, nil
+        }</span>
+
+        <span class="cov6" title="20405">connCfg := cfg.ConnectionConfig
+        nNode.connPolicy, _ = newPolicy[PT, T](cfg.Policy)
+
+        if connCfg.ConnNumber &lt; 1 </span><span class="cov2" title="10">{
+                connCfg.ConnNumber = defaultConnectionsNumber
+        }</span>
+
+        <span class="cov6" title="20405">for i := 0; i &lt; connCfg.ConnNumber; i++ </span><span class="cov6" title="62974">{
+                conn, err := connCfg.ConnFunc()
+                if err != nil </span><span class="cov0" title="0">{
+                        for _, conn_ := range nNode.conns </span><span class="cov0" title="0">{
+                                _ = conn_.Close()
+                        }</span>
+                        <span class="cov0" title="0">return nil, errors.Join(ErrConnectionCreate, err)</span>
+                }
+                <span class="cov6" title="62974">nNode.conns = append(nNode.conns, conn)</span>
+        }
+        <span class="cov6" title="20405">nNode.alive.Store(true) // mark alive because node has connections
+
+        return &amp;nNode, nil</span>
+}
+
+func (n *node[PT, T]) Alive() bool <span class="cov9" title="13878656">{
+        return n.alive.Load()
+}</span>
+
+func (n *node[PT, T]) Close() error <span class="cov2" title="18">{
+        n.mx.Lock()
+        defer n.mx.Unlock()
+
+        n.closed = true
+
+        for _, egress := range n.egresses </span><span class="cov2" title="9">{
+                _ = egress.Close()
+        }</span>
+        <span class="cov2" title="18">for _, conn := range n.conns </span><span class="cov2" title="25">{
+                _ = conn.Close()
+        }</span>
+        <span class="cov2" title="18">n.egresses = nil
+        n.conns = nil
+        n.connFunc = nil
+        n.connPolicy = nil
+
+        return nil</span>
+}
+
+func (n *node[PT, T]) lookup(id string) (int, *node[PT, T]) <span class="cov7" title="169844">{
+        for i, chNode := range n.egresses </span><span class="cov7" title="332256">{
+                if chNode.id == id </span><span class="cov7" title="149435">{
+                        return i, chNode
+                }</span>
+        }
+
+        <span class="cov6" title="20409">return -1, nil</span>
+}
+
+func (n *node[PT, T]) detach(idx int) <span class="cov2" title="9">{
+        n.mx.Lock()
+        defer n.mx.Unlock()
+
+        last := len(n.egresses) - 1
+        n.egresses[idx], n.egresses[last] = n.egresses[last], n.egresses[idx]
+        n.egresses[last] = nil
+        n.egresses = n.egresses[:last]
+
+        if len(n.egresses) == 0 &amp;&amp; len(n.conns) == 0 </span><span class="cov1" title="2">{
+                n.alive.Store(false)
+        }</span>
+
+        <span class="cov2" title="9">return</span>
+}
+
+func (n *node[PT, T]) addEgress(e *node[PT, T]) error <span class="cov6" title="30425">{
+        n.mx.Lock()
+        defer n.mx.Unlock()
+
+        if n.closed </span><span class="cov0" title="0">{
+                return ErrNodeClosed
+        }</span>
+        <span class="cov6" title="30425">n.egresses = append(n.egresses, e)
+        n.alive.Store(true)
+
+        return nil</span>
+}
+
+func (n *node[PT, T]) getBalanced() PT <span class="cov10" title="17117990">{
+        n.mx.RLock()
+        defer n.mx.RUnlock()
+
+        if n.closed </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov10" title="17117990">if len(n.egresses) &gt; 0 </span><span class="cov9" title="13878656">{
+                if len(n.egresses) == 1 </span><span class="cov8" title="2172403">{
+                        if n.egresses[0].Alive() </span><span class="cov8" title="2172403">{
+                                return n.egresses[0].getBalanced()
+                        }</span>
+                        <span class="cov0" title="0">return nil</span>
+                }
+                <span class="cov9" title="11706253">return n.egressPolicy.Get(n.egresses).getBalanced()</span>
+        }
+
+        <span class="cov9" title="3239334">if len(n.conns) &gt; 0 </span><span class="cov9" title="3239328">{
+                if len(n.conns) == 1 </span><span class="cov1" title="1">{
+                        if n.conns[0].Alive() </span><span class="cov1" title="1">{
+                                return n.conns[0]
+                        }</span>
+                        <span class="cov0" title="0">return nil</span>
+                }
+                <span class="cov9" title="3239327">return n.connPolicy.Get(n.conns)</span>
+        }
+
+        <span class="cov1" title="6">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file21" style="display: none">package policy
+
+// FirstReady returns first alive egress node starting from beginning.
+// If no nodes are alive, it returns nil.
+type FirstReady[PT Egress[T], T any] struct {
+}
+
+func NewFirstReady[PT Egress[T], T any]() *FirstReady[PT, T] <span class="cov0" title="0">{
+        return &amp;FirstReady[PT, T]{}
+}</span>
+
+func (fr *FirstReady[PT, T]) Get(egresses []PT) PT <span class="cov6" title="6">{
+        // look for first ready conn
+        for _, eg := range egresses </span><span class="cov10" title="25">{
+                if eg.Alive() </span><span class="cov4" title="4">{
+                        return eg
+                }</span>
+        }
+
+        <span class="cov2" title="2">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file22" style="display: none">package policy
+
+import (
+        "math/rand"
+)
+
+// Random returns random egress node if it's alive.
+// If chosen randomly node is not alive, it falls to FirstReady behaviour.
+type Random[PT Egress[T], T any] struct {
+        *FirstReady[PT, T]
+}
+
+func NewRandom[PT Egress[T], T any]() *Random[PT, T] <span class="cov0" title="0">{
+        return &amp;Random[PT, T]{}
+}</span>
+
+func (rnd *Random[PT, T]) Get(egresses []PT) PT <span class="cov10" title="4">{
+        // select randomly
+        eg := egresses[rand.Intn(len(egresses))]
+        if eg.Alive() </span><span class="cov5" title="2">{
+                return eg
+        }</span>
+
+        // fallback to first ready conn
+        <span class="cov5" title="2">return rnd.FirstReady.Get(egresses)</span>
+}
+</pre>
+		
+		<pre class="file" id="file23" style="display: none">package policy
+
+import (
+        "sync"
+)
+
+type (
+        // RoundRobin returns next alive egress node. It keeps track
+        // of previously chosen node index, so it can determine next one.
+        //
+        // Node index is guarded by mutex.
+        RoundRobin[PT Egress[T], T any] struct {
+                mx  sync.Mutex
+                idx int
+        }
+)
+
+func NewRoundRobin[PT Egress[T], T any]() *RoundRobin[PT, T] <span class="cov6" title="30437">{
+        return &amp;RoundRobin[PT, T]{}
+}</span>
+
+func (c *RoundRobin[PT, T]) Get(egresses []PT) PT <span class="cov9" title="15045604">{
+        c.mx.Lock()
+        defer c.mx.Unlock()
+
+        // get next alive egress
+        for i := 0; i &lt; len(egresses); i++ </span><span class="cov10" title="15045631">{
+                c.idx = (c.idx + 1) % len(egresses)
+                eg := egresses[c.idx]
+                if eg.Alive() </span><span class="cov9" title="15045602">{
+                        return eg
+                }</span>
+        }
+
+        <span class="cov1" title="2">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file24" style="display: none">package balancing
+
+import (
+        "errors"
+
+        "github.com/adwski/ydb-go-query/internal/transport/balancing/policy"
+)
+
+const (
+        PolicyKindFirstReady = "FirstReady"
+        PolicyKindRandom     = "Random"
+        PolicyKindRoundRobin = "RoundRobin"
+)
+
+var ErrPolicyUnknown = errors.New("unknown balancing policy")
+
+func validatePolicyKind(kind string) error <span class="cov10" title="30437">{
+        switch kind </span>{
+        case PolicyKindFirstReady, PolicyKindRandom, PolicyKindRoundRobin:<span class="cov10" title="30437">
+                return nil</span>
+        }
+        <span class="cov0" title="0">return ErrPolicyUnknown</span>
+}
+
+func newPolicy[PT policy.Egress[T], T any](kind string) (balancingPolicy[PT, T], error) <span class="cov10" title="30437">{
+        switch kind </span>{
+        case PolicyKindFirstReady:<span class="cov0" title="0">
+                return policy.NewFirstReady[PT, T](), nil</span>
+        case PolicyKindRandom:<span class="cov0" title="0">
+                return policy.NewRandom[PT, T](), nil</span>
+        case PolicyKindRoundRobin:<span class="cov10" title="30437">
+                return policy.NewRoundRobin[PT, T](), nil</span>
+        }
+        <span class="cov0" title="0">return nil, ErrPolicyUnknown</span>
+}
+</pre>
+		
+		<pre class="file" id="file25" style="display: none">package balancing
+
+import "errors"
+
+const (
+        LevelKindConnection = "Connection"
+        LevelKindEndpoint   = "Endpoint"
+        LevelKindLocation   = "Location"
+)
+
+var (
+        ErrLevelsEmpty               = errors.New("empty levels")
+        ErrPathLen                   = errors.New("path length is not equal to levels length")
+        ErrPathExists                = errors.New("full path exists")
+        ErrPathDoesNotExist          = errors.New("path does not exist")
+        ErrConnectionConfigMisplaced = errors.New("connection config must be provided only for connection level")
+)
+
+type (
+        Level struct {
+                Kind   string
+                Policy string
+        }
+
+        Tree[PT connection[T], T any] struct {
+                node      *node[PT, T]
+                levels    []Level
+                levelsNum int
+        }
+
+        TreeConfig[PT connection[T], T any] struct {
+                Levels           []Level
+                ConnectionConfig *ConnectionConfig[PT, T]
+        }
+
+        ConnectionConfig[PT connection[T], T any] struct {
+                ConnFunc   connFunc[PT, T]
+                ConnNumber int
+        }
+
+        Path[PT connection[T], T any] struct {
+                IDs []string
+
+                ConnectionConfig[PT, T]
+        }
+)
+
+func (l Level) IsConnection() bool <span class="cov7" title="30437">{
+        return l.Kind == LevelKindConnection
+}</span>
+
+func NewTree[PT connection[T], T any](cfg TreeConfig[PT, T]) (*Tree[PT, T], error) <span class="cov2" title="12">{
+        if len(cfg.Levels) == 0 </span><span class="cov0" title="0">{
+                return nil, ErrLevelsEmpty
+        }</span>
+
+        <span class="cov2" title="12">lvl := cfg.Levels[0]
+
+        nodeCfg := nodeConfig[PT, T]{
+                ID:     lvl.Kind,
+                Policy: lvl.Policy,
+        }
+
+        if lvl.IsConnection() </span><span class="cov0" title="0">{
+                if cfg.ConnectionConfig == nil </span><span class="cov0" title="0">{
+                        return nil, ErrConnectionConfigMisplaced
+                }</span>
+                <span class="cov0" title="0">nodeCfg.ConnectionConfig = cfg.ConnectionConfig</span>
+        } else<span class="cov2" title="12"> if cfg.ConnectionConfig != nil </span><span class="cov0" title="0">{
+                return nil, ErrConnectionConfigMisplaced
+        }</span>
+
+        <span class="cov2" title="12">root, err := newNode(nodeCfg)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov2" title="12">return &amp;Tree[PT, T]{
+                node:      root,
+                levels:    cfg.Levels,
+                levelsNum: len(cfg.Levels),
+        }, nil</span>
+}
+
+func (t *Tree[PT, T]) validatePath(path Path[PT, T]) error <span class="cov6" title="20422">{
+        if len(t.levels)-1 != len(path.IDs) </span><span class="cov1" title="4">{
+                return ErrPathLen
+        }</span>
+        <span class="cov6" title="20418">return nil</span>
+}
+
+func (t *Tree[PT, T]) connectionConfigForLevel(lvlIdx int, connCfg *ConnectionConfig[PT, T]) *ConnectionConfig[PT, T] <span class="cov7" title="30425">{
+        if t.levels[lvlIdx].IsConnection() </span><span class="cov6" title="20405">{
+                return connCfg
+        }</span>
+        <span class="cov6" title="10020">return nil</span>
+}
+
+func (t *Tree[PT, T]) GetConn() PT <span class="cov10" title="3239334">{
+        return t.node.getBalanced()
+}</span>
+
+func (t *Tree[PT, T]) AddPath(path Path[PT, T]) error <span class="cov6" title="20407">{
+        if err := t.validatePath(path); err != nil </span><span class="cov1" title="2">{
+                return err
+        }</span>
+
+        <span class="cov6" title="20405">var (
+                nNode    = t.node
+                nextNode *node[PT, T]
+                err      error
+                idx      int
+        )
+
+        // traverse existing nodes
+        for ; idx &lt; len(path.IDs); idx++ </span><span class="cov8" title="169821">{
+                nodeID := path.IDs[idx]
+                nNode.mx.RLock()
+                _, nextNode = nNode.lookup(nodeID)
+                nNode.mx.RUnlock()
+                if nextNode == nil </span><span class="cov6" title="20405">{
+                        break</span>
+                }
+                <span class="cov8" title="149416">nNode = nextNode</span>
+        }
+
+        <span class="cov6" title="20405">if idx == len(path.IDs) </span><span class="cov0" title="0">{
+                // full path already exists
+                return ErrPathExists
+        }</span>
+
+        // store current node pointer
+        // and create new branch
+        <span class="cov6" title="20405">var (
+                root      = nNode
+                newBranch *node[PT, T]
+        )
+
+        for ; idx &lt; len(path.IDs); idx++ </span><span class="cov7" title="30425">{
+                if nextNode, err = newNode[PT, T](nodeConfig[PT, T]{
+                        ID:               path.IDs[idx],
+                        Policy:           t.levels[idx+1].Policy,
+                        ConnectionConfig: t.connectionConfigForLevel(idx+1, &amp;path.ConnectionConfig),
+                }); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov7" title="30425">if newBranch == nil </span><span class="cov6" title="20405">{
+                        newBranch = nextNode
+                }</span> else<span class="cov6" title="10020"> {
+                        _ = nNode.addEgress(nextNode) // nNode is not yet attached and therefore should not be closed
+                }</span>
+                <span class="cov7" title="30425">nNode = nextNode</span>
+        }
+
+        <span class="cov6" title="20405">if newBranch != nil </span><span class="cov6" title="20405">{
+                // attach new branch
+                err = root.addEgress(newBranch)
+
+                if err != nil </span><span class="cov0" title="0">{
+                        _ = newBranch.Close()
+                        return err
+                }</span>
+        }
+
+        <span class="cov6" title="20405">return nil</span>
+}
+
+func (t *Tree[PT, T]) DeletePath(path Path[PT, T]) error <span class="cov2" title="15">{
+        if err := t.validatePath(path); err != nil </span><span class="cov1" title="2">{
+                return err
+        }</span>
+
+        <span class="cov2" title="13">var (
+                nNode    = t.node
+                delRoot  *node[PT, T]
+                prev     *node[PT, T]
+                nextNode *node[PT, T]
+                idx      int
+                prevIdx  int
+                delIdx   int
+        )
+
+        for i, nodeID := range path.IDs </span><span class="cov2" title="23">{
+                nNode.mx.RLock()
+                if len(nNode.egresses) == 1 </span><span class="cov2" title="14">{
+                        delRoot = prev
+                        delIdx = prevIdx
+                }</span>
+
+                <span class="cov2" title="23">idx, nextNode = nNode.lookup(nodeID)
+                if nextNode == nil </span><span class="cov1" title="4">{
+                        // path to not-existing node
+                        return ErrPathDoesNotExist
+                }</span>
+                <span class="cov2" title="19">if i == len(path.IDs)-1 </span><span class="cov2" title="9">{
+                        nNode.mx.RUnlock()
+                        if delRoot != nil </span><span class="cov2" title="9">{
+                                delRoot.detach(delIdx)
+                        }</span> else<span class="cov0" title="0"> {
+                                nNode.detach(idx)
+                        }</span>
+
+                        <span class="cov2" title="9">break</span>
+                }
+
+                <span class="cov2" title="10">nNode.mx.RUnlock()
+                nNode, prev = nextNode, nNode
+                prevIdx = idx</span>
+        }
+
+        <span class="cov2" title="9">return nNode.Close()</span>
+}
+</pre>
+		
+		<pre class="file" id="file26" style="display: none">package transport
+
+import (
+        "context"
+        "errors"
+
+        "google.golang.org/grpc"
+        "google.golang.org/grpc/connectivity"
+        "google.golang.org/grpc/credentials"
+        "google.golang.org/grpc/metadata"
+)
+
+const (
+        headerAuth     = "x-ydb-auth-ticket"
+        headerDatabase = "x-ydb-database"
+)
+
+var (
+        ErrNoToken = errors.New("authenticator did not provide token")
+
+        ErrDial  = errors.New("connection dial error")
+        ErrClose = errors.New("connection close error")
+)
+
+type (
+        Authenticator interface {
+                GetToken() string
+        }
+        Connection struct {
+                *grpc.ClientConn
+
+                auth Authenticator
+                db   string
+        }
+)
+
+func NewConnection(
+        ctx context.Context,
+        endpoint string,
+        creds credentials.TransportCredentials,
+        auth Authenticator,
+        db string,
+) (*Connection, error) <span class="cov0" title="0">{
+        var opts []grpc.DialOption
+        opts = append(opts,
+                grpc.WithTransportCredentials(creds))
+
+        grpcConn, err := grpc.DialContext(ctx, endpoint, opts...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Join(ErrDial, err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;Connection{
+                ClientConn: grpcConn,
+                auth:       auth,
+                db:         db,
+        }, nil</span>
+}
+
+func (c *Connection) Close() error <span class="cov0" title="0">{
+        if err := c.ClientConn.Close(); err != nil </span><span class="cov0" title="0">{
+                return errors.Join(ErrClose, err)
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (c *Connection) Alive() bool <span class="cov0" title="0">{
+        switch c.GetState() </span>{
+        case connectivity.Ready, connectivity.Idle:<span class="cov0" title="0">
+                return true</span>
+        default:<span class="cov0" title="0">
+                return false</span>
+        }
+}
+
+func setContextMD(ctx context.Context, auth Authenticator, db string) (context.Context, error) <span class="cov0" title="0">{
+        md := metadata.Pairs(headerDatabase, db)
+        if auth != nil </span><span class="cov0" title="0">{
+                token := auth.GetToken()
+                if token == "" </span><span class="cov0" title="0">{
+                        return nil, ErrNoToken
+                }</span>
+                <span class="cov0" title="0">md.Append(headerAuth, token)</span>
+        }
+
+        <span class="cov0" title="0">return metadata.NewOutgoingContext(ctx, md), nil</span>
+}
+
+func (c *Connection) Invoke(ctx context.Context, method string, args any, reply any, opts ...grpc.CallOption) error <span class="cov0" title="0">{
+        callCtx, err := setContextMD(ctx, c.auth, c.db)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">return c.ClientConn.Invoke(callCtx, method, args, reply, opts...)</span> //nolint:wrapcheck // unnecessary
+}
+
+func (c *Connection) NewStream(
+        ctx context.Context,
+        desc *grpc.StreamDesc,
+        method string,
+        opts ...grpc.CallOption,
+) (grpc.ClientStream, error) <span class="cov0" title="0">{
+        callCtx, err := setContextMD(ctx, c.auth, c.db)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return c.ClientConn.NewStream(callCtx, desc, method, opts...)</span> //nolint:wrapcheck // unnecessary
+}
+</pre>
+		
+		<pre class="file" id="file27" style="display: none">package credentials
+
+import (
+        "crypto/tls"
+        "crypto/x509"
+
+        "google.golang.org/grpc/credentials"
+        "google.golang.org/grpc/credentials/insecure"
+)
+
+func Insecure() credentials.TransportCredentials <span class="cov0" title="0">{
+        return insecure.NewCredentials()
+}</span>
+
+func TLS() credentials.TransportCredentials <span class="cov0" title="0">{
+        return credentials.NewTLS(tlsConfig())
+}</span>
+
+func TLSSkipVerify() credentials.TransportCredentials <span class="cov0" title="0">{
+        tlsCfg := tlsConfig()
+        tlsCfg.InsecureSkipVerify = true
+        return credentials.NewTLS(tlsCfg)
+}</span>
+
+func tlsConfig() *tls.Config <span class="cov0" title="0">{
+        tlsCfg := &amp;tls.Config{
+                MinVersion: tls.VersionTLS12,
+                RootCAs:    x509.NewCertPool(),
+        }
+        if sysPool, err := x509.SystemCertPool(); err == nil </span><span class="cov0" title="0">{
+                tlsCfg.RootCAs = sysPool
+        }</span>
+        <span class="cov0" title="0">return tlsCfg</span>
+}
+</pre>
+		
+		<pre class="file" id="file28" style="display: none">package dispatcher
+
+import (
+        "context"
+        "strconv"
+        "sync"
+
+        "github.com/adwski/ydb-go-query/internal/endpoints"
+        "github.com/adwski/ydb-go-query/internal/logger"
+        "github.com/adwski/ydb-go-query/internal/transport"
+        "github.com/adwski/ydb-go-query/internal/transport/balancing/grid"
+
+        "google.golang.org/grpc"
+        "google.golang.org/grpc/credentials"
+)
+
+type (
+        grpcBalancer interface {
+                grpc.ClientConnInterface
+
+                AddEndpoint([]string, func() (*transport.Connection, error)) error
+                DeleteEndpoint([]string) error
+        }
+
+        EndpointsProvider interface {
+                EndpointsChan() &lt;-chan endpoints.Announce
+        }
+
+        // Dispatcher provides dynamic transport layer by
+        // gluing together endpoints provider and balancer.
+        //
+        // It uses provider's announces to populate balancing grid.
+        //
+        // Balancing grid in turn is used by YDB services
+        // as abstract transport.
+        Dispatcher struct {
+                logger   logger.Logger
+                balancer grpcBalancer
+
+                discovery EndpointsProvider
+
+                transportCredentials credentials.TransportCredentials
+                auth                 transport.Authenticator
+
+                db string
+        }
+
+        Config struct {
+                Logger               logger.Logger
+                EndpointsProvider    EndpointsProvider
+                Auth                 transport.Authenticator
+                TransportCredentials credentials.TransportCredentials
+                DB                   string
+                InitNodes            []string
+                GridConfig           grid.Config
+        }
+)
+
+func New(cfg Config) *Dispatcher <span class="cov0" title="0">{
+        return &amp;Dispatcher{
+                logger:               cfg.Logger,
+                discovery:            cfg.EndpointsProvider,
+                transportCredentials: cfg.TransportCredentials,
+                auth:                 cfg.Auth,
+                db:                   cfg.DB,
+                balancer:             grid.NewWithThreeLevels(cfg.GridConfig),
+        }
+}</span>
+
+func (r *Dispatcher) Transport() grpc.ClientConnInterface <span class="cov0" title="0">{
+        return r.balancer
+}</span>
+
+func (r *Dispatcher) Run(ctx context.Context, wg *sync.WaitGroup) <span class="cov0" title="0">{
+        r.logger.Debug("dispatcher started")
+        defer func() </span><span class="cov0" title="0">{
+                r.logger.Debug("dispatcher stopped")
+                wg.Done()
+        }</span>()
+
+<span class="cov0" title="0">runLoop:
+        for </span><span class="cov0" title="0">{
+                select </span>{
+                case &lt;-ctx.Done():<span class="cov0" title="0">
+                        break runLoop</span>
+                case ann := &lt;-r.discovery.EndpointsChan():<span class="cov0" title="0">
+                        r.processAnnounce(ctx, ann)</span>
+                }
+        }
+}
+
+func (r *Dispatcher) processAnnounce(ctx context.Context, ann endpoints.Announce) <span class="cov0" title="0">{
+        for _, epAdd := range ann.Add </span><span class="cov0" title="0">{
+                addr := endpointFullAddress(epAdd)
+
+                if err := r.balancer.AddEndpoint(
+                        []string{epAdd.Location, addr},
+                        func() (*transport.Connection, error) </span><span class="cov0" title="0">{
+                                return transport.NewConnection(ctx, addr, r.transportCredentials, r.auth, r.db)
+                        }</span>); err != nil <span class="cov0" title="0">{
+                        r.logger.Error("unable to add endpoint", "error", err)
+                }</span> else<span class="cov0" title="0"> {
+                        r.logger.Debug("endpoint added", "address", addr)
+                }</span>
+        }
+
+        <span class="cov0" title="0">for _, epDel := range ann.Del </span><span class="cov0" title="0">{
+                addr := endpointFullAddress(&amp;epDel)
+
+                if err := r.balancer.DeleteEndpoint([]string{epDel.Location, addr}); err != nil </span><span class="cov0" title="0">{
+                        r.logger.Error("unable to delete endpoint", "error", err)
+                }</span> else<span class="cov0" title="0"> {
+                        r.logger.Debug("endpoint deleted", "address", addr)
+                }</span>
+        }
+}
+
+type addrPort interface {
+        GetAddress() string
+        GetPort() uint32
+}
+
+func endpointFullAddress(ep addrPort) string <span class="cov0" title="0">{
+        return ep.GetAddress() + ":" + strconv.Itoa(int(ep.GetPort()))
+}</span>
+</pre>
+		
+		<pre class="file" id="file29" style="display: none">package xcontext
+
+import (
+        "context"
+
+        "google.golang.org/grpc"
+)
+
+type (
+        transportPtr struct{}
+)
+
+func WithTransportPtr(ctx context.Context, epPtr *grpc.ClientConnInterface) context.Context <span class="cov0" title="0">{
+        return context.WithValue(ctx, transportPtr{}, epPtr)
+}</span>
+
+func GetTransportPtr(ctx context.Context) *grpc.ClientConnInterface <span class="cov0" title="0">{
+        trPtr, ok := ctx.Value(transportPtr{}).(*grpc.ClientConnInterface)
+        if ok </span><span class="cov0" title="0">{
+                return trPtr
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file30" style="display: none">package query
+
+import (
+        "context"
+        "errors"
+
+        "github.com/adwski/ydb-go-query/internal/logger"
+        "github.com/adwski/ydb-go-query/internal/query"
+        "github.com/adwski/ydb-go-query/internal/query/txsettings"
+
+        "github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"
+)
+
+const (
+        maxQueryLogLength = 1000
+)
+
+var (
+        queryLogCut = []byte("...")
+)
+
+type Ctx struct {
+        logger logger.Logger
+        qSvc   *query.Service
+        txSet  *Ydb_Query.TransactionSettings
+}
+
+func NewCtx(logger logger.Logger, qSvc *query.Service, txSet *Ydb_Query.TransactionSettings) *Ctx <span class="cov0" title="0">{
+        return &amp;Ctx{
+                logger: logger,
+                qSvc:   qSvc,
+                txSet:  txSet,
+        }
+}</span>
+
+func (qc *Ctx) OnlineReadOnly() *Ctx <span class="cov0" title="0">{
+        newQCtx := *qc
+        newQCtx.txSet = txsettings.OnlineReadOnly()
+
+        return &amp;newQCtx
+}</span>
+
+func (qc *Ctx) OnlineReadOnlyInconsistent() *Ctx <span class="cov0" title="0">{
+        newQCtx := *qc
+        newQCtx.txSet = txsettings.OnlineReadOnlyInconsistent()
+
+        return &amp;newQCtx
+}</span>
+
+func (qc *Ctx) SnapshotReadOnly() *Ctx <span class="cov0" title="0">{
+        newQCtx := *qc
+        newQCtx.txSet = txsettings.SnapshotReadOnly()
+
+        return &amp;newQCtx
+}</span>
+
+func (qc *Ctx) StaleReadOnly() *Ctx <span class="cov0" title="0">{
+        newQCtx := *qc
+        newQCtx.txSet = txsettings.StaleReadOnly()
+
+        return &amp;newQCtx
+}</span>
+
+func (qc *Ctx) SerializableReadWrite() *Ctx <span class="cov0" title="0">{
+        newQCtx := *qc
+        newQCtx.txSet = txsettings.SerializableReadWrite()
+        return &amp;newQCtx
+}</span>
+
+func (qc *Ctx) Query(queryContent string) *Query <span class="cov0" title="0">{
+        return newQuery(
+                queryContent,
+                qc.exec,
+        )
+}</span>
+
+func (qc *Ctx) Exec(ctx context.Context, queryContent string) (*Result, error) <span class="cov0" title="0">{
+        stream, cancel, err := qc.qSvc.Exec(ctx, queryContent, nil, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err //nolint:wrapcheck //unnecessary
+        }</span>
+
+        <span class="cov0" title="0">return qc.processResult(stream, cancel, nil)</span>
+}
+
+func (qc *Ctx) Tx(ctx context.Context) (*Transaction, error) <span class="cov0" title="0">{
+        sess, cleanup, err := qc.qSvc.AcquireSession(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err //nolint:wrapcheck //unnecessary
+        }</span>
+
+        <span class="cov0" title="0">tx := &amp;Transaction{
+                logger:   qc.logger,
+                settings: qc.txSet,
+                sess:     sess,
+                cleanup:  cleanup,
+        }
+
+        return tx, nil</span>
+}
+
+func (qc *Ctx) exec(
+        ctx context.Context,
+        queryContent string,
+        params map[string]*Ydb.TypedValue,
+        collectRows func([]*Ydb.Value) error,
+) (*Result, error) <span class="cov0" title="0">{
+        stream, cancel, err := qc.qSvc.Exec(ctx, queryContent, params, qc.txSet)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err //nolint:wrapcheck //unnecessary
+        }</span>
+
+        <span class="cov0" title="0">qc.logger.Trace("received result stream", "query", strip(queryContent))
+
+        return qc.processResult(stream, cancel, collectRows)</span>
+}
+
+func (qc *Ctx) processResult(
+        stream Ydb_Query_V1.QueryService_ExecuteQueryClient,
+        cancel context.CancelFunc,
+        collectRows func([]*Ydb.Value) error,
+) (*Result, error) <span class="cov0" title="0">{
+        res := newResult(stream, cancel, qc.logger, collectRows)
+
+        if err := res.recv(); err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Join(ErrResult, err)
+        }</span>
+
+        <span class="cov0" title="0">return res, nil</span>
+}
+
+func strip(s string) string <span class="cov0" title="0">{
+        if len(s) &gt; maxQueryLogLength </span><span class="cov0" title="0">{
+                b := []byte(s[:maxQueryLogLength-2])
+                return string(append(b, queryLogCut...))
+        }</span>
+
+        <span class="cov0" title="0">return s</span>
+}
+</pre>
+		
+		<pre class="file" id="file31" style="display: none">package query
+
+import (
+        "context"
+
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
+)
+
+type (
+        execFunc func(
+                context.Context,
+                string,
+                map[string]*Ydb.TypedValue,
+                func([]*Ydb.Value) error,
+        ) (*Result, error)
+
+        Query struct {
+                collectRowsFunc func([]*Ydb.Value) error
+                execFunc        execFunc
+                params          map[string]*Ydb.TypedValue
+                content         string
+        }
+)
+
+func newQuery(content string, eF execFunc) *Query <span class="cov0" title="0">{
+        return &amp;Query{
+                content:  content,
+                execFunc: eF,
+        }
+}</span>
+
+func (q *Query) Params(params map[string]*Ydb.TypedValue) *Query <span class="cov0" title="0">{
+        q.params = params
+
+        return q
+}</span>
+
+func (q *Query) Param(name string, val *Ydb.TypedValue) *Query <span class="cov0" title="0">{
+        if q.params == nil </span><span class="cov0" title="0">{
+                q.params = make(map[string]*Ydb.TypedValue)
+        }</span>
+        <span class="cov0" title="0">q.params[name] = val
+
+        return q</span>
+}
+
+func (q *Query) Collect(collectRowsFunc func([]*Ydb.Value) error) *Query <span class="cov0" title="0">{
+        q.collectRowsFunc = collectRowsFunc
+
+        return q
+}</span>
+
+func (q *Query) Exec(ctx context.Context) (*Result, error) <span class="cov0" title="0">{
+        return q.execFunc(ctx, q.content, q.params, q.collectRowsFunc)
+}</span>
+</pre>
+		
+		<pre class="file" id="file32" style="display: none">package query
+
+import (
+        "context"
+        "errors"
+        "fmt"
+        "sync/atomic"
+
+        "github.com/adwski/ydb-go-query/internal/logger"
+
+        "github.com/ydb-platform/ydb-go-genproto/Ydb_Query_V1"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Issue"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_TableStats"
+)
+
+var (
+        ErrPartStatus = errors.New("result part status error")
+        ErrStream     = errors.New("result stream error")
+        ErrIssues     = errors.New("query result has issues")
+)
+
+type Result struct {
+        logger logger.Logger
+
+        cancel context.CancelFunc
+
+        stream Ydb_Query_V1.QueryService_ExecuteQueryClient
+
+        stats *Ydb_TableStats.QueryStats
+
+        err error
+
+        txID string
+
+        collectRowsFunc func([]*Ydb.Value) error
+
+        issues []*Ydb_Issue.IssueMessage
+        cols   []*Ydb.Column
+        rows   []*Ydb.Value
+
+        done atomic.Bool
+}
+
+func newResult(
+        stream Ydb_Query_V1.QueryService_ExecuteQueryClient,
+        cancel context.CancelFunc,
+        logger logger.Logger,
+        collectRowsFunc func([]*Ydb.Value) error,
+) *Result <span class="cov0" title="0">{
+        return &amp;Result{
+                logger: logger,
+                stream: stream,
+                cancel: cancel,
+
+                collectRowsFunc: collectRowsFunc,
+        }
+}</span>
+
+// close closes result stream,
+// result data remains available.
+func (r *Result) close() <span class="cov0" title="0">{
+        r.cancel()
+        r.done.Store(true)
+}</span>
+
+func (r *Result) Err() error <span class="cov0" title="0">{
+        return r.err
+}</span>
+
+func (r *Result) Issues() []*Ydb_Issue.IssueMessage <span class="cov0" title="0">{ return r.issues }</span>
+
+func (r *Result) Cols() []*Ydb.Column <span class="cov0" title="0">{
+        return r.cols
+}</span>
+
+func (r *Result) Rows() []*Ydb.Value <span class="cov0" title="0">{
+        return r.rows
+}</span>
+
+func (r *Result) Stats() *Ydb_TableStats.QueryStats <span class="cov0" title="0">{
+        return r.stats
+}</span>
+
+func (r *Result) TxID() string <span class="cov0" title="0">{
+        return r.txID
+}</span>
+
+// recv reads all parts from result stream till completion.
+// It assumes that parts are arriving sequentially,
+// i.e. ConcurrentResultSets is false.
+func (r *Result) recv() error <span class="cov0" title="0">{
+        if r.done.Load() </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov0" title="0">for </span><span class="cov0" title="0">{
+                part, err := r.stream.Recv()
+                r.logger.Trace("received result part", "part", part, "error", err)
+                if err != nil </span><span class="cov0" title="0">{
+                        return errors.Join(ErrStream, err)
+                }</span>
+
+                <span class="cov0" title="0">r.issues = append(r.issues, part.Issues...)
+
+                if part.Status != Ydb.StatusIds_SUCCESS </span><span class="cov0" title="0">{
+                        r.err = errors.Join(ErrPartStatus, fmt.Errorf("status: %s", part.Status))
+
+                        break</span>
+                }
+
+                <span class="cov0" title="0">if part.TxMeta != nil </span><span class="cov0" title="0">{
+                        r.txID = part.TxMeta.Id
+                }</span>
+
+                <span class="cov0" title="0">if len(part.Issues) &gt; 0 </span><span class="cov0" title="0">{
+                        r.err = errors.Join(ErrIssues, r.err)
+                }</span>
+
+                <span class="cov0" title="0">if part.ResultSet != nil </span><span class="cov0" title="0">{
+                        if r.cols == nil &amp;&amp; len(part.ResultSet.Columns) &gt; 0 </span><span class="cov0" title="0">{
+                                r.cols = part.ResultSet.Columns
+                        }</span>
+
+                        <span class="cov0" title="0">if len(part.ResultSet.Rows) &gt; 0 </span><span class="cov0" title="0">{
+                                if r.collectRowsFunc != nil </span><span class="cov0" title="0">{
+                                        err = r.collectRowsFunc(part.ResultSet.Rows)
+                                        if err != nil </span><span class="cov0" title="0">{
+                                                r.err = errors.Join(err, r.err)
+                                                break</span>
+                                        }
+                                } else<span class="cov0" title="0"> {
+                                        r.rows = append(r.rows, part.ResultSet.Rows...)
+                                }</span>
+                        }
+                }
+
+                <span class="cov0" title="0">if part.ExecStats != nil </span><span class="cov0" title="0">{
+                        // stats on the last part
+                        // TODO: find better way to detect last part
+                        r.stats = part.ExecStats
+                        break</span>
+                }
+        }
+
+        <span class="cov0" title="0">r.close()
+
+        return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file33" style="display: none">package query
+
+import (
+        "context"
+        "errors"
+
+        "github.com/adwski/ydb-go-query/internal/logger"
+        "github.com/adwski/ydb-go-query/internal/query/session"
+
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"
+)
+
+var (
+        ErrFinished = errors.New("transaction already finished")
+)
+
+type (
+        Transaction struct {
+                logger logger.Logger
+
+                sess *session.Session
+
+                cleanup func()
+
+                settings *Ydb_Query.TransactionSettings
+
+                id string
+
+                finish bool // committed or rolled back
+        }
+)
+
+func (tx *Transaction) Rollback(ctx context.Context) error <span class="cov0" title="0">{
+        if tx.finish </span><span class="cov0" title="0">{
+                return ErrFinished
+        }</span>
+
+        <span class="cov0" title="0">if err := tx.sess.RollbackTX(ctx, tx.id); err != nil </span><span class="cov0" title="0">{
+                return err //nolint:wrapcheck // unnecessary
+        }</span>
+
+        <span class="cov0" title="0">tx.finish = true
+        tx.cleanup()
+
+        return nil</span>
+}
+
+func (tx *Transaction) Commit(ctx context.Context) error <span class="cov0" title="0">{
+        if tx.finish </span><span class="cov0" title="0">{
+                return ErrFinished
+        }</span>
+
+        <span class="cov0" title="0">if err := tx.sess.CommitTX(ctx, tx.id); err != nil </span><span class="cov0" title="0">{
+                return err //nolint:wrapcheck // unnecessary
+        }</span>
+
+        <span class="cov0" title="0">tx.finish = true
+        tx.cleanup()
+
+        return nil</span>
+}
+
+func (tx *Transaction) Query(queryContent string) *TxQuery <span class="cov0" title="0">{
+        return newTxQuery(
+                queryContent,
+                tx.exec,
+        )
+}</span>
+
+func (tx *Transaction) exec(
+        ctx context.Context,
+        query string,
+        params map[string]*Ydb.TypedValue,
+        collectRowsFunc func([]*Ydb.Value) error,
+        commit bool,
+) (*Result, error) <span class="cov0" title="0">{
+        if tx.finish </span><span class="cov0" title="0">{
+                return nil, ErrFinished
+        }</span>
+
+        <span class="cov0" title="0">if commit </span><span class="cov0" title="0">{
+                defer func() </span><span class="cov0" title="0">{
+                        tx.finish = true
+                        tx.cleanup()
+                }</span>()
+        }
+
+        <span class="cov0" title="0">txControl := &amp;Ydb_Query.TransactionControl{
+                // send last exec with commit
+                CommitTx: commit,
+        }
+        if tx.id == "" </span><span class="cov0" title="0">{
+                // begin tx
+                txControl.TxSelector = &amp;Ydb_Query.TransactionControl_BeginTx{
+                        BeginTx: tx.settings,
+                }
+        }</span> else<span class="cov0" title="0"> {
+                // continue tx
+                txControl.TxSelector = &amp;Ydb_Query.TransactionControl_TxId{
+                        TxId: tx.id,
+                }
+        }</span>
+
+        <span class="cov0" title="0">stream, cancel, err := tx.sess.Exec(ctx, query, params, txControl)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err //nolint:wrapcheck //unnecessary
+        }</span>
+
+        <span class="cov0" title="0">res := newResult(stream, cancel, tx.logger, collectRowsFunc)
+
+        if err = res.recv(); err != nil </span><span class="cov0" title="0">{
+                return nil, errors.Join(ErrResult, err)
+        }</span>
+
+        <span class="cov0" title="0">tx.id = res.TxID()
+        tx.logger.Trace("received tx result", "txID", tx.id)
+
+        return res, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file34" style="display: none">package query
+
+import (
+        "context"
+
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
+)
+
+type (
+        txExecFunc func(
+                context.Context,
+                string,
+                map[string]*Ydb.TypedValue,
+                func([]*Ydb.Value) error,
+                bool,
+        ) (*Result, error)
+
+        TxQuery struct {
+                *Query
+
+                txExecFunc txExecFunc
+
+                commit bool
+        }
+)
+
+func newTxQuery(content string, eF txExecFunc) *TxQuery <span class="cov0" title="0">{
+        return &amp;TxQuery{
+                Query: newQuery(content, nil),
+
+                txExecFunc: eF,
+        }
+}</span>
+
+func (q *TxQuery) Commit() *TxQuery <span class="cov0" title="0">{
+        q.commit = true
+
+        return q
+}</span>
+
+func (q *TxQuery) Exec(ctx context.Context) (*Result, error) <span class="cov0" title="0">{
+        return q.txExecFunc(ctx, q.content, q.params, q.collectRowsFunc, q.commit)
+}</span>
+</pre>
+		
+		<pre class="file" id="file35" style="display: none">package types
+
+import "github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
+
+func Bool(val bool) *Ydb.TypedValue <span class="cov0" title="0">{
+        return &amp;Ydb.TypedValue{
+                Type:  &amp;Ydb.Type{Type: &amp;Ydb.Type_TypeId{TypeId: Ydb.Type_BOOL}},
+                Value: &amp;Ydb.Value{Value: &amp;Ydb.Value_BoolValue{BoolValue: val}},
+        }
+}</span>
+
+func Int32(val int32) *Ydb.TypedValue <span class="cov0" title="0">{
+        return &amp;Ydb.TypedValue{
+                Type:  &amp;Ydb.Type{Type: &amp;Ydb.Type_TypeId{TypeId: Ydb.Type_INT32}},
+                Value: &amp;Ydb.Value{Value: &amp;Ydb.Value_Int32Value{Int32Value: val}},
+        }
+}</span>
+
+func Uint32(val uint32) *Ydb.TypedValue <span class="cov0" title="0">{
+        return &amp;Ydb.TypedValue{
+                Type:  &amp;Ydb.Type{Type: &amp;Ydb.Type_TypeId{TypeId: Ydb.Type_UINT32}},
+                Value: &amp;Ydb.Value{Value: &amp;Ydb.Value_Uint32Value{Uint32Value: val}},
+        }
+}</span>
+
+func Int64(val int64) *Ydb.TypedValue <span class="cov0" title="0">{
+        return &amp;Ydb.TypedValue{
+                Type:  &amp;Ydb.Type{Type: &amp;Ydb.Type_TypeId{TypeId: Ydb.Type_INT64}},
+                Value: &amp;Ydb.Value{Value: &amp;Ydb.Value_Int64Value{Int64Value: val}},
+        }
+}</span>
+
+func Uint64(val uint64) *Ydb.TypedValue <span class="cov0" title="0">{
+        return &amp;Ydb.TypedValue{
+                Type:  &amp;Ydb.Type{Type: &amp;Ydb.Type_TypeId{TypeId: Ydb.Type_UINT64}},
+                Value: &amp;Ydb.Value{Value: &amp;Ydb.Value_Uint64Value{Uint64Value: val}},
+        }
+}</span>
+
+func Float(val float32) *Ydb.TypedValue <span class="cov0" title="0">{
+        return &amp;Ydb.TypedValue{
+                Type:  &amp;Ydb.Type{Type: &amp;Ydb.Type_TypeId{TypeId: Ydb.Type_FLOAT}},
+                Value: &amp;Ydb.Value{Value: &amp;Ydb.Value_FloatValue{FloatValue: val}},
+        }
+}</span>
+
+func Double(val float64) *Ydb.TypedValue <span class="cov0" title="0">{
+        return &amp;Ydb.TypedValue{
+                Type:  &amp;Ydb.Type{Type: &amp;Ydb.Type_TypeId{TypeId: Ydb.Type_DOUBLE}},
+                Value: &amp;Ydb.Value{Value: &amp;Ydb.Value_DoubleValue{DoubleValue: val}},
+        }
+}</span>
+
+func UTF8(val string) *Ydb.TypedValue <span class="cov0" title="0">{
+        return &amp;Ydb.TypedValue{
+                Type:  &amp;Ydb.Type{Type: &amp;Ydb.Type_TypeId{TypeId: Ydb.Type_UTF8}},
+                Value: &amp;Ydb.Value{Value: &amp;Ydb.Value_TextValue{TextValue: val}},
+        }
+}</span>
+
+func Text(val string) *Ydb.TypedValue <span class="cov0" title="0">{
+        return &amp;Ydb.TypedValue{
+                Type:  &amp;Ydb.Type{Type: &amp;Ydb.Type_TypeId{TypeId: Ydb.Type_STRING}},
+                Value: &amp;Ydb.Value{Value: &amp;Ydb.Value_TextValue{TextValue: val}},
+        }
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
