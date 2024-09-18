@@ -1180,7 +1180,7 @@ func (l *Logger) Info(string, ...any) {<span class="cov0" title="0">
 func (l *Logger) Debug(string, ...any) {<span class="cov1" title="4">
 }</span>
 
-func (l *Logger) Trace(string, ...any) {<span class="cov10" title="2803914">
+func (l *Logger) Trace(string, ...any) {<span class="cov10" title="3165912">
 }</span>
 </pre>
 		
@@ -1448,19 +1448,19 @@ func (p *Pool[PT, T]) Close() error <span class="cov1" title="3">{
         <span class="cov1" title="3">return nil</span>
 }
 
-func (p *Pool[PT, T]) Get(rCtx context.Context) PT <span class="cov9" title="1401956">{
+func (p *Pool[PT, T]) Get(rCtx context.Context) PT <span class="cov9" title="1582955">{
 getLoop:
-        for </span><span class="cov10" title="1402542">{
+        for </span><span class="cov10" title="1583533">{
                 select </span>{
-                case itm := &lt;-p.queue:<span class="cov9" title="1402541">
-                        if itm.Alive() </span><span class="cov9" title="1401955">{
+                case itm := &lt;-p.queue:<span class="cov9" title="1583532">
+                        if itm.Alive() </span><span class="cov9" title="1582954">{
                                 p.logger.Trace("item retrieved from pool", "id", itm.ID())
                                 return itm
                         }</span>
-                        <span class="cov5" title="586">_ = itm.Close()
+                        <span class="cov5" title="578">_ = itm.Close()
 
                         select </span>{
-                        case p.tokens &lt;- struct{}{}:<span class="cov5" title="586"></span>
+                        case p.tokens &lt;- struct{}{}:<span class="cov5" title="578"></span>
                         case &lt;-rCtx.Done():<span class="cov0" title="0">
                                 break getLoop</span>
                         }
@@ -1472,10 +1472,10 @@ getLoop:
         <span class="cov1" title="1">return nil</span>
 }
 
-func (p *Pool[PT, T]) Put(itm PT) <span class="cov9" title="1401955">{
+func (p *Pool[PT, T]) Put(itm PT) <span class="cov9" title="1582954">{
         // check if alive
-        if itm.Alive() </span><span class="cov9" title="1401951">{
-                if !p.itemRecycling || !p.itemExpired(itm) </span><span class="cov9" title="1401951">{
+        if itm.Alive() </span><span class="cov9" title="1582944">{
+                if !p.itemRecycling || !p.itemExpired(itm) </span><span class="cov9" title="1582944">{
                         // alive and not expired
                         // push item back and finish iteration
                         p.queue &lt;- itm // ignoring ctx.Done(), should never block here
@@ -1483,7 +1483,7 @@ func (p *Pool[PT, T]) Put(itm PT) <span class="cov9" title="1401955">{
                         return
                 }</span>
         }
-        <span class="cov1" title="4">p.logger.Trace("item recycled on returning", "id", itm.ID())
+        <span class="cov2" title="10">p.logger.Trace("item recycled on returning", "id", itm.ID())
         // recycle
         _ = itm.Close()
         // push token
@@ -1498,13 +1498,13 @@ func (p *Pool[PT, T]) spawnItems(ctx context.Context) <span class="cov1" title="
         }</span>()
 
 <span class="cov1" title="2">spawnLoop:
-        for </span><span class="cov5" title="686">{
+        for </span><span class="cov5" title="691">{
                 select </span>{
                 case &lt;-ctx.Done():<span class="cov1" title="2">
                         break spawnLoop</span>
-                case &lt;-p.tokens:<span class="cov5" title="684">
+                case &lt;-p.tokens:<span class="cov5" title="689">
                 createLoop:
-                        for </span><span class="cov5" title="684">{
+                        for </span><span class="cov5" title="689">{
                                 p.wg.Add(1)
                                 itm, err := p.spawnItem(ctx)
                                 if err != nil </span><span class="cov0" title="0">{
@@ -1523,7 +1523,7 @@ func (p *Pool[PT, T]) spawnItems(ctx context.Context) <span class="cov1" title="
 
                                 // Ignoring ctx.Done() here and put item in queue anyway,
                                 // so it can be closed later by drain().
-                                <span class="cov5" title="684">p.queue &lt;- itm
+                                <span class="cov5" title="689">p.queue &lt;- itm
 
                                 break</span>
                         }
@@ -1533,9 +1533,9 @@ func (p *Pool[PT, T]) spawnItems(ctx context.Context) <span class="cov1" title="
 
 func (p *Pool[PT, T]) drain() <span class="cov1" title="2">{
 drainLoop:
-        for </span><span class="cov3" title="95">{
+        for </span><span class="cov3" title="102">{
                 select </span>{
-                case itm := &lt;-p.queue:<span class="cov3" title="93">
+                case itm := &lt;-p.queue:<span class="cov3" title="100">
                         _ = itm.Close()</span>
                 default:<span class="cov1" title="2">
                         break drainLoop</span>
@@ -1543,7 +1543,7 @@ drainLoop:
         }
 }
 
-func (p *Pool[PT, T]) spawnItem(ctx context.Context) (PT, error) <span class="cov5" title="684">{
+func (p *Pool[PT, T]) spawnItem(ctx context.Context) (PT, error) <span class="cov5" title="689">{
         defer p.wg.Done()
 
         itm, err := p.createFunc(ctx, p.createTimeout)
@@ -1553,11 +1553,11 @@ func (p *Pool[PT, T]) spawnItem(ctx context.Context) (PT, error) <span class="co
                 return nil, err
         }</span>
 
-        <span class="cov5" title="684">if p.itemRecycling </span><span class="cov0" title="0">{
+        <span class="cov5" title="689">if p.itemRecycling </span><span class="cov0" title="0">{
                 p.setItemExpire(itm.ID())
         }</span>
 
-        <span class="cov5" title="684">return itm, nil</span>
+        <span class="cov5" title="689">return itm, nil</span>
 }
 
 func (p *Pool[PT, T]) setItemExpire(id uint64) <span class="cov0" title="0">{
@@ -2644,23 +2644,23 @@ func newNode[PT connection[T], T any](cfg nodeConfig[PT, T]) (*node[PT, T], erro
         return &amp;nNode, nil</span>
 }
 
-func (n *node[PT, T]) Alive() bool <span class="cov9" title="13853332">{
+func (n *node[PT, T]) Alive() bool <span class="cov9" title="13909830">{
         return n.alive.Load()
 }</span>
 
-func (n *node[PT, T]) Close() error <span class="cov2" title="18">{
+func (n *node[PT, T]) Close() error <span class="cov2" title="20">{
         n.mx.Lock()
         defer n.mx.Unlock()
 
         n.closed = true
 
-        for _, egress := range n.egresses </span><span class="cov2" title="9">{
+        for _, egress := range n.egresses </span><span class="cov2" title="10">{
                 _ = egress.Close()
         }</span>
-        <span class="cov2" title="18">for _, conn := range n.conns </span><span class="cov2" title="25">{
+        <span class="cov2" title="20">for _, conn := range n.conns </span><span class="cov2" title="27">{
                 _ = conn.Close()
         }</span>
-        <span class="cov2" title="18">n.egresses = nil
+        <span class="cov2" title="20">n.egresses = nil
         n.conns = nil
         n.connFunc = nil
         n.connPolicy = nil
@@ -2668,9 +2668,9 @@ func (n *node[PT, T]) Close() error <span class="cov2" title="18">{
         return nil</span>
 }
 
-func (n *node[PT, T]) lookup(id string) (int, *node[PT, T]) <span class="cov7" title="169844">{
-        for i, chNode := range n.egresses </span><span class="cov7" title="332256">{
-                if chNode.id == id </span><span class="cov7" title="149435">{
+func (n *node[PT, T]) lookup(id string) (int, *node[PT, T]) <span class="cov7" title="169846">{
+        for i, chNode := range n.egresses </span><span class="cov7" title="332258">{
+                if chNode.id == id </span><span class="cov7" title="149437">{
                         return i, chNode
                 }</span>
         }
@@ -2678,7 +2678,7 @@ func (n *node[PT, T]) lookup(id string) (int, *node[PT, T]) <span class="cov7" t
         <span class="cov6" title="20409">return -1, nil</span>
 }
 
-func (n *node[PT, T]) detach(idx int) <span class="cov2" title="9">{
+func (n *node[PT, T]) detach(idx int) <span class="cov2" title="10">{
         n.mx.Lock()
         defer n.mx.Unlock()
 
@@ -2691,7 +2691,7 @@ func (n *node[PT, T]) detach(idx int) <span class="cov2" title="9">{
                 n.alive.Store(false)
         }</span>
 
-        <span class="cov2" title="9">return</span>
+        <span class="cov2" title="10">return</span>
 }
 
 func (n *node[PT, T]) addEgress(e *node[PT, T]) error <span class="cov6" title="30425">{
@@ -2707,7 +2707,7 @@ func (n *node[PT, T]) addEgress(e *node[PT, T]) error <span class="cov6" title="
         return nil</span>
 }
 
-func (n *node[PT, T]) getBalanced() PT <span class="cov10" title="17080004">{
+func (n *node[PT, T]) getBalanced() PT <span class="cov10" title="17164751">{
         n.mx.RLock()
         defer n.mx.RUnlock()
 
@@ -2715,24 +2715,24 @@ func (n *node[PT, T]) getBalanced() PT <span class="cov10" title="17080004">{
                 return nil
         }</span>
 
-        <span class="cov10" title="17080004">if len(n.egresses) &gt; 0 </span><span class="cov9" title="13853332">{
-                if len(n.egresses) == 1 </span><span class="cov8" title="2164732">{
-                        if n.egresses[0].Alive() </span><span class="cov8" title="2164732">{
+        <span class="cov10" title="17164751">if len(n.egresses) &gt; 0 </span><span class="cov9" title="13909830">{
+                if len(n.egresses) == 1 </span><span class="cov8" title="2177643">{
+                        if n.egresses[0].Alive() </span><span class="cov8" title="2177643">{
                                 return n.egresses[0].getBalanced()
                         }</span>
                         <span class="cov0" title="0">return nil</span>
                 }
-                <span class="cov9" title="11688600">return n.egressPolicy.Get(n.egresses).getBalanced()</span>
+                <span class="cov9" title="11732187">return n.egressPolicy.Get(n.egresses).getBalanced()</span>
         }
 
-        <span class="cov9" title="3226672">if len(n.conns) &gt; 0 </span><span class="cov9" title="3226666">{
+        <span class="cov9" title="3254921">if len(n.conns) &gt; 0 </span><span class="cov9" title="3254915">{
                 if len(n.conns) == 1 </span><span class="cov1" title="1">{
                         if n.conns[0].Alive() </span><span class="cov1" title="1">{
                                 return n.conns[0]
                         }</span>
                         <span class="cov0" title="0">return nil</span>
                 }
-                <span class="cov9" title="3226665">return n.connPolicy.Get(n.conns)</span>
+                <span class="cov9" title="3254914">return n.connPolicy.Get(n.conns)</span>
         }
 
         <span class="cov1" title="6">return nil</span>
@@ -2811,15 +2811,15 @@ func NewRoundRobin[PT Egress[T], T any]() *RoundRobin[PT, T] <span class="cov6" 
         return &amp;RoundRobin[PT, T]{}
 }</span>
 
-func (c *RoundRobin[PT, T]) Get(egresses []PT) PT <span class="cov9" title="15015289">{
+func (c *RoundRobin[PT, T]) Get(egresses []PT) PT <span class="cov9" title="15087125">{
         c.mx.Lock()
         defer c.mx.Unlock()
 
         // get next alive egress
-        for i := 0; i &lt; len(egresses); i++ </span><span class="cov10" title="15015316">{
+        for i := 0; i &lt; len(egresses); i++ </span><span class="cov10" title="15087152">{
                 c.idx = (c.idx + 1) % len(egresses)
                 eg := egresses[c.idx]
-                if eg.Alive() </span><span class="cov9" title="15015287">{
+                if eg.Alive() </span><span class="cov9" title="15087123">{
                         return eg
                 }</span>
         }
@@ -2949,11 +2949,11 @@ func NewTree[PT connection[T], T any](cfg TreeConfig[PT, T]) (*Tree[PT, T], erro
         }, nil</span>
 }
 
-func (t *Tree[PT, T]) validatePath(path Path[PT, T]) error <span class="cov6" title="20422">{
+func (t *Tree[PT, T]) validatePath(path Path[PT, T]) error <span class="cov6" title="20423">{
         if len(t.levels)-1 != len(path.IDs) </span><span class="cov1" title="4">{
                 return ErrPathLen
         }</span>
-        <span class="cov6" title="20418">return nil</span>
+        <span class="cov6" title="20419">return nil</span>
 }
 
 func (t *Tree[PT, T]) connectionConfigForLevel(lvlIdx int, connCfg *ConnectionConfig[PT, T]) *ConnectionConfig[PT, T] <span class="cov7" title="30425">{
@@ -2963,7 +2963,7 @@ func (t *Tree[PT, T]) connectionConfigForLevel(lvlIdx int, connCfg *ConnectionCo
         <span class="cov6" title="10020">return nil</span>
 }
 
-func (t *Tree[PT, T]) GetConn() PT <span class="cov10" title="3226672">{
+func (t *Tree[PT, T]) GetConn() PT <span class="cov10" title="3254921">{
         return t.node.getBalanced()
 }</span>
 
@@ -3032,12 +3032,12 @@ func (t *Tree[PT, T]) AddPath(path Path[PT, T]) error <span class="cov6" title="
         <span class="cov6" title="20405">return nil</span>
 }
 
-func (t *Tree[PT, T]) DeletePath(path Path[PT, T]) error <span class="cov2" title="15">{
+func (t *Tree[PT, T]) DeletePath(path Path[PT, T]) error <span class="cov2" title="16">{
         if err := t.validatePath(path); err != nil </span><span class="cov1" title="2">{
                 return err
         }</span>
 
-        <span class="cov2" title="13">var (
+        <span class="cov2" title="14">var (
                 nNode    = t.node
                 delRoot  *node[PT, T]
                 prev     *node[PT, T]
@@ -3047,35 +3047,35 @@ func (t *Tree[PT, T]) DeletePath(path Path[PT, T]) error <span class="cov2" titl
                 delIdx   int
         )
 
-        for i, nodeID := range path.IDs </span><span class="cov2" title="23">{
+        for i, nodeID := range path.IDs </span><span class="cov2" title="25">{
                 nNode.mx.RLock()
-                if len(nNode.egresses) == 1 </span><span class="cov2" title="14">{
+                if len(nNode.egresses) == 1 </span><span class="cov2" title="15">{
                         delRoot = prev
                         delIdx = prevIdx
                 }</span>
 
-                <span class="cov2" title="23">idx, nextNode = nNode.lookup(nodeID)
+                <span class="cov2" title="25">idx, nextNode = nNode.lookup(nodeID)
                 if nextNode == nil </span><span class="cov1" title="4">{
                         // path to not-existing node
                         return ErrPathDoesNotExist
                 }</span>
-                <span class="cov2" title="19">if i == len(path.IDs)-1 </span><span class="cov2" title="9">{
+                <span class="cov2" title="21">if i == len(path.IDs)-1 </span><span class="cov2" title="10">{
                         nNode.mx.RUnlock()
-                        if delRoot != nil </span><span class="cov2" title="9">{
+                        if delRoot != nil </span><span class="cov2" title="10">{
                                 delRoot.detach(delIdx)
                         }</span> else<span class="cov0" title="0"> {
                                 nNode.detach(idx)
                         }</span>
 
-                        <span class="cov2" title="9">break</span>
+                        <span class="cov2" title="10">break</span>
                 }
 
-                <span class="cov2" title="10">nNode.mx.RUnlock()
+                <span class="cov2" title="11">nNode.mx.RUnlock()
                 nNode, prev = nextNode, nNode
                 prevIdx = idx</span>
         }
 
-        <span class="cov2" title="9">return nNode.Close()</span>
+        <span class="cov2" title="10">return nNode.Close()</span>
 }
 </pre>
 		
