@@ -61,11 +61,11 @@
 				
 				<option value="file2">github.com/adwski/ydb-go-query/examples/showcase/main.go (0.0%)</option>
 				
-				<option value="file3">github.com/adwski/ydb-go-query/internal/discovery/filter.go (0.0%)</option>
+				<option value="file3">github.com/adwski/ydb-go-query/internal/discovery/service.go (0.0%)</option>
 				
-				<option value="file4">github.com/adwski/ydb-go-query/internal/discovery/service.go (0.0%)</option>
+				<option value="file4">github.com/adwski/ydb-go-query/internal/endpoints/db.go (100.0%)</option>
 				
-				<option value="file5">github.com/adwski/ydb-go-query/internal/endpoints/db.go (100.0%)</option>
+				<option value="file5">github.com/adwski/ydb-go-query/internal/endpoints/filter.go (96.8%)</option>
 				
 				<option value="file6">github.com/adwski/ydb-go-query/internal/endpoints/info.go (100.0%)</option>
 				
@@ -77,7 +77,7 @@
 				
 				<option value="file10">github.com/adwski/ydb-go-query/internal/logger/zerolog/zerolog.go (0.0%)</option>
 				
-				<option value="file11">github.com/adwski/ydb-go-query/internal/pool/pool.go (61.3%)</option>
+				<option value="file11">github.com/adwski/ydb-go-query/internal/pool/pool.go (97.9%)</option>
 				
 				<option value="file12">github.com/adwski/ydb-go-query/internal/query/service.go (0.0%)</option>
 				
@@ -738,112 +738,6 @@ func checkResult(result *query.Result, err error) <span class="cov0" title="0">{
 		<pre class="file" id="file3" style="display: none">package discovery
 
 import (
-        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Discovery"
-)
-
-const (
-        ServiceNameQuery = "query_service"
-)
-
-type (
-        Filter struct {
-                Require *Require
-                Prefer  *Prefer
-        }
-
-        Require struct {
-                Services  []string
-                Locations []string
-        }
-
-        Prefer struct {
-                Locations []string
-        }
-)
-
-func NewFilter() *Filter <span class="cov0" title="0">{
-        return &amp;Filter{}
-}</span>
-
-func (f *Filter) WithQueryService() *Filter <span class="cov0" title="0">{
-        if f.Require == nil </span><span class="cov0" title="0">{
-                f.Require = &amp;Require{}
-        }</span>
-        <span class="cov0" title="0">f.Require.Services = []string{ServiceNameQuery}
-
-        return f</span>
-}
-
-func (f *Filter) matchRequired(ep *Ydb_Discovery.EndpointInfo) bool <span class="cov0" title="0">{
-        if f.Require == nil </span><span class="cov0" title="0">{
-                return true
-        }</span>
-
-        <span class="cov0" title="0">if !matchServices(ep, f.Require.Services) </span><span class="cov0" title="0">{
-                return false
-        }</span>
-
-        <span class="cov0" title="0">return matchLocation(ep, f.Require.Locations)</span>
-}
-
-func (f *Filter) matchPreferred(ep *Ydb_Discovery.EndpointInfo) bool <span class="cov0" title="0">{
-        if f.Prefer == nil </span><span class="cov0" title="0">{
-                return true
-        }</span>
-
-        <span class="cov0" title="0">return matchLocation(ep, f.Prefer.Locations)</span>
-}
-
-func (f *Filter) filter(endpoints []*Ydb_Discovery.EndpointInfo) (
-        preferred []*Ydb_Discovery.EndpointInfo,
-        notPreferred []*Ydb_Discovery.EndpointInfo,
-) <span class="cov0" title="0">{
-        for _, ep := range endpoints </span><span class="cov0" title="0">{
-                if f.matchRequired(ep) </span><span class="cov0" title="0">{
-                        if f.matchPreferred(ep) </span><span class="cov0" title="0">{
-                                preferred = append(preferred, ep)
-                        }</span> else<span class="cov0" title="0"> {
-                                notPreferred = append(notPreferred, ep)
-                        }</span>
-                }
-        }
-
-        <span class="cov0" title="0">return</span>
-}
-
-func matchServices(ep *Ydb_Discovery.EndpointInfo, services []string) bool <span class="cov0" title="0">{
-        srvs := make(map[string]struct{})
-        for _, srv := range ep.Service </span><span class="cov0" title="0">{
-                srvs[srv] = struct{}{}
-        }</span>
-        <span class="cov0" title="0">for _, srv := range services </span><span class="cov0" title="0">{
-                if _, ok := srvs[srv]; !ok </span><span class="cov0" title="0">{
-                        return false
-                }</span>
-        }
-
-        <span class="cov0" title="0">return true</span>
-}
-
-func matchLocation(ep *Ydb_Discovery.EndpointInfo, locations []string) bool <span class="cov0" title="0">{
-        if len(locations) == 0 </span><span class="cov0" title="0">{
-                return true
-        }</span>
-
-        <span class="cov0" title="0">matchLoc := false
-        for _, loc := range locations </span><span class="cov0" title="0">{
-                if loc == ep.Location </span><span class="cov0" title="0">{
-                        matchLoc = true
-                }</span>
-        }
-
-        <span class="cov0" title="0">return matchLoc</span>
-}
-</pre>
-		
-		<pre class="file" id="file4" style="display: none">package discovery
-
-import (
         "context"
         "errors"
         "fmt"
@@ -876,7 +770,7 @@ type (
                 logger logger.Logger
                 dsc    Ydb_Discovery_V1.DiscoveryServiceClient
                 ann    chan endpoints.Announce
-                filter *Filter
+                filter *endpoints.Filter
                 epDB   endpoints.DB
                 dbName string
         }
@@ -893,7 +787,7 @@ func NewService(cfg Config) *Service <span class="cov0" title="0">{
         svc := &amp;Service{
                 dbName: cfg.DB,
                 logger: cfg.Logger,
-                filter: NewFilter().WithQueryService(),
+                filter: endpoints.NewFilter().WithQueryService(),
                 dsc:    Ydb_Discovery_V1.NewDiscoveryServiceClient(cfg.Transport),
                 epDB:   endpoints.NewDB(),
         }
@@ -992,7 +886,7 @@ func (svc *Service) getEndpoints(ctx context.Context) ([]*Ydb_Discovery.Endpoint
                 return nil, errors.Join(ErrEndpointsUnmarshal, err)
         }</span>
 
-        <span class="cov0" title="0">preferred, requiredButNotPreferred := svc.filter.filter(epRes.Endpoints)
+        <span class="cov0" title="0">preferred, requiredButNotPreferred := svc.filter.Filter(epRes.Endpoints)
         if len(preferred) == 0 </span><span class="cov0" title="0">{
                 return requiredButNotPreferred, nil
         }</span>
@@ -1001,7 +895,7 @@ func (svc *Service) getEndpoints(ctx context.Context) ([]*Ydb_Discovery.Endpoint
 }
 </pre>
 		
-		<pre class="file" id="file5" style="display: none">package endpoints
+		<pre class="file" id="file4" style="display: none">package endpoints
 
 import (
         "sync"
@@ -1114,6 +1008,111 @@ func (db *DB) swap(dbm Map) <span class="cov8" title="5">{
 }</span>
 </pre>
 		
+		<pre class="file" id="file5" style="display: none">package endpoints
+
+import (
+        "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Discovery"
+)
+
+const (
+        serviceNameQuery = "query_service"
+)
+
+type (
+        Filter struct {
+                Require *Require
+                Prefer  *Prefer
+        }
+
+        Require struct {
+                Services  []string
+                Locations []string
+        }
+
+        Prefer struct {
+                Locations []string
+        }
+)
+
+func NewFilter() *Filter <span class="cov3" title="2">{
+        return &amp;Filter{
+                Require: &amp;Require{},
+        }
+}</span>
+
+func (f *Filter) WithQueryService() *Filter <span class="cov1" title="1">{
+        f.Require.Services = append(f.Require.Services, serviceNameQuery)
+
+        return f
+}</span>
+
+func (f *Filter) matchRequired(ep *Ydb_Discovery.EndpointInfo) bool <span class="cov7" title="6">{
+        if f.Require == nil </span><span class="cov0" title="0">{
+                return true
+        }</span>
+
+        <span class="cov7" title="6">if !matchServices(ep, f.Require.Services) </span><span class="cov4" title="3">{
+                return false
+        }</span>
+
+        <span class="cov4" title="3">return matchLocation(ep, f.Require.Locations)</span>
+}
+
+func (f *Filter) matchPreferred(ep *Ydb_Discovery.EndpointInfo) bool <span class="cov4" title="3">{
+        if f.Prefer == nil </span><span class="cov1" title="1">{
+                return true
+        }</span>
+
+        <span class="cov3" title="2">return matchLocation(ep, f.Prefer.Locations)</span>
+}
+
+func (f *Filter) Filter(endpoints []*Ydb_Discovery.EndpointInfo) (
+        preferred []*Ydb_Discovery.EndpointInfo,
+        notPreferred []*Ydb_Discovery.EndpointInfo,
+) <span class="cov3" title="2">{
+        for _, ep := range endpoints </span><span class="cov7" title="6">{
+                if f.matchRequired(ep) </span><span class="cov4" title="3">{
+                        if f.matchPreferred(ep) </span><span class="cov3" title="2">{
+                                preferred = append(preferred, ep)
+                        }</span> else<span class="cov1" title="1"> {
+                                notPreferred = append(notPreferred, ep)
+                        }</span>
+                }
+        }
+
+        <span class="cov3" title="2">return</span>
+}
+
+func matchServices(ep *Ydb_Discovery.EndpointInfo, services []string) bool <span class="cov7" title="6">{
+        srvs := make(map[string]struct{})
+        for _, srv := range ep.Service </span><span class="cov10" title="14">{
+                srvs[srv] = struct{}{}
+        }</span>
+        <span class="cov7" title="6">for _, srv := range services </span><span class="cov8" title="10">{
+                if _, ok := srvs[srv]; !ok </span><span class="cov4" title="3">{
+                        return false
+                }</span>
+        }
+
+        <span class="cov4" title="3">return true</span>
+}
+
+func matchLocation(ep *Ydb_Discovery.EndpointInfo, locations []string) bool <span class="cov6" title="5">{
+        if len(locations) == 0 </span><span class="cov1" title="1">{
+                return true
+        }</span>
+
+        <span class="cov5" title="4">matchLoc := false
+        for _, loc := range locations </span><span class="cov8" title="8">{
+                if loc == ep.Location </span><span class="cov4" title="3">{
+                        matchLoc = true
+                }</span>
+        }
+
+        <span class="cov5" title="4">return matchLoc</span>
+}
+</pre>
+		
 		<pre class="file" id="file6" style="display: none">package endpoints
 
 import "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Discovery"
@@ -1167,7 +1166,7 @@ func (e LocalFailureError) Error() string <span class="cov0" title="0">{
 type Logger struct {
 }
 
-func NewLogger() *Logger <span class="cov1" title="2">{
+func NewLogger() *Logger <span class="cov1" title="4">{
         return &amp;Logger{}
 }</span>
 
@@ -1177,10 +1176,10 @@ func (l *Logger) Error(string, ...any) {<span class="cov0" title="0">
 func (l *Logger) Info(string, ...any) {<span class="cov0" title="0">
 }</span>
 
-func (l *Logger) Debug(string, ...any) {<span class="cov1" title="4">
+func (l *Logger) Debug(string, ...any) {<span class="cov2" title="11">
 }</span>
 
-func (l *Logger) Trace(string, ...any) {<span class="cov10" title="2919028">
+func (l *Logger) Trace(string, ...any) {<span class="cov10" title="3287583">
 }</span>
 </pre>
 		
@@ -1315,6 +1314,8 @@ const (
         minCreateTimeout     = time.Second
         minItemLifetime      = 5 * time.Minute
 
+        minPoolSize = 1
+
         defaultCreateRetryDelayOnLocalErrors = time.Second
 )
 
@@ -1381,25 +1382,32 @@ type (
 
                 // PoolSize specifies amount of items in pool.
                 PoolSize uint
+
+                test bool
         }
 )
 
-func New[PT item[T], T any](ctx context.Context, cfg Config[PT, T]) *Pool[PT, T] <span class="cov1" title="2">{
+func New[PT item[T], T any](ctx context.Context, cfg Config[PT, T]) *Pool[PT, T] <span class="cov1" title="4">{
         runCtx, cancel := context.WithCancel(ctx)
 
-        if cfg.CreateTimeout &lt; minCreateTimeout </span><span class="cov0" title="0">{
-                cfg.CreateTimeout = defaultCreateTimeout
-        }</span>
-        <span class="cov1" title="2">if cfg.Lifetime &lt; minItemLifetime </span><span class="cov1" title="2">{
-                cfg.Lifetime = 0 // infinite lifetime
-        }</span>
+        if !cfg.test </span><span class="cov1" title="3">{ // bypass min value checks
+                if cfg.CreateTimeout &lt; minCreateTimeout </span><span class="cov1" title="1">{
+                        cfg.CreateTimeout = defaultCreateTimeout
+                }</span>
+                <span class="cov1" title="3">if cfg.Lifetime &lt; minItemLifetime </span><span class="cov1" title="3">{
+                        cfg.Lifetime = 0 // infinite lifetime
+                }</span>
+                <span class="cov1" title="3">if cfg.PoolSize &lt; minPoolSize </span><span class="cov1" title="1">{
+                        cfg.PoolSize = minPoolSize
+                }</span>
+        }
 
-        <span class="cov1" title="2">pool := &amp;Pool[PT, T]{
+        <span class="cov1" title="4">pool := &amp;Pool[PT, T]{
                 logger:        cfg.Logger,
                 size:          cfg.PoolSize,
                 createTimeout: cfg.CreateTimeout,
-                itemLifetime:  cfg.Lifetime.Microseconds() / 1000,
-                recycleWindow: cfg.RecycleWindow.Microseconds() / 1000,
+                itemLifetime:  cfg.Lifetime.Milliseconds() / 1000,
+                recycleWindow: cfg.RecycleWindow.Milliseconds() / 1000,
 
                 itemRecycling: cfg.Lifetime != 0,
 
@@ -1417,27 +1425,27 @@ func New[PT item[T], T any](ctx context.Context, cfg Config[PT, T]) *Pool[PT, T]
         }
 
         // fill tokens
-        for i := 0; i &lt; int(cfg.PoolSize); i++ </span><span class="cov3" title="101">{
+        for i := 0; i &lt; int(cfg.PoolSize); i++ </span><span class="cov3" title="103">{
                 pool.tokens &lt;- struct{}{}
         }</span>
 
         // start spawner
-        <span class="cov1" title="2">pool.wg.Add(1)
+        <span class="cov1" title="4">pool.wg.Add(1)
         go pool.spawnItems(runCtx)
 
-        if pool.itemRecycling </span><span class="cov0" title="0">{
+        if pool.itemRecycling </span><span class="cov1" title="1">{
                 // start recycler
                 pool.wg.Add(1)
                 go pool.recycleItems(runCtx)
         }</span>
 
-        <span class="cov1" title="2">pool.logger.Debug("pool created", "size", pool.size)
+        <span class="cov1" title="4">pool.logger.Debug("pool created", "size", pool.size)
 
         return pool</span>
 }
 
-func (p *Pool[PT, T]) Close() error <span class="cov1" title="3">{
-        p.closeOnce.Do(func() </span><span class="cov1" title="2">{
+func (p *Pool[PT, T]) Close() error <span class="cov2" title="5">{
+        p.closeOnce.Do(func() </span><span class="cov1" title="4">{
                 p.cancelFunc()
                 p.drain()
                 p.wg.Wait()
@@ -1445,22 +1453,22 @@ func (p *Pool[PT, T]) Close() error <span class="cov1" title="3">{
                 p.logger.Debug("pool closed")
         }</span>)
 
-        <span class="cov1" title="3">return nil</span>
+        <span class="cov2" title="5">return nil</span>
 }
 
-func (p *Pool[PT, T]) Get(rCtx context.Context) PT <span class="cov9" title="1459513">{
+func (p *Pool[PT, T]) Get(rCtx context.Context) PT <span class="cov9" title="1643787">{
 getLoop:
-        for </span><span class="cov10" title="1460087">{
+        for </span><span class="cov10" title="1644365">{
                 select </span>{
-                case itm := &lt;-p.queue:<span class="cov9" title="1460086">
-                        if itm.Alive() </span><span class="cov9" title="1459512">{
+                case itm := &lt;-p.queue:<span class="cov9" title="1644364">
+                        if itm.Alive() </span><span class="cov9" title="1643786">{
                                 p.logger.Trace("item retrieved from pool", "id", itm.ID())
                                 return itm
                         }</span>
-                        <span class="cov5" title="574">_ = itm.Close()
+                        <span class="cov4" title="578">_ = itm.Close()
 
                         select </span>{
-                        case p.tokens &lt;- struct{}{}:<span class="cov5" title="574"></span>
+                        case p.tokens &lt;- struct{}{}:<span class="cov4" title="578"></span>
                         case &lt;-rCtx.Done():<span class="cov0" title="0">
                                 break getLoop</span>
                         }
@@ -1472,10 +1480,10 @@ getLoop:
         <span class="cov1" title="1">return nil</span>
 }
 
-func (p *Pool[PT, T]) Put(itm PT) <span class="cov9" title="1459512">{
+func (p *Pool[PT, T]) Put(itm PT) <span class="cov9" title="1643786">{
         // check if alive
-        if itm.Alive() </span><span class="cov9" title="1459501">{
-                if !p.itemRecycling || !p.itemExpired(itm) </span><span class="cov9" title="1459501">{
+        if itm.Alive() </span><span class="cov9" title="1643775">{
+                if !p.itemRecycling || !p.itemExpired(itm) </span><span class="cov9" title="1643775">{
                         // alive and not expired
                         // push item back and finish iteration
                         p.queue &lt;- itm // ignoring ctx.Done(), should never block here
@@ -1490,40 +1498,40 @@ func (p *Pool[PT, T]) Put(itm PT) <span class="cov9" title="1459512">{
         p.tokens &lt;- struct{}{}</span> // ignoring ctx.Done(), should never block here
 }
 
-func (p *Pool[PT, T]) spawnItems(ctx context.Context) <span class="cov1" title="2">{
+func (p *Pool[PT, T]) spawnItems(ctx context.Context) <span class="cov1" title="4">{
         p.logger.Trace("pool spawner started")
-        defer func() </span><span class="cov1" title="2">{
+        defer func() </span><span class="cov1" title="4">{
                 p.wg.Done()
                 p.logger.Trace("pool spawner exited")
         }</span>()
 
-<span class="cov1" title="2">spawnLoop:
-        for </span><span class="cov5" title="688">{
+<span class="cov1" title="4">spawnLoop:
+        for </span><span class="cov5" title="694">{
                 select </span>{
-                case &lt;-ctx.Done():<span class="cov1" title="2">
+                case &lt;-ctx.Done():<span class="cov1" title="3">
                         break spawnLoop</span>
-                case &lt;-p.tokens:<span class="cov5" title="686">
+                case &lt;-p.tokens:<span class="cov5" title="691">
                 createLoop:
-                        for </span><span class="cov5" title="686">{
+                        for </span><span class="cov5" title="693">{
                                 p.wg.Add(1)
                                 itm, err := p.spawnItem(ctx)
-                                if err != nil </span><span class="cov0" title="0">{
-                                        if errors.Is(err, localErrs.LocalFailureError{}) </span><span class="cov0" title="0">{
+                                if err != nil </span><span class="cov1" title="3">{
+                                        if errors.Is(err, localErrs.LocalFailureError{}) </span><span class="cov1" title="3">{
                                                 // Local errors return instantly.
                                                 // Sleep here a bit to prevent unnecessary flood of create attempts.
                                                 time.Sleep(defaultCreateRetryDelayOnLocalErrors)
                                         }</span>
-                                        <span class="cov0" title="0">select </span>{
-                                        case &lt;-ctx.Done():<span class="cov0" title="0">
+                                        <span class="cov1" title="3">select </span>{
+                                        case &lt;-ctx.Done():<span class="cov1" title="1">
                                                 break spawnLoop</span>
-                                        default:<span class="cov0" title="0">
+                                        default:<span class="cov1" title="2">
                                                 continue createLoop</span>
                                         }
                                 }
 
                                 // Ignoring ctx.Done() here and put item in queue anyway,
                                 // so it can be closed later by drain().
-                                <span class="cov5" title="686">p.queue &lt;- itm
+                                <span class="cov5" title="690">p.queue &lt;- itm
 
                                 break</span>
                         }
@@ -1531,86 +1539,86 @@ func (p *Pool[PT, T]) spawnItems(ctx context.Context) <span class="cov1" title="
         }
 }
 
-func (p *Pool[PT, T]) drain() <span class="cov1" title="2">{
+func (p *Pool[PT, T]) drain() <span class="cov1" title="4">{
 drainLoop:
-        for </span><span class="cov3" title="102">{
+        for </span><span class="cov3" title="103">{
                 select </span>{
-                case itm := &lt;-p.queue:<span class="cov3" title="100">
+                case itm := &lt;-p.queue:<span class="cov3" title="99">
                         _ = itm.Close()</span>
-                default:<span class="cov1" title="2">
+                default:<span class="cov1" title="4">
                         break drainLoop</span>
                 }
         }
 }
 
-func (p *Pool[PT, T]) spawnItem(ctx context.Context) (PT, error) <span class="cov5" title="686">{
+func (p *Pool[PT, T]) spawnItem(ctx context.Context) (PT, error) <span class="cov5" title="693">{
         defer p.wg.Done()
 
         itm, err := p.createFunc(ctx, p.createTimeout)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov1" title="3">{
                 p.logger.Debug("pool item create error", "error", err)
 
                 return nil, err
         }</span>
 
-        <span class="cov5" title="686">if p.itemRecycling </span><span class="cov0" title="0">{
+        <span class="cov5" title="690">if p.itemRecycling </span><span class="cov1" title="2">{
                 p.setItemExpire(itm.ID())
         }</span>
 
-        <span class="cov5" title="686">return itm, nil</span>
+        <span class="cov5" title="690">return itm, nil</span>
 }
 
-func (p *Pool[PT, T]) setItemExpire(id uint64) <span class="cov0" title="0">{
+func (p *Pool[PT, T]) setItemExpire(id uint64) <span class="cov1" title="2">{
         p.itemsMx.Lock()
         defer p.itemsMx.Unlock()
 
         p.itemsExpire[id] = time.Now().Unix() + p.itemLifetime
 }</span>
 
-func (p *Pool[PT, T]) getItemExpire(id uint64) int64 <span class="cov0" title="0">{
+func (p *Pool[PT, T]) getItemExpire(id uint64) int64 <span class="cov1" title="3">{
         p.itemsMx.RLock()
         defer p.itemsMx.RUnlock()
 
         return p.itemsExpire[id]
 }</span>
 
-func (p *Pool[PT, T]) itemExpired(itm PT) bool <span class="cov0" title="0">{
+func (p *Pool[PT, T]) itemExpired(itm PT) bool <span class="cov1" title="3">{
         return p.getItemExpire(itm.ID())-p.recycleWindow+rand.Int63n(2*p.recycleWindow) &lt; time.Now().Unix()
 }</span>
 
-func (p *Pool[PT, T]) recycleItems(ctx context.Context) <span class="cov0" title="0">{
+func (p *Pool[PT, T]) recycleItems(ctx context.Context) <span class="cov1" title="1">{
         p.logger.Trace("pool recycler started")
-        defer func() </span><span class="cov0" title="0">{
+        defer func() </span><span class="cov1" title="1">{
                 p.wg.Done()
                 p.logger.Trace("pool recycler exited")
         }</span>()
 
-        <span class="cov0" title="0">ticker := time.NewTicker(defaultRecycleTick)
+        <span class="cov1" title="1">ticker := time.NewTicker(defaultRecycleTick)
         defer ticker.Stop()
 
 recycleLoop:
-        for </span><span class="cov0" title="0">{
+        for </span><span class="cov1" title="4">{
                 // wait for tick
                 select </span>{
-                case &lt;-ctx.Done():<span class="cov0" title="0">
+                case &lt;-ctx.Done():<span class="cov1" title="1">
                         break recycleLoop</span>
-                case &lt;-ticker.C:<span class="cov0" title="0"></span>
+                case &lt;-ticker.C:<span class="cov1" title="3"></span>
                 }
 
                 // get item from queue
-                <span class="cov0" title="0">select </span>{
+                <span class="cov1" title="3">select </span>{
                 case &lt;-ctx.Done():<span class="cov0" title="0">
                         break recycleLoop</span>
-                case itm := &lt;-p.queue:<span class="cov0" title="0">
+                case itm := &lt;-p.queue:<span class="cov1" title="3">
                         // check if alive
-                        if itm.Alive() &amp;&amp; !p.itemExpired(itm) </span><span class="cov0" title="0">{
+                        if itm.Alive() &amp;&amp; !p.itemExpired(itm) </span><span class="cov1" title="2">{
                                 // alive and not expired
                                 // push item back and finish iteration
                                 p.queue &lt;- itm // ignoring ctx.Done(), should never block here
                                 break</span>
                         }
                         // recycle
-                        <span class="cov0" title="0">_ = itm.Close()
+                        <span class="cov1" title="1">_ = itm.Close()
                         p.logger.Trace("item recycled", "id", itm.ID())
                         // push token
                         p.tokens &lt;- struct{}{}</span> // ignoring ctx.Done(), should never block here
@@ -2644,7 +2652,7 @@ func newNode[PT connection[T], T any](cfg nodeConfig[PT, T]) (*node[PT, T], erro
         return &amp;nNode, nil</span>
 }
 
-func (n *node[PT, T]) Alive() bool <span class="cov9" title="14083104">{
+func (n *node[PT, T]) Alive() bool <span class="cov9" title="13947910">{
         return n.alive.Load()
 }</span>
 
@@ -2669,7 +2677,7 @@ func (n *node[PT, T]) Close() error <span class="cov2" title="20">{
 }
 
 func (n *node[PT, T]) lookup(id string) (int, *node[PT, T]) <span class="cov7" title="169846">{
-        for i, chNode := range n.egresses </span><span class="cov7" title="332262">{
+        for i, chNode := range n.egresses </span><span class="cov7" title="332260">{
                 if chNode.id == id </span><span class="cov7" title="149437">{
                         return i, chNode
                 }</span>
@@ -2707,7 +2715,7 @@ func (n *node[PT, T]) addEgress(e *node[PT, T]) error <span class="cov6" title="
         return nil</span>
 }
 
-func (n *node[PT, T]) getBalanced() PT <span class="cov10" title="17424662">{
+func (n *node[PT, T]) getBalanced() PT <span class="cov10" title="17221871">{
         n.mx.RLock()
         defer n.mx.RUnlock()
 
@@ -2715,24 +2723,24 @@ func (n *node[PT, T]) getBalanced() PT <span class="cov10" title="17424662">{
                 return nil
         }</span>
 
-        <span class="cov10" title="17424662">if len(n.egresses) &gt; 0 </span><span class="cov9" title="14083104">{
-                if len(n.egresses) == 1 </span><span class="cov8" title="2286486">{
-                        if n.egresses[0].Alive() </span><span class="cov8" title="2286486">{
+        <span class="cov10" title="17221871">if len(n.egresses) &gt; 0 </span><span class="cov9" title="13947910">{
+                if len(n.egresses) == 1 </span><span class="cov8" title="2189889">{
+                        if n.egresses[0].Alive() </span><span class="cov8" title="2189889">{
                                 return n.egresses[0].getBalanced()
                         }</span>
                         <span class="cov0" title="0">return nil</span>
                 }
-                <span class="cov9" title="11796618">return n.egressPolicy.Get(n.egresses).getBalanced()</span>
+                <span class="cov9" title="11758021">return n.egressPolicy.Get(n.egresses).getBalanced()</span>
         }
 
-        <span class="cov9" title="3341558">if len(n.conns) &gt; 0 </span><span class="cov9" title="3341552">{
+        <span class="cov9" title="3273961">if len(n.conns) &gt; 0 </span><span class="cov9" title="3273955">{
                 if len(n.conns) == 1 </span><span class="cov1" title="1">{
                         if n.conns[0].Alive() </span><span class="cov1" title="1">{
                                 return n.conns[0]
                         }</span>
                         <span class="cov0" title="0">return nil</span>
                 }
-                <span class="cov9" title="3341551">return n.connPolicy.Get(n.conns)</span>
+                <span class="cov9" title="3273954">return n.connPolicy.Get(n.conns)</span>
         }
 
         <span class="cov1" title="6">return nil</span>
@@ -2811,15 +2819,15 @@ func NewRoundRobin[PT Egress[T], T any]() *RoundRobin[PT, T] <span class="cov6" 
         return &amp;RoundRobin[PT, T]{}
 }</span>
 
-func (c *RoundRobin[PT, T]) Get(egresses []PT) PT <span class="cov9" title="15238193">{
+func (c *RoundRobin[PT, T]) Get(egresses []PT) PT <span class="cov9" title="15131999">{
         c.mx.Lock()
         defer c.mx.Unlock()
 
         // get next alive egress
-        for i := 0; i &lt; len(egresses); i++ </span><span class="cov10" title="15238220">{
+        for i := 0; i &lt; len(egresses); i++ </span><span class="cov10" title="15132026">{
                 c.idx = (c.idx + 1) % len(egresses)
                 eg := egresses[c.idx]
-                if eg.Alive() </span><span class="cov9" title="15238191">{
+                if eg.Alive() </span><span class="cov9" title="15131997">{
                         return eg
                 }</span>
         }
@@ -2963,7 +2971,7 @@ func (t *Tree[PT, T]) connectionConfigForLevel(lvlIdx int, connCfg *ConnectionCo
         <span class="cov6" title="10020">return nil</span>
 }
 
-func (t *Tree[PT, T]) GetConn() PT <span class="cov10" title="3341558">{
+func (t *Tree[PT, T]) GetConn() PT <span class="cov10" title="3273961">{
         return t.node.getBalanced()
 }</span>
 
