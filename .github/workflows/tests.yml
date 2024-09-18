@@ -22,17 +22,18 @@ jobs:
         run: go mod download
 
       - name: run tests
-        id: run-tests
         run: |
           go test -v -race -count=1 -cover -coverpkg=./... -coverprofile=profile.cov ./...
 
           go tool cover -func=profile.cov -o=coverage.out
           go tool cover -html=profile.cov -o=coverage.html
 
-      - name: coverage badge
+      - name: coverage
         if: github.ref == 'refs/heads/main'
+        id: coverage
         run: |
           cov=$(grep "total:"  coverage.out | awk '{print $3+0}')
+          echo "coverage=$cov" >> $GITHUB_OUTPUT
           color=brightgreen
           if [ $(echo "$cov<=30"|bc) -eq 1 ]; then
             color=red
@@ -41,18 +42,20 @@ jobs:
           fi
           curl -s "https://img.shields.io/badge/Coverage-${cov}%25-${color}" --output coverage.svg
 
-      - name: push badge
+      - name: push info
         if: github.ref == 'refs/heads/main'
         run: |
+          cov=${{ steps.coverage.outputs.coverage }}
           git config --local user.email "adwski@users.noreply.github.com"
           git config --local user.name "GitHub Action"
           git fetch --depth=1
           git checkout pages
           mkdir -p badges
           mkdir -p coverage
-          cp coverage.svg badges/
-          cp coverage.html coverage/
-          if git diff --exit-code . ; then
+          echo $cov >> coverage/percent
+          if ! git diff --exit-code 1>/dev/null ; then
+            cp coverage.svg badges/
+            cp coverage.html coverage/
             git add badges/ coverage/
             git commit -m "update coverage [skip ci]"
             git push origin pages
