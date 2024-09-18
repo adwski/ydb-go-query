@@ -22,27 +22,40 @@ jobs:
         run: go mod download
 
       - name: run tests
+        id: run-tests
         run: |
           go test -v -race -count=1 -cover -coverpkg=./... -coverprofile=profile.cov ./...
-          go tool cover -func=profile.cov
+
           go tool cover -func=profile.cov -o=coverage.out
+          go tool cover -html=profile.cov -o=coverage.html
 
       - name: coverage badge
-        uses: tj-actions/coverage-badge-go@v2
-        with:
-          filename: coverage.out
-
-      - name: verify changed files
-        uses: tj-actions/verify-changed-files@v17
-        id: verify-changed-files
-        with:
-          files: README.md
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cov=$(grep "total:"  coverage.out | awk '{print $3+0}')
+          color=brightgreen
+          if [ $(echo "$cov<=30"|bc) -eq 1 ]; then
+            color=red
+          elif [ $(echo "$cov<=70"|bc) -eq 1 ]; then
+            color=yellow
+          fi
+          curl -s "https://img.shields.io/badge/Coverage-${cov}%25-${color}" --output coverage.svg
 
       - name: push badge
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        if: github.ref == 'refs/heads/main'
         run: |
           git config --local user.email "adwski@users.noreply.github.com"
           git config --local user.name "GitHub Action"
-          git add README.md
-          git commit -m "chore: update coverage badge"
-          git push
+          git fetch --depth=1
+          git checkout pages
+          mkdir -p badges
+          mkdir -p coverage
+          cp coverage.svg badges/
+          cp coverage.html coverage/
+          if git diff --exit-code . ; then
+            git add badges/ coverage/
+            git commit -m "update coverage [skip ci]"
+            git push origin pages
+          else
+            echo "coverage did not change"
+          fi
