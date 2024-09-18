@@ -1,11 +1,11 @@
-package discovery
+package endpoints
 
 import (
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Discovery"
 )
 
 const (
-	ServiceNameQuery = "query_service"
+	serviceNameQuery = "query_service"
 )
 
 type (
@@ -25,14 +25,13 @@ type (
 )
 
 func NewFilter() *Filter {
-	return &Filter{}
+	return &Filter{
+		Require: &Require{},
+	}
 }
 
 func (f *Filter) WithQueryService() *Filter {
-	if f.Require == nil {
-		f.Require = &Require{}
-	}
-	f.Require.Services = []string{ServiceNameQuery}
+	f.Require.Services = append(f.Require.Services, serviceNameQuery)
 
 	return f
 }
@@ -57,7 +56,7 @@ func (f *Filter) matchPreferred(ep *Ydb_Discovery.EndpointInfo) bool {
 	return matchLocation(ep, f.Prefer.Locations)
 }
 
-func (f *Filter) filter(endpoints []*Ydb_Discovery.EndpointInfo) (
+func (f *Filter) Filter(endpoints []*Ydb_Discovery.EndpointInfo) (
 	preferred []*Ydb_Discovery.EndpointInfo,
 	notPreferred []*Ydb_Discovery.EndpointInfo,
 ) {

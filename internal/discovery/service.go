@@ -33,7 +33,7 @@ type (
 		logger logger.Logger
 		dsc    Ydb_Discovery_V1.DiscoveryServiceClient
 		ann    chan endpoints.Announce
-		filter *Filter
+		filter *endpoints.Filter
 		epDB   endpoints.DB
 		dbName string
 	}
@@ -50,7 +50,7 @@ func NewService(cfg Config) *Service {
 	svc := &Service{
 		dbName: cfg.DB,
 		logger: cfg.Logger,
-		filter: NewFilter().WithQueryService(),
+		filter: endpoints.NewFilter().WithQueryService(),
 		dsc:    Ydb_Discovery_V1.NewDiscoveryServiceClient(cfg.Transport),
 		epDB:   endpoints.NewDB(),
 	}
@@ -149,7 +149,7 @@ func (svc *Service) getEndpoints(ctx context.Context) ([]*Ydb_Discovery.Endpoint
 		return nil, errors.Join(ErrEndpointsUnmarshal, err)
 	}
 
-	preferred, requiredButNotPreferred := svc.filter.filter(epRes.Endpoints)
+	preferred, requiredButNotPreferred := svc.filter.Filter(epRes.Endpoints)
 	if len(preferred) == 0 {
 		return requiredButNotPreferred, nil
 	}
