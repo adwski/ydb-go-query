@@ -41,7 +41,7 @@ func Open(ctx context.Context, cfg Config, opts ...Option) (*Client, error) {
 		PoolSize:      client.poolSize,
 	})
 
-	client.queryCtx = qq.NewCtx(client.logger, client.querySvc, cfg.txSettings)
+	client.queryCtx = qq.NewCtx(client.logger, client.querySvc, cfg.txSettings, cfg.queryTimeout)
 
 	client.wg.Add(1)
 	go client.dispatcher.Run(runCtx, client.wg)

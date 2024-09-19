@@ -3,6 +3,7 @@ package query
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/adwski/ydb-go-query/internal/logger"
 	"github.com/adwski/ydb-go-query/internal/query/session"
@@ -73,6 +74,7 @@ func (tx *Transaction) exec(
 	query string,
 	params map[string]*Ydb.TypedValue,
 	collectRowsFunc func([]*Ydb.Value) error,
+	timeout time.Duration,
 	commit bool,
 ) (*Result, error) {
 	if tx.finish {
@@ -102,8 +104,20 @@ func (tx *Transaction) exec(
 		}
 	}
 
+	var (
+		qCancel context.CancelFunc
+	)
+	if timeout > 0 {
+		ctx, qCancel = context.WithDeadline(ctx, time.Now().Add(timeout))
+	}
+
 	stream, cancel, err := tx.sess.Exec(ctx, query, params, txControl)
+	if qCancel != nil {
+		// if ctx was overwritten, then cancel() inherits from qCancel()
+		cancel = qCancel
+	}
 	if err != nil {
+		cancel()
 		return nil, err //nolint:wrapcheck //unnecessary
 	}
 

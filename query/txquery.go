@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"time"
 
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
 )
@@ -12,6 +13,7 @@ type (
 		string,
 		map[string]*Ydb.TypedValue,
 		func([]*Ydb.Value) error,
+		time.Duration,
 		bool,
 	) (*Result, error)
 
@@ -39,5 +41,5 @@ func (q *TxQuery) Commit() *TxQuery {
 }
 
 func (q *TxQuery) Exec(ctx context.Context) (*Result, error) {
-	return q.txExecFunc(ctx, q.content, q.params, q.collectRowsFunc, q.commit)
+	return q.txExecFunc(ctx, q.content, q.params, q.collectRowsFunc, q.timeout, q.commit)
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"time"
 
 	ydb "github.com/adwski/ydb-go-query"
 	"github.com/adwski/ydb-go-query/query"
@@ -23,12 +24,13 @@ func main() {
 
 	// parse command line args
 	var (
-		fs        = pflag.NewFlagSet("", pflag.ContinueOnError)
-		addr      = fs.StringP("address", "a", "127.0.0.1:12136", "YDB server address")
-		db        = fs.StringP("database", "d", "/local", "YDB database path")
-		poolSize  = fs.UintP("pool-size", "p", 10, "YDB session pool size")
-		ycIamFile = fs.StringP("yc-iam-key-file", "y", "", "Yandex Cloud IAM key file")
-		logLevel  = fs.StringP("log-level", "l", "error", "Log level: error|info|debug|trace")
+		fs           = pflag.NewFlagSet("", pflag.ContinueOnError)
+		addr         = fs.StringP("address", "a", "127.0.0.1:12136", "YDB server address")
+		db           = fs.StringP("database", "d", "/local", "YDB database path")
+		queryTimeout = fs.Duration("query-timeout", time.Minute, "query execution timeout")
+		poolSize     = fs.UintP("pool-size", "p", 10, "YDB session pool size")
+		ycIamFile    = fs.StringP("yc-iam-key-file", "y", "", "Yandex Cloud IAM key file")
+		logLevel     = fs.StringP("log-level", "l", "error", "Log level: error|info|debug|trace")
 	)
 
 	err := fs.Parse(os.Args[1:])
@@ -47,6 +49,7 @@ func main() {
 	// configure ydb client
 	options := []ydb.Option{
 		ydb.WithZeroLogger(logger.With().Str("component", "ydb").Logger()),
+		ydb.WithQueryTimeout(*queryTimeout),
 		ydb.WithSessionPoolSize(*poolSize)}
 
 	if *ycIamFile != "" {

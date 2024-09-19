@@ -24,6 +24,7 @@ import (
 
 const (
 	defaultSessionCreateTimeout = 3 * time.Second
+	defaultQueryTimeout         = 5 * time.Minute
 	defaultSessionPoolSize      = 10
 )
 
@@ -40,6 +41,7 @@ type (
 
 		poolSize             uint
 		sessionCreateTimeout time.Duration
+		queryTimeout         time.Duration
 	}
 	Option func(context.Context, *Config) error
 )
@@ -47,6 +49,7 @@ type (
 func (cfg *Config) setDefaults() {
 	cfg.logger = noop.NewLogger()
 	cfg.sessionCreateTimeout = defaultSessionCreateTimeout
+	cfg.queryTimeout = defaultQueryTimeout
 	cfg.poolSize = defaultSessionPoolSize
 	cfg.transportCredentials = transportCreds.Insecure()
 	cfg.txSettings = txsettings.SerializableReadWrite()
@@ -76,6 +79,13 @@ func WithZapLogger(log *zap.Logger) Option {
 func WithSessionCreateTimeout(timeout time.Duration) Option {
 	return func(ctx context.Context, cfg *Config) error {
 		cfg.sessionCreateTimeout = timeout
+		return nil
+	}
+}
+
+func WithQueryTimeout(timeout time.Duration) Option {
+	return func(ctx context.Context, cfg *Config) error {
+		cfg.queryTimeout = timeout
 		return nil
 	}
 }

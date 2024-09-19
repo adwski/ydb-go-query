@@ -3,6 +3,7 @@ package query
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/adwski/ydb-go-query/internal/logger"
 	"github.com/adwski/ydb-go-query/internal/query"
@@ -22,16 +23,23 @@ var (
 )
 
 type Ctx struct {
-	logger logger.Logger
-	qSvc   *query.Service
-	txSet  *Ydb_Query.TransactionSettings
+	logger  logger.Logger
+	qSvc    *query.Service
+	txSet   *Ydb_Query.TransactionSettings
+	timeout time.Duration
 }
 
-func NewCtx(logger logger.Logger, qSvc *query.Service, txSet *Ydb_Query.TransactionSettings) *Ctx {
+func NewCtx(
+	logger logger.Logger,
+	qSvc *query.Service,
+	txSet *Ydb_Query.TransactionSettings,
+	timeout time.Duration,
+) *Ctx {
 	return &Ctx{
-		logger: logger,
-		qSvc:   qSvc,
-		txSet:  txSet,
+		logger:  logger,
+		qSvc:    qSvc,
+		txSet:   txSet,
+		timeout: timeout,
 	}
 }
 
@@ -72,17 +80,48 @@ func (qc *Ctx) SerializableReadWrite() *Ctx {
 func (qc *Ctx) Query(queryContent string) *Query {
 	return newQuery(
 		queryContent,
-		qc.exec,
+		func(
+			ctx context.Context,
+			queryContent string,
+			params map[string]*Ydb.TypedValue,
+			collectRows func([]*Ydb.Value) error,
+			timeout time.Duration,
+		) (*Result, error) {
+			return qc.exec(ctx, queryContent, params, collectRows, qc.txSet, timeout)
+		},
 	)
 }
 
 func (qc *Ctx) Exec(ctx context.Context, queryContent string) (*Result, error) {
-	stream, cancel, err := qc.qSvc.Exec(ctx, queryContent, nil, nil)
+	return qc.exec(ctx, queryContent, nil, nil, nil, 0)
+}
+
+func (qc *Ctx) exec(
+	ctx context.Context,
+	queryContent string,
+	params map[string]*Ydb.TypedValue,
+	collectRows func([]*Ydb.Value) error,
+	txSet *Ydb_Query.TransactionSettings,
+	timeout time.Duration,
+) (*Result, error) {
+	var (
+		qCancel context.CancelFunc
+	)
+	if timeout == 0 {
+		timeout = qc.timeout
+	}
+	if timeout > 0 {
+		ctx, qCancel = context.WithDeadline(ctx, time.Now().Add(timeout))
+		defer qCancel()
+	}
+	stream, cancel, err := qc.qSvc.Exec(ctx, queryContent, params, txSet)
 	if err != nil {
 		return nil, err //nolint:wrapcheck //unnecessary
 	}
 
-	return qc.processResult(stream, cancel, nil)
+	qc.logger.Trace("received result stream", "query", strip(queryContent))
+
+	return qc.processResult(stream, cancel, collectRows)
 }
 
 func (qc *Ctx) Tx(ctx context.Context) (*Transaction, error) {
@@ -99,22 +138,6 @@ func (qc *Ctx) Tx(ctx context.Context) (*Transaction, error) {
 	}
 
 	return tx, nil
-}
-
-func (qc *Ctx) exec(
-	ctx context.Context,
-	queryContent string,
-	params map[string]*Ydb.TypedValue,
-	collectRows func([]*Ydb.Value) error,
-) (*Result, error) {
-	stream, cancel, err := qc.qSvc.Exec(ctx, queryContent, params, qc.txSet)
-	if err != nil {
-		return nil, err //nolint:wrapcheck //unnecessary
-	}
-
-	qc.logger.Trace("received result stream", "query", strip(queryContent))
-
-	return qc.processResult(stream, cancel, collectRows)
 }
 
 func (qc *Ctx) processResult(

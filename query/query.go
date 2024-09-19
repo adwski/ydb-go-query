@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"time"
 
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
 )
@@ -12,6 +13,7 @@ type (
 		string,
 		map[string]*Ydb.TypedValue,
 		func([]*Ydb.Value) error,
+		time.Duration,
 	) (*Result, error)
 
 	Query struct {
@@ -19,6 +21,7 @@ type (
 		execFunc        execFunc
 		params          map[string]*Ydb.TypedValue
 		content         string
+		timeout         time.Duration
 	}
 )
 
@@ -50,6 +53,12 @@ func (q *Query) Collect(collectRowsFunc func([]*Ydb.Value) error) *Query {
 	return q
 }
 
+func (q *Query) Timeout(timeout time.Duration) *Query {
+	q.timeout = timeout
+
+	return q
+}
+
 func (q *Query) Exec(ctx context.Context) (*Result, error) {
-	return q.execFunc(ctx, q.content, q.params, q.collectRowsFunc)
+	return q.execFunc(ctx, q.content, q.params, q.collectRowsFunc, q.timeout)
 }
