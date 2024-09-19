@@ -26,6 +26,14 @@ jobs:
     container: golang:1.23.1-bookworm
 
     steps:
+      # installing/updating deps because steps are running inside container
+      # https://github.com/actions/checkout/issues/363
+      - name: install deps
+        run: |
+          apt-get update
+          apt-get install -y git bc
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
