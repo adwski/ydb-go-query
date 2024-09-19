@@ -133,7 +133,7 @@ func (s *Session) Close() error {
 	defer cancel()
 	err := errors.Join(s.err, s.cleanup(ctx))
 
-	s.logger.Trace("session closed", "id", s.id)
+	s.logger.Debug("session closed", "id", s.id)
 	return err
 }
 
@@ -164,11 +164,11 @@ func (s *Session) spin() {
 		if err != nil {
 			switch {
 			case errors.Is(err, io.EOF):
-				s.logger.Trace("session stream ended", "id", s.id)
+				s.logger.Debug("session stream ended", "id", s.id)
 			case status.Code(err) == codes.Canceled:
 				s.logger.Trace("session stream context canceled", "id", s.id)
 			default:
-				s.logger.Debug("session stream error", "id", s.id, "err", err)
+				s.logger.Error("session stream error", "id", s.id, "err", err)
 				s.err = err
 			}
 
@@ -176,7 +176,7 @@ func (s *Session) spin() {
 		}
 		if s.state != state {
 			// TODO: Check state (which states can we expect here?)
-			s.logger.Trace("session state changed",
+			s.logger.Debug("session state changed",
 				"id", s.id, "node", s.node, "state", state)
 			s.state = state
 		}
