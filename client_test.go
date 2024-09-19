@@ -74,10 +74,14 @@ func TestClient_Queries(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	client, err := Open(ctx, Config{
-		InitialNodes: []string{ydbEndpoint},
-		DB:           ydbPath,
-	}, WithZeroLogger(zeroLogger))
+	client, err := Open(ctx,
+		Config{
+			InitialNodes: []string{ydbEndpoint},
+			DB:           ydbPath,
+		},
+		WithZeroLogger(zeroLogger),
+		WithQueryTimeout(5*time.Second),
+	)
 	require.NoError(t, err)
 	defer client.Close()
 
@@ -107,16 +111,29 @@ func TestClient_Queries(t *testing.T) {
 		verifyResult(t, res, err)
 	}
 
-	usrCtr := 0
-	res, err = qCtx.Query("SELECT * FROM users").Collect(func(rows []*Ydb.Value) error {
-		for _, _ = range rows {
-			usrCtr++
-		}
-		return nil
-	}).Exec(ctx)
-	verifyResult(t, res, err)
+	selectQ := func(t *testing.T, qCtx *query.Ctx) {
+		t.Helper()
 
-	assert.Equal(t, usersCount, usrCtr)
+		usrCtr := 0
+		res, err = qCtx.Query("SELECT * FROM users").Collect(func(rows []*Ydb.Value) error {
+			for _, _ = range rows {
+				usrCtr++
+			}
+			return nil
+		}).Exec(ctx)
+		verifyResult(t, res, err)
+		assert.Equal(t, usersCount, usrCtr)
+	}
+
+	// try different tx modes
+	selectQ(t, qCtx)
+	selectQ(t, qCtx.SnapshotReadOnly())
+	selectQ(t, qCtx.OnlineReadOnly())
+	selectQ(t, qCtx.OnlineReadOnlyInconsistent())
+	selectQ(t, qCtx.StaleReadOnly())
+
+	res, err = qCtx.Exec(ctx, `DROP TABLE IF EXISTS users`)
+	verifyResult(t, res, err)
 }
 
 func verifyResult(t *testing.T, res *query.Result, err error) {
