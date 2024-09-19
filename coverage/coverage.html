@@ -57,7 +57,7 @@
 				
 				<option value="file0">github.com/adwski/ydb-go-query/client.go (79.4%)</option>
 				
-				<option value="file1">github.com/adwski/ydb-go-query/config.go (15.1%)</option>
+				<option value="file1">github.com/adwski/ydb-go-query/config.go (21.1%)</option>
 				
 				<option value="file2">github.com/adwski/ydb-go-query/examples/showcase/main.go (0.0%)</option>
 				
@@ -115,9 +115,9 @@
 				
 				<option value="file29">github.com/adwski/ydb-go-query/internal/xcontext/context.go (100.0%)</option>
 				
-				<option value="file30">github.com/adwski/ydb-go-query/query/context.go (35.9%)</option>
+				<option value="file30">github.com/adwski/ydb-go-query/query/context.go (72.1%)</option>
 				
-				<option value="file31">github.com/adwski/ydb-go-query/query/query.go (80.0%)</option>
+				<option value="file31">github.com/adwski/ydb-go-query/query/query.go (66.7%)</option>
 				
 				<option value="file32">github.com/adwski/ydb-go-query/query/result.go (71.8%)</option>
 				
@@ -175,13 +175,13 @@ var (
         ErrDiscoveryTransportCreate = errors.New("discovery transport create error")
 )
 
-func Open(ctx context.Context, cfg Config, opts ...Option) (*Client, error) <span class="cov10" title="2">{
+func Open(ctx context.Context, cfg Config, opts ...Option) (*Client, error) <span class="cov6" title="2">{
         client, err := newClient(ctx, &amp;cfg, opts...)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
 
-        <span class="cov10" title="2">var runCtx context.Context
+        <span class="cov6" title="2">var runCtx context.Context
         runCtx, client.cancel = context.WithCancel(ctx)
 
         client.querySvc = query.NewService(runCtx, query.Config{
@@ -191,7 +191,7 @@ func Open(ctx context.Context, cfg Config, opts ...Option) (*Client, error) <spa
                 PoolSize:      client.poolSize,
         })
 
-        client.queryCtx = qq.NewCtx(client.logger, client.querySvc, cfg.txSettings)
+        client.queryCtx = qq.NewCtx(client.logger, client.querySvc, cfg.txSettings, cfg.queryTimeout)
 
         client.wg.Add(1)
         go client.dispatcher.Run(runCtx, client.wg)
@@ -204,7 +204,7 @@ func Open(ctx context.Context, cfg Config, opts ...Option) (*Client, error) <spa
                 go cfg.auth.Run(runCtx, client.wg)
         }</span>
 
-        <span class="cov10" title="2">return client, nil</span>
+        <span class="cov6" title="2">return client, nil</span>
 }
 
 type (
@@ -235,34 +235,34 @@ func (c *Client) QueryCtx() *qq.Ctx <span class="cov1" title="1">{
         return c.queryCtx
 }</span>
 
-func (c *Client) Close() <span class="cov10" title="2">{
+func (c *Client) Close() <span class="cov6" title="2">{
         c.cancel()
         _ = c.querySvc.Close()
         c.wg.Wait()
 }</span>
 
-func newClient(ctx context.Context, cfg *Config, opts ...Option) (*Client, error) <span class="cov10" title="2">{
+func newClient(ctx context.Context, cfg *Config, opts ...Option) (*Client, error) <span class="cov6" title="2">{
         if len(cfg.InitialNodes) == 0 </span><span class="cov0" title="0">{
                 return nil, ErrNoInitialNodes
         }</span>
-        <span class="cov10" title="2">if len(cfg.DB) == 0 </span><span class="cov0" title="0">{
+        <span class="cov6" title="2">if len(cfg.DB) == 0 </span><span class="cov0" title="0">{
                 return nil, ErrDBEmpty
         }</span>
 
-        <span class="cov10" title="2">cfg.setDefaults()
+        <span class="cov6" title="2">cfg.setDefaults()
 
-        for _, opt := range opts </span><span class="cov10" title="2">{
+        for _, opt := range opts </span><span class="cov10" title="3">{
                 if err := opt(ctx, cfg); err != nil </span><span class="cov0" title="0">{
                         return nil, err
                 }</span>
         }
 
-        <span class="cov10" title="2">tr, err := grid.NewWithStaticEndpoints(ctx, cfg.InitialNodes, cfg.transportCredentials, cfg.auth, cfg.DB)
+        <span class="cov6" title="2">tr, err := grid.NewWithStaticEndpoints(ctx, cfg.InitialNodes, cfg.transportCredentials, cfg.auth, cfg.DB)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, errors.Join(ErrDiscoveryTransportCreate, err)
         }</span>
 
-        <span class="cov10" title="2">discoverySvc := discovery.NewService(discovery.Config{
+        <span class="cov6" title="2">discoverySvc := discovery.NewService(discovery.Config{
                 Logger:     cfg.logger,
                 DB:         cfg.DB,
                 Transport:  tr,
@@ -323,6 +323,7 @@ import (
 
 const (
         defaultSessionCreateTimeout = 3 * time.Second
+        defaultQueryTimeout         = 5 * time.Minute
         defaultSessionPoolSize      = 10
 )
 
@@ -339,6 +340,7 @@ type (
 
                 poolSize             uint
                 sessionCreateTimeout time.Duration
+                queryTimeout         time.Duration
         }
         Option func(context.Context, *Config) error
 )
@@ -346,6 +348,7 @@ type (
 func (cfg *Config) setDefaults() <span class="cov10" title="2">{
         cfg.logger = noop.NewLogger()
         cfg.sessionCreateTimeout = defaultSessionCreateTimeout
+        cfg.queryTimeout = defaultQueryTimeout
         cfg.poolSize = defaultSessionPoolSize
         cfg.transportCredentials = transportCreds.Insecure()
         cfg.txSettings = txsettings.SerializableReadWrite()
@@ -375,6 +378,13 @@ func WithZapLogger(log *zap.Logger) Option <span class="cov0" title="0">{
 func WithSessionCreateTimeout(timeout time.Duration) Option <span class="cov0" title="0">{
         return func(ctx context.Context, cfg *Config) error </span><span class="cov0" title="0">{
                 cfg.sessionCreateTimeout = timeout
+                return nil
+        }</span>
+}
+
+func WithQueryTimeout(timeout time.Duration) Option <span class="cov1" title="1">{
+        return func(ctx context.Context, cfg *Config) error </span><span class="cov1" title="1">{
+                cfg.queryTimeout = timeout
                 return nil
         }</span>
 }
@@ -488,6 +498,7 @@ import (
         "fmt"
         "os"
         "os/signal"
+        "time"
 
         ydb "github.com/adwski/ydb-go-query"
         "github.com/adwski/ydb-go-query/query"
@@ -506,12 +517,13 @@ func main() <span class="cov0" title="0">{
 
         // parse command line args
         var (
-                fs        = pflag.NewFlagSet("", pflag.ContinueOnError)
-                addr      = fs.StringP("address", "a", "127.0.0.1:12136", "YDB server address")
-                db        = fs.StringP("database", "d", "/local", "YDB database path")
-                poolSize  = fs.UintP("pool-size", "p", 10, "YDB session pool size")
-                ycIamFile = fs.StringP("yc-iam-key-file", "y", "", "Yandex Cloud IAM key file")
-                logLevel  = fs.StringP("log-level", "l", "error", "Log level: error|info|debug|trace")
+                fs           = pflag.NewFlagSet("", pflag.ContinueOnError)
+                addr         = fs.StringP("address", "a", "127.0.0.1:12136", "YDB server address")
+                db           = fs.StringP("database", "d", "/local", "YDB database path")
+                queryTimeout = fs.Duration("query-timeout", time.Minute, "query execution timeout")
+                poolSize     = fs.UintP("pool-size", "p", 10, "YDB session pool size")
+                ycIamFile    = fs.StringP("yc-iam-key-file", "y", "", "Yandex Cloud IAM key file")
+                logLevel     = fs.StringP("log-level", "l", "error", "Log level: error|info|debug|trace")
         )
 
         err := fs.Parse(os.Args[1:])
@@ -530,6 +542,7 @@ func main() <span class="cov0" title="0">{
         // configure ydb client
         options := []ydb.Option{
                 ydb.WithZeroLogger(logger.With().Str("component", "ydb").Logger()),
+                ydb.WithQueryTimeout(*queryTimeout),
                 ydb.WithSessionPoolSize(*poolSize)}
 
         if *ycIamFile != "" </span><span class="cov0" title="0">{
@@ -1181,7 +1194,7 @@ func (l *Logger) Info(string, ...any) {<span class="cov0" title="0">
 func (l *Logger) Debug(string, ...any) {<span class="cov2" title="11">
 }</span>
 
-func (l *Logger) Trace(string, ...any) {<span class="cov10" title="2729315">
+func (l *Logger) Trace(string, ...any) {<span class="cov10" title="2607703">
 }</span>
 </pre>
 		
@@ -1267,33 +1280,33 @@ func (l *Logger) Info(msg string, fields ...any) <span class="cov1" title="1">{
         emit(l.Logger.Info(), msg, fields...)
 }</span>
 
-func (l *Logger) Debug(msg string, fields ...any) <span class="cov4" title="14">{
+func (l *Logger) Debug(msg string, fields ...any) <span class="cov5" title="34">{
         emit(l.Logger.Debug(), msg, fields...)
 }</span>
 
-func (l *Logger) Trace(msg string, fields ...any) <span class="cov9" title="444">{
+func (l *Logger) Trace(msg string, fields ...any) <span class="cov9" title="446">{
         emit(l.Logger.Trace(), msg, fields...)
 }</span>
 
-func emit(ev *zerolog.Event, msg string, fields ...any) <span class="cov9" title="461">{
+func emit(ev *zerolog.Event, msg string, fields ...any) <span class="cov9" title="483">{
         if len(fields)%2 != 0 </span><span class="cov0" title="0">{
                 fields = fields[:len(fields)-1]
         }</span>
-        <span class="cov9" title="461">for i := 0; i &lt; len(fields); i += 2 </span><span class="cov10" title="579">{
+        <span class="cov9" title="483">for i := 0; i &lt; len(fields); i += 2 </span><span class="cov10" title="606">{
                 key, ok := fields[i].(string)
                 if !ok </span><span class="cov0" title="0">{
                         continue</span>
                 }
-                <span class="cov10" title="579">switch val := fields[i+1].(type) </span>{
-                case fmt.Stringer:<span class="cov7" title="113">
+                <span class="cov10" title="606">switch val := fields[i+1].(type) </span>{
+                case fmt.Stringer:<span class="cov7" title="118">
                         ev = ev.Str(key, val.String())</span>
                 case error:<span class="cov3" title="6">
                         ev = ev.Err(val)</span>
-                default:<span class="cov9" title="460">
+                default:<span class="cov9" title="482">
                         ev = ev.Any(key, val)</span>
                 }
         }
-        <span class="cov9" title="461">ev.Msg(msg)</span>
+        <span class="cov9" title="483">ev.Msg(msg)</span>
 }
 </pre>
 		
@@ -1458,19 +1471,19 @@ func (p *Pool[PT, T]) Close() error <span class="cov2" title="7">{
         <span class="cov2" title="7">return nil</span>
 }
 
-func (p *Pool[PT, T]) Get(rCtx context.Context) PT <span class="cov9" title="1364756">{
+func (p *Pool[PT, T]) Get(rCtx context.Context) PT <span class="cov9" title="1303955">{
 getLoop:
-        for </span><span class="cov10" title="1365323">{
+        for </span><span class="cov10" title="1304529">{
                 select </span>{
-                case itm := &lt;-p.queue:<span class="cov9" title="1365322">
-                        if itm.Alive() </span><span class="cov9" title="1364755">{
+                case itm := &lt;-p.queue:<span class="cov9" title="1304528">
+                        if itm.Alive() </span><span class="cov9" title="1303954">{
                                 p.logger.Trace("item retrieved from pool", "id", itm.ID())
                                 return itm
                         }</span>
-                        <span class="cov5" title="567">_ = itm.Close()
+                        <span class="cov5" title="574">_ = itm.Close()
 
                         select </span>{
-                        case p.tokens &lt;- struct{}{}:<span class="cov5" title="567"></span>
+                        case p.tokens &lt;- struct{}{}:<span class="cov5" title="574"></span>
                         case &lt;-rCtx.Done():<span class="cov0" title="0">
                                 break getLoop</span>
                         }
@@ -1482,10 +1495,10 @@ getLoop:
         <span class="cov1" title="1">return nil</span>
 }
 
-func (p *Pool[PT, T]) Put(itm PT) <span class="cov9" title="1364755">{
+func (p *Pool[PT, T]) Put(itm PT) <span class="cov9" title="1303954">{
         // check if alive
-        if itm.Alive() </span><span class="cov9" title="1364739">{
-                if !p.itemRecycling || !p.itemExpired(itm) </span><span class="cov9" title="1364739">{
+        if itm.Alive() </span><span class="cov9" title="1303943">{
+                if !p.itemRecycling || !p.itemExpired(itm) </span><span class="cov9" title="1303943">{
                         // alive and not expired
                         // push item back and finish iteration
                         p.queue &lt;- itm // ignoring ctx.Done(), should never block here
@@ -1493,7 +1506,7 @@ func (p *Pool[PT, T]) Put(itm PT) <span class="cov9" title="1364755">{
                         return
                 }</span>
         }
-        <span class="cov2" title="16">p.logger.Trace("item recycled on returning", "id", itm.ID())
+        <span class="cov2" title="11">p.logger.Trace("item recycled on returning", "id", itm.ID())
         // recycle
         _ = itm.Close()
         // push token
@@ -1508,13 +1521,13 @@ func (p *Pool[PT, T]) spawnItems(ctx context.Context) <span class="cov2" title="
         }</span>()
 
 <span class="cov2" title="6">spawnLoop:
-        for </span><span class="cov5" title="701">{
+        for </span><span class="cov5" title="704">{
                 select </span>{
                 case &lt;-ctx.Done():<span class="cov1" title="4">
                         break spawnLoop</span>
-                case &lt;-p.tokens:<span class="cov5" title="697">
+                case &lt;-p.tokens:<span class="cov5" title="700">
                 createLoop:
-                        for </span><span class="cov5" title="702">{
+                        for </span><span class="cov5" title="705">{
                                 p.wg.Add(1)
                                 itm, err := p.spawnItem(ctx)
                                 if err != nil </span><span class="cov2" title="7">{
@@ -1533,7 +1546,7 @@ func (p *Pool[PT, T]) spawnItems(ctx context.Context) <span class="cov2" title="
 
                                 // Ignoring ctx.Done() here and put item in queue anyway,
                                 // so it can be closed later by drain().
-                                <span class="cov5" title="695">p.queue &lt;- itm
+                                <span class="cov5" title="698">p.queue &lt;- itm
 
                                 break</span>
                         }
@@ -1543,9 +1556,9 @@ func (p *Pool[PT, T]) spawnItems(ctx context.Context) <span class="cov2" title="
 
 func (p *Pool[PT, T]) drain() <span class="cov2" title="6">{
 drainLoop:
-        for </span><span class="cov4" title="116">{
+        for </span><span class="cov4" title="117">{
                 select </span>{
-                case itm := &lt;-p.queue:<span class="cov3" title="110">
+                case itm := &lt;-p.queue:<span class="cov4" title="111">
                         _ = itm.Close()</span>
                 default:<span class="cov2" title="6">
                         break drainLoop</span>
@@ -1553,7 +1566,7 @@ drainLoop:
         }
 }
 
-func (p *Pool[PT, T]) spawnItem(ctx context.Context) (PT, error) <span class="cov5" title="702">{
+func (p *Pool[PT, T]) spawnItem(ctx context.Context) (PT, error) <span class="cov5" title="705">{
         defer p.wg.Done()
 
         itm, err := p.createFunc(ctx, p.createTimeout)
@@ -1563,11 +1576,11 @@ func (p *Pool[PT, T]) spawnItem(ctx context.Context) (PT, error) <span class="co
                 return nil, err
         }</span>
 
-        <span class="cov5" title="695">if p.itemRecycling </span><span class="cov1" title="2">{
+        <span class="cov5" title="698">if p.itemRecycling </span><span class="cov1" title="2">{
                 p.setItemExpire(itm.ID())
         }</span>
 
-        <span class="cov5" title="695">return itm, nil</span>
+        <span class="cov5" title="698">return itm, nil</span>
 }
 
 func (p *Pool[PT, T]) setItemExpire(id uint64) <span class="cov1" title="2">{
@@ -1694,13 +1707,13 @@ func (svc *Service) Close() error <span class="cov2" title="2">{
         return svc.pool.Close() //nolint:wrapcheck //unnecessary
 }</span>
 
-func (svc *Service) AcquireSession(ctx context.Context) (*session.Session, func(), error) <span class="cov10" title="103">{
+func (svc *Service) AcquireSession(ctx context.Context) (*session.Session, func(), error) <span class="cov10" title="108">{
         sess := svc.pool.Get(ctx)
         if sess == nil </span><span class="cov0" title="0">{
                 return nil, nil, ErrNoSession
         }</span>
 
-        <span class="cov10" title="103">return sess, func() </span><span class="cov10" title="103">{ svc.pool.Put(sess) }</span>, nil
+        <span class="cov10" title="108">return sess, func() </span><span class="cov10" title="108">{ svc.pool.Put(sess) }</span>, nil
 }
 
 // Exec provides low-level single query execution.
@@ -1709,15 +1722,15 @@ func (svc *Service) Exec(
         query string,
         params map[string]*Ydb.TypedValue,
         txSettings *Ydb_Query.TransactionSettings,
-) (Ydb_Query_V1.QueryService_ExecuteQueryClient, context.CancelFunc, error) <span class="cov10" title="103">{
+) (Ydb_Query_V1.QueryService_ExecuteQueryClient, context.CancelFunc, error) <span class="cov10" title="108">{
         sess, cleanup, err := svc.AcquireSession(ctx)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, nil, err
         }</span>
-        <span class="cov10" title="103">defer cleanup()
+        <span class="cov10" title="108">defer cleanup()
 
         var txControl *Ydb_Query.TransactionControl
-        if txSettings != nil </span><span class="cov9" title="101">{
+        if txSettings != nil </span><span class="cov9" title="105">{
                 txControl = &amp;Ydb_Query.TransactionControl{
                         TxSelector: &amp;Ydb_Query.TransactionControl_BeginTx{
                                 BeginTx: txSettings,
@@ -1726,12 +1739,12 @@ func (svc *Service) Exec(
                 }
         }</span>
 
-        <span class="cov10" title="103">stream, cancel, err := sess.Exec(ctx, query, params, txControl)
+        <span class="cov10" title="108">stream, cancel, err := sess.Exec(ctx, query, params, txControl)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, nil, errors.Join(ErrExec, err)
         }</span>
 
-        <span class="cov10" title="103">return stream, cancel, nil</span>
+        <span class="cov10" title="108">return stream, cancel, nil</span>
 }
 </pre>
 		
@@ -1795,12 +1808,12 @@ func (s *Session) Exec(
         query string,
         params map[string]*Ydb.TypedValue,
         txControl *Ydb_Query.TransactionControl,
-) (Ydb_Query_V1.QueryService_ExecuteQueryClient, context.CancelFunc, error) <span class="cov10" title="103">{
+) (Ydb_Query_V1.QueryService_ExecuteQueryClient, context.CancelFunc, error) <span class="cov10" title="108">{
         if s.shutdown.Load() </span><span class="cov0" title="0">{
                 return nil, nil, ErrShutdown
         }</span>
 
-        <span class="cov10" title="103">streamCtx, cancelStream := context.WithCancel(ctx)
+        <span class="cov10" title="108">streamCtx, cancelStream := context.WithCancel(ctx)
 
         respExec, err := s.qsc.ExecuteQuery(streamCtx, &amp;Ydb_Query.ExecuteQueryRequest{
                 SessionId: s.id,
@@ -1822,7 +1835,7 @@ func (s *Session) Exec(
                 return nil, nil, errors.Join(ErrExec, err)
         }</span>
 
-        <span class="cov10" title="103">return respExec, cancelStream, nil</span>
+        <span class="cov10" title="108">return respExec, cancelStream, nil</span>
 }
 </pre>
 		
@@ -1937,11 +1950,11 @@ func CreateSession(
         <span class="cov4" title="10">return sess, nil</span>
 }
 
-func (s *Session) ID() uint64 <span class="cov10" title="206">{
+func (s *Session) ID() uint64 <span class="cov10" title="216">{
         return s.id_
 }</span>
 
-func (s *Session) Alive() bool <span class="cov10" title="206">{
+func (s *Session) Alive() bool <span class="cov10" title="216">{
         return !s.shutdown.Load()
 }</span>
 
@@ -1961,7 +1974,7 @@ func (s *Session) Close() error <span class="cov4" title="10">{
         defer cancel()
         err := errors.Join(s.err, s.cleanup(ctx))
 
-        s.logger.Trace("session closed", "id", s.id)
+        s.logger.Debug("session closed", "id", s.id)
         return err</span>
 }
 
@@ -1992,11 +2005,11 @@ func (s *Session) spin() <span class="cov4" title="10">{
                 if err != nil </span><span class="cov4" title="10">{
                         switch </span>{
                         case errors.Is(err, io.EOF):<span class="cov0" title="0">
-                                s.logger.Trace("session stream ended", "id", s.id)</span>
+                                s.logger.Debug("session stream ended", "id", s.id)</span>
                         case status.Code(err) == codes.Canceled:<span class="cov4" title="10">
                                 s.logger.Trace("session stream context canceled", "id", s.id)</span>
                         default:<span class="cov0" title="0">
-                                s.logger.Debug("session stream error", "id", s.id, "err", err)
+                                s.logger.Error("session stream error", "id", s.id, "err", err)
                                 s.err = err</span>
                         }
 
@@ -2004,7 +2017,7 @@ func (s *Session) spin() <span class="cov4" title="10">{
                 }
                 <span class="cov4" title="10">if s.state != state </span><span class="cov4" title="10">{
                         // TODO: Check state (which states can we expect here?)
-                        s.logger.Trace("session state changed",
+                        s.logger.Debug("session state changed",
                                 "id", s.id, "node", s.node, "state", state)
                         s.state = state
                 }</span>
@@ -2033,7 +2046,7 @@ func (s *Session) cleanup(ctx context.Context) error <span class="cov4" title="1
 
 import "github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"
 
-func OnlineReadOnly() *Ydb_Query.TransactionSettings <span class="cov1" title="1">{
+func OnlineReadOnly() *Ydb_Query.TransactionSettings <span class="cov6" title="2">{
         return &amp;Ydb_Query.TransactionSettings{
                 TxMode: &amp;Ydb_Query.TransactionSettings_OnlineReadOnly{
                         OnlineReadOnly: &amp;Ydb_Query.OnlineModeSettings{},
@@ -2041,7 +2054,7 @@ func OnlineReadOnly() *Ydb_Query.TransactionSettings <span class="cov1" title="1
         }
 }</span>
 
-func OnlineReadOnlyInconsistent() *Ydb_Query.TransactionSettings <span class="cov1" title="1">{
+func OnlineReadOnlyInconsistent() *Ydb_Query.TransactionSettings <span class="cov6" title="2">{
         return &amp;Ydb_Query.TransactionSettings{
                 TxMode: &amp;Ydb_Query.TransactionSettings_OnlineReadOnly{
                         OnlineReadOnly: &amp;Ydb_Query.OnlineModeSettings{
@@ -2051,7 +2064,7 @@ func OnlineReadOnlyInconsistent() *Ydb_Query.TransactionSettings <span class="co
         }
 }</span>
 
-func SnapshotReadOnly() *Ydb_Query.TransactionSettings <span class="cov1" title="1">{
+func SnapshotReadOnly() *Ydb_Query.TransactionSettings <span class="cov6" title="2">{
         return &amp;Ydb_Query.TransactionSettings{
                 TxMode: &amp;Ydb_Query.TransactionSettings_SnapshotReadOnly{
                         SnapshotReadOnly: &amp;Ydb_Query.SnapshotModeSettings{},
@@ -2059,7 +2072,7 @@ func SnapshotReadOnly() *Ydb_Query.TransactionSettings <span class="cov1" title=
         }
 }</span>
 
-func StaleReadOnly() *Ydb_Query.TransactionSettings <span class="cov1" title="1">{
+func StaleReadOnly() *Ydb_Query.TransactionSettings <span class="cov6" title="2">{
         return &amp;Ydb_Query.TransactionSettings{
                 TxMode: &amp;Ydb_Query.TransactionSettings_StaleReadOnly{
                         StaleReadOnly: &amp;Ydb_Query.StaleModeSettings{},
@@ -2654,23 +2667,23 @@ func newNode[PT connection[T], T any](cfg nodeConfig[PT, T]) (*node[PT, T], erro
         return &amp;nNode, nil</span>
 }
 
-func (n *node[PT, T]) Alive() bool <span class="cov9" title="13537687">{
+func (n *node[PT, T]) Alive() bool <span class="cov9" title="13521627">{
         return n.alive.Load()
 }</span>
 
-func (n *node[PT, T]) Close() error <span class="cov2" title="20">{
+func (n *node[PT, T]) Close() error <span class="cov2" title="18">{
         n.mx.Lock()
         defer n.mx.Unlock()
 
         n.closed = true
 
-        for _, egress := range n.egresses </span><span class="cov2" title="10">{
+        for _, egress := range n.egresses </span><span class="cov2" title="9">{
                 _ = egress.Close()
         }</span>
-        <span class="cov2" title="20">for _, conn := range n.conns </span><span class="cov2" title="27">{
+        <span class="cov2" title="18">for _, conn := range n.conns </span><span class="cov2" title="25">{
                 _ = conn.Close()
         }</span>
-        <span class="cov2" title="20">n.egresses = nil
+        <span class="cov2" title="18">n.egresses = nil
         n.conns = nil
         n.connFunc = nil
         n.connPolicy = nil
@@ -2678,9 +2691,9 @@ func (n *node[PT, T]) Close() error <span class="cov2" title="20">{
         return nil</span>
 }
 
-func (n *node[PT, T]) lookup(id string) (int, *node[PT, T]) <span class="cov7" title="169849">{
-        for i, chNode := range n.egresses </span><span class="cov7" title="332263">{
-                if chNode.id == id </span><span class="cov7" title="149437">{
+func (n *node[PT, T]) lookup(id string) (int, *node[PT, T]) <span class="cov7" title="169847">{
+        for i, chNode := range n.egresses </span><span class="cov7" title="332258">{
+                if chNode.id == id </span><span class="cov7" title="149435">{
                         return i, chNode
                 }</span>
         }
@@ -2688,7 +2701,7 @@ func (n *node[PT, T]) lookup(id string) (int, *node[PT, T]) <span class="cov7" t
         <span class="cov6" title="20412">return -1, nil</span>
 }
 
-func (n *node[PT, T]) detach(idx int) <span class="cov2" title="10">{
+func (n *node[PT, T]) detach(idx int) <span class="cov2" title="9">{
         n.mx.Lock()
         defer n.mx.Unlock()
 
@@ -2701,7 +2714,7 @@ func (n *node[PT, T]) detach(idx int) <span class="cov2" title="10">{
                 n.alive.Store(false)
         }</span>
 
-        <span class="cov2" title="10">return</span>
+        <span class="cov2" title="9">return</span>
 }
 
 func (n *node[PT, T]) addEgress(e *node[PT, T]) error <span class="cov6" title="30429">{
@@ -2717,7 +2730,7 @@ func (n *node[PT, T]) addEgress(e *node[PT, T]) error <span class="cov6" title="
         return nil</span>
 }
 
-func (n *node[PT, T]) getBalanced() PT <span class="cov10" title="16606542">{
+func (n *node[PT, T]) getBalanced() PT <span class="cov10" title="16582452">{
         n.mx.RLock()
         defer n.mx.RUnlock()
 
@@ -2725,24 +2738,24 @@ func (n *node[PT, T]) getBalanced() PT <span class="cov10" title="16606542">{
                 return nil
         }</span>
 
-        <span class="cov10" title="16606542">if len(n.egresses) &gt; 0 </span><span class="cov9" title="13537687">{
-                if len(n.egresses) == 1 </span><span class="cov8" title="1975472">{
-                        if n.egresses[0].Alive() </span><span class="cov8" title="1975472">{
+        <span class="cov10" title="16582452">if len(n.egresses) &gt; 0 </span><span class="cov9" title="13521627">{
+                if len(n.egresses) == 1 </span><span class="cov8" title="1980438">{
+                        if n.egresses[0].Alive() </span><span class="cov8" title="1980438">{
                                 return n.egresses[0].getBalanced()
                         }</span>
                         <span class="cov0" title="0">return nil</span>
                 }
-                <span class="cov9" title="11562215">return n.egressPolicy.Get(n.egresses).getBalanced()</span>
+                <span class="cov9" title="11541189">return n.egressPolicy.Get(n.egresses).getBalanced()</span>
         }
 
-        <span class="cov9" title="3068855">if len(n.conns) &gt; 0 </span><span class="cov9" title="3068845">{
+        <span class="cov9" title="3060825">if len(n.conns) &gt; 0 </span><span class="cov9" title="3060815">{
                 if len(n.conns) == 1 </span><span class="cov1" title="4">{
                         if n.conns[0].Alive() </span><span class="cov1" title="2">{
                                 return n.conns[0]
                         }</span>
                         <span class="cov1" title="2">return nil</span>
                 }
-                <span class="cov9" title="3068841">return n.connPolicy.Get(n.conns)</span>
+                <span class="cov9" title="3060811">return n.connPolicy.Get(n.conns)</span>
         }
 
         <span class="cov2" title="10">return nil</span>
@@ -2821,15 +2834,15 @@ func NewRoundRobin[PT Egress[T], T any]() *RoundRobin[PT, T] <span class="cov6" 
         return &amp;RoundRobin[PT, T]{}
 }</span>
 
-func (c *RoundRobin[PT, T]) Get(egresses []PT) PT <span class="cov9" title="14731080">{
+func (c *RoundRobin[PT, T]) Get(egresses []PT) PT <span class="cov9" title="14702024">{
         c.mx.Lock()
         defer c.mx.Unlock()
 
         // get next alive egress
-        for i := 0; i &lt; len(egresses); i++ </span><span class="cov10" title="14731107">{
+        for i := 0; i &lt; len(egresses); i++ </span><span class="cov10" title="14702051">{
                 c.idx = (c.idx + 1) % len(egresses)
                 eg := egresses[c.idx]
-                if eg.Alive() </span><span class="cov9" title="14731078">{
+                if eg.Alive() </span><span class="cov9" title="14702022">{
                         return eg
                 }</span>
         }
@@ -2959,11 +2972,11 @@ func NewTree[PT connection[T], T any](cfg TreeConfig[PT, T]) (*Tree[PT, T], erro
         }, nil</span>
 }
 
-func (t *Tree[PT, T]) validatePath(path Path[PT, T]) error <span class="cov6" title="20426">{
+func (t *Tree[PT, T]) validatePath(path Path[PT, T]) error <span class="cov6" title="20425">{
         if len(t.levels)-1 != len(path.IDs) </span><span class="cov1" title="4">{
                 return ErrPathLen
         }</span>
-        <span class="cov6" title="20422">return nil</span>
+        <span class="cov6" title="20421">return nil</span>
 }
 
 func (t *Tree[PT, T]) connectionConfigForLevel(lvlIdx int, connCfg *ConnectionConfig[PT, T]) *ConnectionConfig[PT, T] <span class="cov7" title="30429">{
@@ -2973,7 +2986,7 @@ func (t *Tree[PT, T]) connectionConfigForLevel(lvlIdx int, connCfg *ConnectionCo
         <span class="cov6" title="10021">return nil</span>
 }
 
-func (t *Tree[PT, T]) GetConn() PT <span class="cov10" title="3068855">{
+func (t *Tree[PT, T]) GetConn() PT <span class="cov10" title="3060825">{
         return t.node.getBalanced()
 }</span>
 
@@ -3042,12 +3055,12 @@ func (t *Tree[PT, T]) AddPath(path Path[PT, T]) error <span class="cov6" title="
         <span class="cov6" title="20408">return nil</span>
 }
 
-func (t *Tree[PT, T]) DeletePath(path Path[PT, T]) error <span class="cov2" title="16">{
+func (t *Tree[PT, T]) DeletePath(path Path[PT, T]) error <span class="cov2" title="15">{
         if err := t.validatePath(path); err != nil </span><span class="cov1" title="2">{
                 return err
         }</span>
 
-        <span class="cov2" title="14">var (
+        <span class="cov2" title="13">var (
                 nNode    = t.node
                 delRoot  *node[PT, T]
                 prev     *node[PT, T]
@@ -3057,35 +3070,35 @@ func (t *Tree[PT, T]) DeletePath(path Path[PT, T]) error <span class="cov2" titl
                 delIdx   int
         )
 
-        for i, nodeID := range path.IDs </span><span class="cov2" title="25">{
+        for i, nodeID := range path.IDs </span><span class="cov2" title="23">{
                 nNode.mx.RLock()
-                if len(nNode.egresses) == 1 </span><span class="cov2" title="15">{
+                if len(nNode.egresses) == 1 </span><span class="cov2" title="14">{
                         delRoot = prev
                         delIdx = prevIdx
                 }</span>
 
-                <span class="cov2" title="25">idx, nextNode = nNode.lookup(nodeID)
+                <span class="cov2" title="23">idx, nextNode = nNode.lookup(nodeID)
                 if nextNode == nil </span><span class="cov1" title="4">{
                         // path to not-existing node
                         return ErrPathDoesNotExist
                 }</span>
-                <span class="cov2" title="21">if i == len(path.IDs)-1 </span><span class="cov2" title="10">{
+                <span class="cov2" title="19">if i == len(path.IDs)-1 </span><span class="cov2" title="9">{
                         nNode.mx.RUnlock()
-                        if delRoot != nil </span><span class="cov2" title="10">{
+                        if delRoot != nil </span><span class="cov2" title="9">{
                                 delRoot.detach(delIdx)
                         }</span> else<span class="cov0" title="0"> {
                                 nNode.detach(idx)
                         }</span>
 
-                        <span class="cov2" title="10">break</span>
+                        <span class="cov2" title="9">break</span>
                 }
 
-                <span class="cov2" title="11">nNode.mx.RUnlock()
+                <span class="cov2" title="10">nNode.mx.RUnlock()
                 nNode, prev = nextNode, nNode
                 prevIdx = idx</span>
         }
 
-        <span class="cov2" title="10">return nNode.Close()</span>
+        <span class="cov2" title="9">return nNode.Close()</span>
 }
 </pre>
 		
@@ -3164,7 +3177,7 @@ func (c *Connection) Alive() bool <span class="cov5" title="13">{
         }
 }
 
-func setContextMD(ctx context.Context, auth Authenticator, db string) (context.Context, error) <span class="cov10" title="134">{
+func setContextMD(ctx context.Context, auth Authenticator, db string) (context.Context, error) <span class="cov10" title="139">{
         md := metadata.Pairs(headerDatabase, db)
         if auth != nil </span><span class="cov0" title="0">{
                 token := auth.GetToken()
@@ -3174,7 +3187,7 @@ func setContextMD(ctx context.Context, auth Authenticator, db string) (context.C
                 <span class="cov0" title="0">md.Append(headerAuth, token)</span>
         }
 
-        <span class="cov10" title="134">return metadata.NewOutgoingContext(ctx, md), nil</span>
+        <span class="cov10" title="139">return metadata.NewOutgoingContext(ctx, md), nil</span>
 }
 
 func (c *Connection) Invoke(ctx context.Context, method string, args any, reply any, opts ...grpc.CallOption) error <span class="cov6" title="21">{
@@ -3190,12 +3203,12 @@ func (c *Connection) NewStream(
         desc *grpc.StreamDesc,
         method string,
         opts ...grpc.CallOption,
-) (grpc.ClientStream, error) <span class="cov9" title="113">{
+) (grpc.ClientStream, error) <span class="cov9" title="118">{
         callCtx, err := setContextMD(ctx, c.auth, c.db)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
-        <span class="cov9" title="113">return c.ClientConn.NewStream(callCtx, desc, method, opts...)</span> //nolint:wrapcheck // unnecessary
+        <span class="cov9" title="118">return c.ClientConn.NewStream(callCtx, desc, method, opts...)</span> //nolint:wrapcheck // unnecessary
 }
 </pre>
 		
@@ -3393,6 +3406,7 @@ func GetTransportPtr(ctx context.Context) *grpc.ClientConnInterface <span class=
 import (
         "context"
         "errors"
+        "time"
 
         "github.com/adwski/ydb-go-query/internal/logger"
         "github.com/adwski/ydb-go-query/internal/query"
@@ -3412,41 +3426,48 @@ var (
 )
 
 type Ctx struct {
-        logger logger.Logger
-        qSvc   *query.Service
-        txSet  *Ydb_Query.TransactionSettings
+        logger  logger.Logger
+        qSvc    *query.Service
+        txSet   *Ydb_Query.TransactionSettings
+        timeout time.Duration
 }
 
-func NewCtx(logger logger.Logger, qSvc *query.Service, txSet *Ydb_Query.TransactionSettings) *Ctx <span class="cov2" title="2">{
+func NewCtx(
+        logger logger.Logger,
+        qSvc *query.Service,
+        txSet *Ydb_Query.TransactionSettings,
+        timeout time.Duration,
+) *Ctx <span class="cov2" title="2">{
         return &amp;Ctx{
-                logger: logger,
-                qSvc:   qSvc,
-                txSet:  txSet,
+                logger:  logger,
+                qSvc:    qSvc,
+                txSet:   txSet,
+                timeout: timeout,
         }
 }</span>
 
-func (qc *Ctx) OnlineReadOnly() *Ctx <span class="cov0" title="0">{
+func (qc *Ctx) OnlineReadOnly() *Ctx <span class="cov1" title="1">{
         newQCtx := *qc
         newQCtx.txSet = txsettings.OnlineReadOnly()
 
         return &amp;newQCtx
 }</span>
 
-func (qc *Ctx) OnlineReadOnlyInconsistent() *Ctx <span class="cov0" title="0">{
+func (qc *Ctx) OnlineReadOnlyInconsistent() *Ctx <span class="cov1" title="1">{
         newQCtx := *qc
         newQCtx.txSet = txsettings.OnlineReadOnlyInconsistent()
 
         return &amp;newQCtx
 }</span>
 
-func (qc *Ctx) SnapshotReadOnly() *Ctx <span class="cov0" title="0">{
+func (qc *Ctx) SnapshotReadOnly() *Ctx <span class="cov1" title="1">{
         newQCtx := *qc
         newQCtx.txSet = txsettings.SnapshotReadOnly()
 
         return &amp;newQCtx
 }</span>
 
-func (qc *Ctx) StaleReadOnly() *Ctx <span class="cov0" title="0">{
+func (qc *Ctx) StaleReadOnly() *Ctx <span class="cov1" title="1">{
         newQCtx := *qc
         newQCtx.txSet = txsettings.StaleReadOnly()
 
@@ -3459,20 +3480,51 @@ func (qc *Ctx) SerializableReadWrite() *Ctx <span class="cov0" title="0">{
         return &amp;newQCtx
 }</span>
 
-func (qc *Ctx) Query(queryContent string) *Query <span class="cov9" title="101">{
+func (qc *Ctx) Query(queryContent string) *Query <span class="cov9" title="105">{
         return newQuery(
                 queryContent,
-                qc.exec,
+                func(
+                        ctx context.Context,
+                        queryContent string,
+                        params map[string]*Ydb.TypedValue,
+                        collectRows func([]*Ydb.Value) error,
+                        timeout time.Duration,
+                ) (*Result, error) </span><span class="cov9" title="105">{
+                        return qc.exec(ctx, queryContent, params, collectRows, qc.txSet, timeout)
+                }</span>,
         )
+}
+
+func (qc *Ctx) Exec(ctx context.Context, queryContent string) (*Result, error) <span class="cov3" title="3">{
+        return qc.exec(ctx, queryContent, nil, nil, nil, 0)
 }</span>
 
-func (qc *Ctx) Exec(ctx context.Context, queryContent string) (*Result, error) <span class="cov2" title="2">{
-        stream, cancel, err := qc.qSvc.Exec(ctx, queryContent, nil, nil)
+func (qc *Ctx) exec(
+        ctx context.Context,
+        queryContent string,
+        params map[string]*Ydb.TypedValue,
+        collectRows func([]*Ydb.Value) error,
+        txSet *Ydb_Query.TransactionSettings,
+        timeout time.Duration,
+) (*Result, error) <span class="cov10" title="108">{
+        var (
+                qCancel context.CancelFunc
+        )
+        if timeout == 0 </span><span class="cov10" title="108">{
+                timeout = qc.timeout
+        }</span>
+        <span class="cov10" title="108">if timeout &gt; 0 </span><span class="cov10" title="108">{
+                ctx, qCancel = context.WithDeadline(ctx, time.Now().Add(timeout))
+                defer qCancel()
+        }</span>
+        <span class="cov10" title="108">stream, cancel, err := qc.qSvc.Exec(ctx, queryContent, params, txSet)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, err //nolint:wrapcheck //unnecessary
         }</span>
 
-        <span class="cov2" title="2">return qc.processResult(stream, cancel, nil)</span>
+        <span class="cov10" title="108">qc.logger.Trace("received result stream", "query", strip(queryContent))
+
+        return qc.processResult(stream, cancel, collectRows)</span>
 }
 
 func (qc *Ctx) Tx(ctx context.Context) (*Transaction, error) <span class="cov0" title="0">{
@@ -3491,43 +3543,27 @@ func (qc *Ctx) Tx(ctx context.Context) (*Transaction, error) <span class="cov0" 
         return tx, nil</span>
 }
 
-func (qc *Ctx) exec(
-        ctx context.Context,
-        queryContent string,
-        params map[string]*Ydb.TypedValue,
-        collectRows func([]*Ydb.Value) error,
-) (*Result, error) <span class="cov9" title="101">{
-        stream, cancel, err := qc.qSvc.Exec(ctx, queryContent, params, qc.txSet)
-        if err != nil </span><span class="cov0" title="0">{
-                return nil, err //nolint:wrapcheck //unnecessary
-        }</span>
-
-        <span class="cov9" title="101">qc.logger.Trace("received result stream", "query", strip(queryContent))
-
-        return qc.processResult(stream, cancel, collectRows)</span>
-}
-
 func (qc *Ctx) processResult(
         stream Ydb_Query_V1.QueryService_ExecuteQueryClient,
         cancel context.CancelFunc,
         collectRows func([]*Ydb.Value) error,
-) (*Result, error) <span class="cov10" title="103">{
+) (*Result, error) <span class="cov10" title="108">{
         res := newResult(stream, cancel, qc.logger, collectRows)
 
         if err := res.recv(); err != nil </span><span class="cov0" title="0">{
                 return nil, errors.Join(ErrResult, err)
         }</span>
 
-        <span class="cov10" title="103">return res, nil</span>
+        <span class="cov10" title="108">return res, nil</span>
 }
 
-func strip(s string) string <span class="cov9" title="101">{
+func strip(s string) string <span class="cov10" title="108">{
         if len(s) &gt; maxQueryLogLength </span><span class="cov0" title="0">{
                 b := []byte(s[:maxQueryLogLength-2])
                 return string(append(b, queryLogCut...))
         }</span>
 
-        <span class="cov9" title="101">return s</span>
+        <span class="cov10" title="108">return s</span>
 }
 </pre>
 		
@@ -3535,6 +3571,7 @@ func strip(s string) string <span class="cov9" title="101">{
 
 import (
         "context"
+        "time"
 
         "github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
 )
@@ -3545,6 +3582,7 @@ type (
                 string,
                 map[string]*Ydb.TypedValue,
                 func([]*Ydb.Value) error,
+                time.Duration,
         ) (*Result, error)
 
         Query struct {
@@ -3552,10 +3590,11 @@ type (
                 execFunc        execFunc
                 params          map[string]*Ydb.TypedValue
                 content         string
+                timeout         time.Duration
         }
 )
 
-func newQuery(content string, eF execFunc) *Query <span class="cov7" title="101">{
+func newQuery(content string, eF execFunc) *Query <span class="cov7" title="105">{
         return &amp;Query{
                 content:  content,
                 execFunc: eF,
@@ -3577,14 +3616,20 @@ func (q *Query) Param(name string, val *Ydb.TypedValue) *Query <span class="cov1
         return q</span>
 }
 
-func (q *Query) Collect(collectRowsFunc func([]*Ydb.Value) error) *Query <span class="cov1" title="1">{
+func (q *Query) Collect(collectRowsFunc func([]*Ydb.Value) error) *Query <span class="cov3" title="5">{
         q.collectRowsFunc = collectRowsFunc
 
         return q
 }</span>
 
-func (q *Query) Exec(ctx context.Context) (*Result, error) <span class="cov7" title="101">{
-        return q.execFunc(ctx, q.content, q.params, q.collectRowsFunc)
+func (q *Query) Timeout(timeout time.Duration) *Query <span class="cov0" title="0">{
+        q.timeout = timeout
+
+        return q
+}</span>
+
+func (q *Query) Exec(ctx context.Context) (*Result, error) <span class="cov7" title="105">{
+        return q.execFunc(ctx, q.content, q.params, q.collectRowsFunc, q.timeout)
 }</span>
 </pre>
 		
@@ -3637,7 +3682,7 @@ func newResult(
         cancel context.CancelFunc,
         logger logger.Logger,
         collectRowsFunc func([]*Ydb.Value) error,
-) *Result <span class="cov10" title="103">{
+) *Result <span class="cov10" title="108">{
         return &amp;Result{
                 logger: logger,
                 stream: stream,
@@ -3649,16 +3694,16 @@ func newResult(
 
 // close closes result stream,
 // result data remains available.
-func (r *Result) close() <span class="cov10" title="103">{
+func (r *Result) close() <span class="cov10" title="108">{
         r.cancel()
         r.done.Store(true)
 }</span>
 
-func (r *Result) Err() error <span class="cov10" title="103">{
+func (r *Result) Err() error <span class="cov10" title="108">{
         return r.err
 }</span>
 
-func (r *Result) Issues() []*Ydb_Issue.IssueMessage <span class="cov10" title="103">{ return r.issues }</span>
+func (r *Result) Issues() []*Ydb_Issue.IssueMessage <span class="cov10" title="108">{ return r.issues }</span>
 
 func (r *Result) Cols() []*Ydb.Column <span class="cov0" title="0">{
         return r.cols
@@ -3668,7 +3713,7 @@ func (r *Result) Rows() []*Ydb.Value <span class="cov0" title="0">{
         return r.rows
 }</span>
 
-func (r *Result) Stats() *Ydb_TableStats.QueryStats <span class="cov10" title="103">{
+func (r *Result) Stats() *Ydb_TableStats.QueryStats <span class="cov10" title="108">{
         return r.stats
 }</span>
 
@@ -3679,18 +3724,18 @@ func (r *Result) TxID() string <span class="cov0" title="0">{
 // recv reads all parts from result stream till completion.
 // It assumes that parts are arriving sequentially,
 // i.e. ConcurrentResultSets is false.
-func (r *Result) recv() error <span class="cov10" title="103">{
+func (r *Result) recv() error <span class="cov10" title="108">{
         if r.done.Load() </span><span class="cov0" title="0">{
                 return nil
         }</span>
-        <span class="cov10" title="103">for </span><span class="cov10" title="103">{
+        <span class="cov10" title="108">for </span><span class="cov10" title="108">{
                 part, err := r.stream.Recv()
                 r.logger.Trace("received result part", "part", part, "error", err)
                 if err != nil </span><span class="cov0" title="0">{
                         return errors.Join(ErrStream, err)
                 }</span>
 
-                <span class="cov10" title="103">r.issues = append(r.issues, part.Issues...)
+                <span class="cov10" title="108">r.issues = append(r.issues, part.Issues...)
 
                 if part.Status != Ydb.StatusIds_SUCCESS </span><span class="cov0" title="0">{
                         r.err = errors.Join(ErrPartStatus, fmt.Errorf("status: %s", part.Status))
@@ -3698,21 +3743,21 @@ func (r *Result) recv() error <span class="cov10" title="103">{
                         break</span>
                 }
 
-                <span class="cov10" title="103">if part.TxMeta != nil </span><span class="cov10" title="103">{
+                <span class="cov10" title="108">if part.TxMeta != nil </span><span class="cov10" title="108">{
                         r.txID = part.TxMeta.Id
                 }</span>
 
-                <span class="cov10" title="103">if len(part.Issues) &gt; 0 </span><span class="cov0" title="0">{
+                <span class="cov10" title="108">if len(part.Issues) &gt; 0 </span><span class="cov0" title="0">{
                         r.err = errors.Join(ErrIssues, r.err)
                 }</span>
 
-                <span class="cov10" title="103">if part.ResultSet != nil </span><span class="cov1" title="1">{
-                        if r.cols == nil &amp;&amp; len(part.ResultSet.Columns) &gt; 0 </span><span class="cov1" title="1">{
+                <span class="cov10" title="108">if part.ResultSet != nil </span><span class="cov4" title="5">{
+                        if r.cols == nil &amp;&amp; len(part.ResultSet.Columns) &gt; 0 </span><span class="cov4" title="5">{
                                 r.cols = part.ResultSet.Columns
                         }</span>
 
-                        <span class="cov1" title="1">if len(part.ResultSet.Rows) &gt; 0 </span><span class="cov1" title="1">{
-                                if r.collectRowsFunc != nil </span><span class="cov1" title="1">{
+                        <span class="cov4" title="5">if len(part.ResultSet.Rows) &gt; 0 </span><span class="cov4" title="5">{
+                                if r.collectRowsFunc != nil </span><span class="cov4" title="5">{
                                         err = r.collectRowsFunc(part.ResultSet.Rows)
                                         if err != nil </span><span class="cov0" title="0">{
                                                 r.err = errors.Join(err, r.err)
@@ -3724,7 +3769,7 @@ func (r *Result) recv() error <span class="cov10" title="103">{
                         }
                 }
 
-                <span class="cov10" title="103">if part.ExecStats != nil </span><span class="cov10" title="103">{
+                <span class="cov10" title="108">if part.ExecStats != nil </span><span class="cov10" title="108">{
                         // stats on the last part
                         // TODO: find better way to detect last part
                         r.stats = part.ExecStats
@@ -3732,7 +3777,7 @@ func (r *Result) recv() error <span class="cov10" title="103">{
                 }
         }
 
-        <span class="cov10" title="103">r.close()
+        <span class="cov10" title="108">r.close()
 
         return nil</span>
 }
@@ -3743,6 +3788,7 @@ func (r *Result) recv() error <span class="cov10" title="103">{
 import (
         "context"
         "errors"
+        "time"
 
         "github.com/adwski/ydb-go-query/internal/logger"
         "github.com/adwski/ydb-go-query/internal/query/session"
@@ -3813,6 +3859,7 @@ func (tx *Transaction) exec(
         query string,
         params map[string]*Ydb.TypedValue,
         collectRowsFunc func([]*Ydb.Value) error,
+        timeout time.Duration,
         commit bool,
 ) (*Result, error) <span class="cov0" title="0">{
         if tx.finish </span><span class="cov0" title="0">{
@@ -3842,8 +3889,20 @@ func (tx *Transaction) exec(
                 }
         }</span>
 
+        <span class="cov0" title="0">var (
+                qCancel context.CancelFunc
+        )
+        if timeout &gt; 0 </span><span class="cov0" title="0">{
+                ctx, qCancel = context.WithDeadline(ctx, time.Now().Add(timeout))
+        }</span>
+
         <span class="cov0" title="0">stream, cancel, err := tx.sess.Exec(ctx, query, params, txControl)
-        if err != nil </span><span class="cov0" title="0">{
+        if qCancel != nil </span><span class="cov0" title="0">{
+                // if ctx was overwritten, then cancel() inherits from qCancel()
+                cancel = qCancel
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                cancel()
                 return nil, err //nolint:wrapcheck //unnecessary
         }</span>
 
@@ -3864,6 +3923,7 @@ func (tx *Transaction) exec(
 
 import (
         "context"
+        "time"
 
         "github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
 )
@@ -3874,6 +3934,7 @@ type (
                 string,
                 map[string]*Ydb.TypedValue,
                 func([]*Ydb.Value) error,
+                time.Duration,
                 bool,
         ) (*Result, error)
 
@@ -3901,7 +3962,7 @@ func (q *TxQuery) Commit() *TxQuery <span class="cov0" title="0">{
 }</span>
 
 func (q *TxQuery) Exec(ctx context.Context) (*Result, error) <span class="cov0" title="0">{
-        return q.txExecFunc(ctx, q.content, q.params, q.collectRowsFunc, q.commit)
+        return q.txExecFunc(ctx, q.content, q.params, q.collectRowsFunc, q.timeout, q.commit)
 }</span>
 </pre>
 		
