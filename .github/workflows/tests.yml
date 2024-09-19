@@ -9,21 +9,35 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+
+    services:
+      ydb:
+        image: ydbplatform/local-ydb:latest
+        env:
+          GRPC_TLS_PORT: "2135"
+          GRPC_PORT: "2136"
+          MON_PORT: "8765"
+          YDB_USE_IN_MEMORY_PDISKS: "true"
+        ports:
+          - "2135:2135"
+          - "2136:2136"
+          - "8765:8765"
+
+    container: golang:1.23.1-bookworm
+
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-
       - name: install deps
         run: go mod download
 
       - name: run tests
+        env:
+          YDB_TEST_ENDPOINT: ydb:2136
         run: |
-          go test -v -race -count=1 -cover -coverpkg=./... -coverprofile=profile.cov ./...
+          go test -v -race -count=1 -cover -coverpkg=./... -coverprofile=profile.cov ./... -tags integration
 
           go tool cover -func=profile.cov -o=coverage.out
           go tool cover -html=profile.cov -o=coverage.html

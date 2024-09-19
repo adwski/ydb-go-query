@@ -49,8 +49,10 @@ func Open(ctx context.Context, cfg Config, opts ...Option) (*Client, error) {
 	client.wg.Add(1)
 	go client.discoverySvc.Run(runCtx, client.wg)
 
-	client.wg.Add(1)
-	go cfg.auth.Run(runCtx, client.wg)
+	if cfg.auth != nil {
+		client.wg.Add(1)
+		go cfg.auth.Run(runCtx, client.wg)
+	}
 
 	return client, nil
 }

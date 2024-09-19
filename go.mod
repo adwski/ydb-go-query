@@ -3,6 +3,7 @@ module github.com/adwski/ydb-go-query
 go 1.23.1
 
 require (
+	github.com/brianvoe/gofakeit/v7 v7.0.4
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.1
