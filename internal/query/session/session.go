@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"hash/maphash"
 	"io"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -83,8 +84,8 @@ func CreateSession(
 	if err != nil {
 		return nil, errors.Join(ErrSessionCreate, err)
 	}
-	if status := respCreate.Status; status != Ydb.StatusIds_SUCCESS {
-		return nil, errors.Join(ErrSessionCreate, fmt.Errorf("status: %s", status))
+	if respCreate.Status != Ydb.StatusIds_SUCCESS {
+		return nil, errors.Join(ErrSessionCreate, fmt.Errorf("status: %s", respCreate.Status))
 	}
 
 	if transport == nil {
@@ -153,12 +154,29 @@ func (s *Session) attachStream(ctx context.Context) error {
 	s.stream = respAttach
 	s.cancelFunc = streamCancel
 
-	go s.spin()
+	s.logger.Trace("attached to session", "id", s.id, "node", s.node, "id_", s.id_)
+
+	sig := make(chan struct{}) // async success signal
+	go s.spin(sig)
+
+	// Looks like attach mechanism is non-blocking.
+	// AttachSession might finish but on YDB side
+	// session still may be not attached for some short time.
+	// Seems like transition to attached state is signaled by status:SUCCESS,
+	// so we need to wait for status change before handling session to the pool.
+	//
+	// Otherwise, we in race condition and first query for this session may return BAD REQUEST.
+	select {
+	case <-sig:
+	case <-s.done:
+	}
+	close(sig)
 
 	return nil
 }
 
-func (s *Session) spin() {
+func (s *Session) spin(sigSuccess chan<- struct{}) {
+	once := sync.Once{}
 	for {
 		state, err := s.stream.Recv()
 		if err != nil {
@@ -179,6 +197,9 @@ func (s *Session) spin() {
 			s.logger.Debug("session state changed",
 				"id", s.id, "node", s.node, "state", state)
 			s.state = state
+			if state.Status == Ydb.StatusIds_SUCCESS {
+				once.Do(func() { sigSuccess <- struct{}{} })
+			}
 		}
 	}
 	s.shutdown.Store(true)
