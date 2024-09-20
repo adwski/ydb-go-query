@@ -4,7 +4,7 @@ run:
   # Settable parameters #
   timeout: 5m
   tests: true
-  build-tags: []
+  build-tags: [integration]
 
   # Invariable parameters #
 
@@ -103,7 +103,7 @@ linters-settings:
     scope: toplevel
 
   gofmt:
-    simplify: false
+    simplify: true
 
   goimports:
     local-prefixes: github.com/org/project
@@ -378,8 +378,8 @@ issues:
   exclude-dirs:
     - "bin"
     - "scripts"
-    - ".ci"
-    - ".gradle"
+    - "\\.ci"
+    - "\\.gradle"
   exclude: []
   exclude-case-sensitive: false
   # Enables skipping of directories:
