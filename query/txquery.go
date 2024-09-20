@@ -18,17 +18,18 @@ type (
 	) (*Result, error)
 
 	TxQuery struct {
-		*Query
-
-		txExecFunc txExecFunc
-
-		commit bool
+		collectRowsFunc func([]*Ydb.Value) error
+		txExecFunc      txExecFunc
+		params          map[string]*Ydb.TypedValue
+		content         string
+		timeout         time.Duration
+		commit          bool
 	}
 )
 
 func newTxQuery(content string, eF txExecFunc) *TxQuery {
 	return &TxQuery{
-		Query: newQuery(content, nil),
+		content: content,
 
 		txExecFunc: eF,
 	}
@@ -36,6 +37,33 @@ func newTxQuery(content string, eF txExecFunc) *TxQuery {
 
 func (q *TxQuery) Commit() *TxQuery {
 	q.commit = true
+
+	return q
+}
+
+func (q *TxQuery) Collect(collectRowsFunc func([]*Ydb.Value) error) *TxQuery {
+	q.collectRowsFunc = collectRowsFunc
+
+	return q
+}
+
+func (q *TxQuery) Param(name string, val *Ydb.TypedValue) *TxQuery {
+	if q.params == nil {
+		q.params = make(map[string]*Ydb.TypedValue)
+	}
+	q.params[name] = val
+
+	return q
+}
+
+func (q *TxQuery) Params(params map[string]*Ydb.TypedValue) *TxQuery {
+	q.params = params
+
+	return q
+}
+
+func (q *TxQuery) Timeout(timeout time.Duration) *TxQuery {
+	q.timeout = timeout
 
 	return q
 }
