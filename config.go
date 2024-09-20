@@ -26,6 +26,7 @@ const (
 	defaultSessionCreateTimeout = 3 * time.Second
 	defaultQueryTimeout         = 5 * time.Minute
 	defaultSessionPoolSize      = 10
+	defaultLogLevel             = "info"
 )
 
 type (
@@ -47,7 +48,7 @@ type (
 )
 
 func (cfg *Config) setDefaults() {
-	cfg.logger = noop.NewLogger()
+	cfg.logger = logger.New(noop.NewLogger())
 	cfg.sessionCreateTimeout = defaultSessionCreateTimeout
 	cfg.queryTimeout = defaultQueryTimeout
 	cfg.poolSize = defaultSessionPoolSize
@@ -62,16 +63,26 @@ func WithLogger(log logger.Logger) Option {
 	}
 }
 
-func WithZeroLogger(log zerolog.Logger) Option {
+func WithZeroLogger(log zerolog.Logger, level string) Option {
 	return func(ctx context.Context, cfg *Config) error {
-		cfg.logger = zerologger.NewLogger(log)
+		lg, err := logger.NewWithLevel(zerologger.NewLogger(log), level)
+		if err != nil {
+			return err //nolint:wrapcheck // unnecessary
+		}
+		cfg.logger = lg
+
 		return nil
 	}
 }
 
-func WithZapLogger(log *zap.Logger) Option {
+func WithZapLogger(log *zap.Logger, level string) Option {
 	return func(ctx context.Context, cfg *Config) error {
-		cfg.logger = zaplogger.NewLogger(log)
+		lg, err := logger.NewWithLevel(zaplogger.NewLogger(log), level)
+		if err != nil {
+			return err //nolint:wrapcheck // unnecessary
+		}
+		cfg.logger = lg
+
 		return nil
 	}
 }

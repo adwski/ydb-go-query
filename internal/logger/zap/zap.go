@@ -16,23 +16,23 @@ func NewLogger(logger *zap.Logger) *Logger {
 	}
 }
 
-func (l *Logger) Error(msg string, fields ...any) {
-	l.Logger.Error(msg, zapFields(fields...)...)
+func (l *Logger) Error(msg string, fields []any) {
+	l.Logger.Error(msg, zapFields(fields)...)
 }
 
-func (l *Logger) Info(msg string, fields ...any) {
-	l.Logger.Info(msg, zapFields(fields...)...)
+func (l *Logger) Info(msg string, fields []any) {
+	l.Logger.Info(msg, zapFields(fields)...)
 }
 
-func (l *Logger) Debug(msg string, fields ...any) {
-	l.Logger.Debug(msg, zapFields(fields...)...)
+func (l *Logger) Debug(msg string, fields []any) {
+	l.Logger.Debug(msg, zapFields(fields)...)
 }
 
-func (l *Logger) Trace(msg string, fields ...any) {
-	l.Logger.Debug(msg, zapFields(fields...)...)
+func (l *Logger) Trace(msg string, fields []any) {
+	l.Logger.Debug(msg, zapFields(fields)...)
 }
 
-func zapFields(fields ...any) []zap.Field {
+func zapFields(fields []any) []zap.Field {
 	zfs := make([]zap.Field, 0, len(fields)/2)
 
 	for i := 0; i < len(fields); i += 2 {

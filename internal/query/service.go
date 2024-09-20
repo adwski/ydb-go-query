@@ -22,16 +22,16 @@ var (
 
 type (
 	Service struct {
-		logger logger.Logger
-		qsc    Ydb_Query_V1.QueryServiceClient
-
+		qsc  Ydb_Query_V1.QueryServiceClient
 		pool *pool.Pool[*session.Session, session.Session]
+
+		logger logger.Logger
 	}
 )
 
 type Config struct {
-	Logger        logger.Logger
 	Transport     grpc.ClientConnInterface
+	Logger        logger.Logger
 	CreateTimeout time.Duration
 	PoolSize      uint
 }

@@ -16,23 +16,23 @@ func NewLogger(logger zerolog.Logger) *Logger {
 	}
 }
 
-func (l *Logger) Error(msg string, fields ...any) {
-	emit(l.Logger.Error(), msg, fields...)
+func (l *Logger) Error(msg string, fields []any) {
+	emit(l.Logger.Error(), msg, fields)
 }
 
-func (l *Logger) Info(msg string, fields ...any) {
-	emit(l.Logger.Info(), msg, fields...)
+func (l *Logger) Info(msg string, fields []any) {
+	emit(l.Logger.Info(), msg, fields)
 }
 
-func (l *Logger) Debug(msg string, fields ...any) {
-	emit(l.Logger.Debug(), msg, fields...)
+func (l *Logger) Debug(msg string, fields []any) {
+	emit(l.Logger.Debug(), msg, fields)
 }
 
-func (l *Logger) Trace(msg string, fields ...any) {
-	emit(l.Logger.Trace(), msg, fields...)
+func (l *Logger) Trace(msg string, fields []any) {
+	emit(l.Logger.Trace(), msg, fields)
 }
 
-func emit(ev *zerolog.Event, msg string, fields ...any) {
+func emit(ev *zerolog.Event, msg string, fields []any) {
 	if len(fields)%2 != 0 {
 		fields = fields[:len(fields)-1]
 	}

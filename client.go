@@ -64,8 +64,6 @@ type (
 		Run(ctx context.Context, wg *sync.WaitGroup)
 	}
 	Client struct {
-		logger logger.Logger
-
 		dispatcher *dispatcher.Dispatcher
 
 		discoverySvc *discovery.Service
@@ -75,6 +73,8 @@ type (
 
 		wg     *sync.WaitGroup
 		cancel context.CancelFunc
+
+		logger logger.Logger
 
 		sessionCreateTimeout time.Duration
 		poolSize             uint

@@ -39,16 +39,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	lvl, err := zerolog.ParseLevel(*logLevel)
-	if err != nil {
-		logger.Error().Err(err).Msg("incorrect log level")
-		os.Exit(1)
-	}
-	logger = logger.Level(lvl)
-
 	// configure ydb client
 	options := []ydb.Option{
-		ydb.WithZeroLogger(logger.With().Str("component", "ydb").Logger()),
+		ydb.WithZeroLogger(logger.With().Str("component", "ydb").Logger(), *logLevel),
 		ydb.WithQueryTimeout(*queryTimeout),
 		ydb.WithSessionPoolSize(*poolSize)}
 

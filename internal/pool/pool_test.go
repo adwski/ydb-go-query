@@ -9,6 +9,7 @@ import (
 	"time"
 
 	localErrs "github.com/adwski/ydb-go-query/internal/errors"
+	"github.com/adwski/ydb-go-query/internal/logger"
 	"github.com/adwski/ydb-go-query/internal/logger/noop"
 )
 
@@ -52,7 +53,7 @@ func TestPool_GetPut(t *testing.T) {
 	defer runCancel()
 
 	pool := New[*itm, itm](runCtx, Config[*itm, itm]{
-		Logger: noop.NewLogger(),
+		Logger: logger.New(noop.NewLogger()),
 		CreateFunc: func(ctx context.Context, createTimeout time.Duration) (*itm, error) {
 			return &itm{
 				mx:    &sync.RWMutex{},
@@ -140,7 +141,7 @@ func TestPool_GetPutConcurrent(t *testing.T) {
 	defer runCancel()
 
 	pool := New[*itm, itm](runCtx, Config[*itm, itm]{
-		Logger: noop.NewLogger(),
+		Logger: logger.New(noop.NewLogger()),
 		CreateFunc: func(ctx context.Context, createTimeout time.Duration) (*itm, error) {
 			itm_ := &itm{
 				mx:    &sync.RWMutex{},
@@ -218,7 +219,7 @@ func TestPool_Recycle(t *testing.T) {
 	itms := make([]*itm, 0, 10)
 
 	pool := New[*itm, itm](runCtx, Config[*itm, itm]{
-		Logger: noop.NewLogger(),
+		Logger: logger.New(noop.NewLogger()),
 		CreateFunc: func(ctx context.Context, createTimeout time.Duration) (*itm, error) {
 			itm_ := &itm{
 				mx:    &sync.RWMutex{},
@@ -263,7 +264,7 @@ func TestPool_LocalErrorCreateRetry(t *testing.T) {
 	ctr := 0
 
 	pool := New[*itm, itm](runCtx, Config[*itm, itm]{
-		Logger: noop.NewLogger(),
+		Logger: logger.New(noop.NewLogger()),
 		CreateFunc: func(ctx context.Context, createTimeout time.Duration) (*itm, error) {
 			ctr++
 			return nil, localErrs.LocalFailureError{}

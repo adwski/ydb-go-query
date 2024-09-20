@@ -61,9 +61,9 @@ type (
 	}
 
 	Config struct {
-		Logger         logger.Logger
 		Transport      grpc.ClientConnInterface
 		CreateResponse *Ydb_Query.CreateSessionResponse
+		Logger         logger.Logger
 	}
 )
 

@@ -23,9 +23,9 @@ var (
 )
 
 type Ctx struct {
-	logger  logger.Logger
 	qSvc    *query.Service
 	txSet   *Ydb_Query.TransactionSettings
+	logger  logger.Logger
 	timeout time.Duration
 }
 
@@ -119,7 +119,9 @@ func (qc *Ctx) exec(
 		return nil, err //nolint:wrapcheck //unnecessary
 	}
 
-	qc.logger.Trace("received result stream", "query", strip(queryContent))
+	qc.logger.TraceFunc(func() (string, []any) {
+		return "received result stream", []any{"query", strip(queryContent)}
+	})
 
 	return qc.processResult(stream, cancel, collectRows)
 }

@@ -23,6 +23,8 @@ import (
 const (
 	ydbPath = "/local"
 
+	logLevel = "debug"
+
 	usersTable = `CREATE TABLE users (                  
     	user_id Uint64,
     	first_name Utf8,
@@ -45,6 +47,8 @@ const (
 var (
 	ydbEndpoint = "127.0.0.1:2136"
 
+	ydbConfig Config
+
 	zeroLogger = zerolog.New(zerolog.NewConsoleWriter()).
 			Level(zerolog.DebugLevel).
 			With().Timestamp().Logger()
@@ -56,12 +60,17 @@ var (
 		EncodeLevel:    zapcore.LowercaseLevelEncoder,
 		EncodeTime:     zapcore.ISO8601TimeEncoder,
 		EncodeDuration: zapcore.StringDurationEncoder,
-	}), os.Stdout, zapcore.InfoLevel))
+	}), os.Stdout, zapcore.DebugLevel))
 )
 
 func init() {
 	if val, ok := os.LookupEnv("YDB_TEST_ENDPOINT"); ok {
 		ydbEndpoint = val
+	}
+
+	ydbConfig = Config{
+		InitialNodes: []string{ydbEndpoint},
+		DB:           ydbPath,
 	}
 }
 
@@ -72,7 +81,7 @@ func TestClient_OpenClose(t *testing.T) {
 	client, err := Open(ctx, Config{
 		InitialNodes: []string{ydbEndpoint},
 		DB:           ydbPath,
-	}, WithZeroLogger(zeroLogger))
+	}, WithZeroLogger(zeroLogger, logLevel))
 	require.NoError(t, err)
 
 	done := make(chan struct{})
@@ -95,12 +104,8 @@ func TestClient_Queries(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	client, err := Open(ctx,
-		Config{
-			InitialNodes: []string{ydbEndpoint},
-			DB:           ydbPath,
-		},
-		WithZeroLogger(zeroLogger),
+	client, err := Open(ctx, ydbConfig,
+		WithZeroLogger(zeroLogger, logLevel),
 		WithQueryTimeout(5*time.Second),
 	)
 	require.NoError(t, err)
@@ -137,12 +142,8 @@ func TestClient_TransactionFinished(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	client, err := Open(ctx,
-		Config{
-			InitialNodes: []string{ydbEndpoint},
-			DB:           ydbPath,
-		},
-		WithZeroLogger(zeroLogger),
+	client, err := Open(ctx, ydbConfig,
+		WithZeroLogger(zeroLogger, logLevel),
 		WithQueryTimeout(5*time.Second),
 	)
 	require.NoError(t, err)
@@ -173,12 +174,8 @@ func TestClient_Transactions(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	client, err := Open(ctx,
-		Config{
-			InitialNodes: []string{ydbEndpoint},
-			DB:           ydbPath,
-		},
-		WithZapLogger(zapLogger),
+	client, err := Open(ctx, ydbConfig,
+		WithZapLogger(zapLogger, logLevel),
 		WithQueryTimeout(5*time.Second),
 	)
 	require.NoError(t, err)
@@ -238,12 +235,13 @@ func assertUsers(ctx context.Context, t *testing.T, qCtx *query.Ctx, usersCount 
 	t.Helper()
 
 	usrCtr := 0
-	res, err := qCtx.Query("SELECT * FROM users").Collect(func(rows []*Ydb.Value) error {
-		for range rows {
-			usrCtr++
-		}
-		return nil
-	}).Exec(ctx)
+	res, err := qCtx.Query("SELECT * FROM users").
+		Collect(func(rows []*Ydb.Value) error {
+			for range rows {
+				usrCtr++
+			}
+			return nil
+		}).Exec(ctx)
 	verifyResult(t, res, err)
 	assert.Equal(t, usersCount, usrCtr)
 }

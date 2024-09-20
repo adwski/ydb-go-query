@@ -32,8 +32,6 @@ type (
 	}
 
 	Pool[PT item[T], T any] struct {
-		logger logger.Logger
-
 		createFunc func(context.Context, time.Duration) (PT, error)
 		cancelFunc context.CancelFunc
 
@@ -46,6 +44,8 @@ type (
 		itemsExpire map[uint64]int64
 		itemsMx     *sync.RWMutex
 
+		logger logger.Logger
+
 		createTimeout time.Duration
 		itemLifetime  int64 // seconds
 		recycleWindow int64 // seconds
@@ -57,14 +57,14 @@ type (
 
 	// Config holds pool configuration.
 	Config[PT item[T], T any] struct {
-		Logger logger.Logger
-
 		// CreateFunc is used to create pool item.
 		// Timeout is not set as context.WithTimeout
 		// because this is running context for long-lived item.
 		// Timeout itself should limit only creation steps,
 		// and it is responsibility of CreateFunc to handle it appropriately.
 		CreateFunc func(ctx context.Context, createTimeout time.Duration) (PT, error)
+
+		Logger logger.Logger
 
 		// CreateTimeout limits runtime for CreateFunc.
 		// This timeout cannot be less than a second (minCreateTimeout).

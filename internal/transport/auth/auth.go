@@ -32,8 +32,8 @@ type (
 		renewDisable bool
 	}
 	Config struct {
-		Logger       logger.Logger
 		Provider     Provider
+		Logger       logger.Logger
 		RenewDisable bool
 	}
 )
