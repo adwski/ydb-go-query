@@ -34,27 +34,28 @@ type (
 	connFunc[PT connection[T], T any] func() (PT, error)
 
 	node[PT connection[T], T any] struct {
+		mx *sync.RWMutex
+
 		id string
 
 		// intermediate levels balancing
-		egresses     []*node[PT, T]
 		egressPolicy balancingPolicy[*node[PT, T], node[PT, T]]
+		egresses     []*node[PT, T]
 
 		// connection level balancing
 		// TODO: may be egressPolicy and connPolicy can be unified?
-		conns      []PT
 		connFunc   connFunc[PT, T]
 		connPolicy balancingPolicy[PT, T]
+		conns      []PT
 
-		mx     *sync.RWMutex
 		alive  atomic.Bool
 		closed bool
 	}
 
 	nodeConfig[PT connection[T], T any] struct {
+		ConnectionConfig *ConnectionConfig[PT, T]
 		ID               string
 		Policy           string
-		ConnectionConfig *ConnectionConfig[PT, T]
 	}
 )
 
@@ -142,8 +143,6 @@ func (n *node[PT, T]) detach(idx int) {
 	if len(n.egresses) == 0 && len(n.conns) == 0 {
 		n.alive.Store(false)
 	}
-
-	return
 }
 
 func (n *node[PT, T]) addEgress(e *node[PT, T]) error {

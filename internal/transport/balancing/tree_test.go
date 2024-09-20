@@ -301,7 +301,6 @@ func TestTreeGetAddDelConcurrent(t *testing.T) {
 
 		go func() {
 			deletingAfter := delAfter - delInterval + time.Duration(rand.Intn(2*delInterval))*time.Millisecond
-			//fmt.Println("deletingAfter:", deletingAfter)
 			time.Sleep(deletingAfter)
 			errD := tree.DeletePath(path)
 			require.NoError(t, errD)

@@ -86,7 +86,6 @@ func NewWithStaticEndpoints(
 		if err != nil {
 			return nil, errors.Join(ErrGridEndpoint, err)
 		}
-
 	}
 
 	return tr, nil
@@ -148,6 +147,7 @@ func newGrid(gridCfg Config, treeCfg balancing.TreeConfig[*transport.Connection,
 }
 
 func (g *Grid) AddEndpoint(path []string, connFunc func() (*transport.Connection, error)) error {
+	//nolint:wrapcheck // unnecessary
 	return g.AddPath(balancing.Path[*transport.Connection, transport.Connection]{
 		IDs: path,
 		ConnectionConfig: balancing.ConnectionConfig[*transport.Connection, transport.Connection]{
@@ -158,6 +158,7 @@ func (g *Grid) AddEndpoint(path []string, connFunc func() (*transport.Connection
 }
 
 func (g *Grid) DeleteEndpoint(path []string) error {
+	//nolint:wrapcheck // unnecessary
 	return g.DeletePath(balancing.Path[*transport.Connection, transport.Connection]{
 		IDs: path,
 	})
@@ -170,7 +171,7 @@ func (g *Grid) Invoke(ctx context.Context, method string, args any, reply any, o
 			*trPtr = conn
 		}
 
-		return conn.Invoke(ctx, method, args, reply, opts...)
+		return conn.Invoke(ctx, method, args, reply, opts...) //nolint:wrapcheck // unnecessary
 	}
 
 	return errors.Join(localErrs.LocalFailureError{}, ErrNoConnections)
@@ -183,7 +184,7 @@ func (g *Grid) NewStream(
 	opts ...grpc.CallOption,
 ) (grpc.ClientStream, error) {
 	if conn := g.GetConn(); conn != nil {
-		return conn.NewStream(ctx, desc, method, opts...)
+		return conn.NewStream(ctx, desc, method, opts...) //nolint:wrapcheck // unnecessary
 	}
 
 	return nil, errors.Join(localErrs.LocalFailureError{}, ErrNoConnections)

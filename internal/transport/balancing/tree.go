@@ -29,8 +29,8 @@ type (
 	}
 
 	TreeConfig[PT connection[T], T any] struct {
-		Levels           []Level
 		ConnectionConfig *ConnectionConfig[PT, T]
+		Levels           []Level
 	}
 
 	ConnectionConfig[PT connection[T], T any] struct {
@@ -39,9 +39,9 @@ type (
 	}
 
 	Path[PT connection[T], T any] struct {
-		IDs []string
-
 		ConnectionConfig[PT, T]
+
+		IDs []string
 	}
 )
 

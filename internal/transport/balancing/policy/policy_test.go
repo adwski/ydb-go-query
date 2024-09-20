@@ -1,9 +1,10 @@
 package policy
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 type (
@@ -19,8 +20,12 @@ type (
 	}
 )
 
+func (n *node) Alive() bool {
+	return n.alive
+}
+
 var (
-	oneOrNoneAlive = []test{
+	simpleTests = []test{
 		{
 			name: "0 ready",
 			nodes: func() []*node {
@@ -56,113 +61,60 @@ var (
 			}(),
 			wantIdx: -1,
 		},
+		{
+			name: "all alive",
+			nodes: func() []*node {
+				nodes := make([]*node, 10)
+				for i := range nodes {
+					nodes[i] = &node{
+						idx:   i,
+						alive: true,
+					}
+				}
+				return nodes
+			}(),
+		},
 	}
 )
 
-func (n *node) Alive() bool {
-	return n.alive
+type policy_[PT Egress[T], T any] interface {
+	Get([]PT) PT
+}
+
+func testSimple(t *testing.T, pFunc func() policy_[*node, node], tests []test) {
+	t.Helper()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := pFunc().Get(tt.nodes)
+
+			switch {
+			case tt.checkValid:
+				require.NotNil(t, got)
+				assert.True(t, got.idx >= 0 && got.idx <= 9)
+			case tt.wantIdx >= 0:
+				require.NotNil(t, got)
+				assert.Equal(t, tt.wantIdx, got.idx)
+			default:
+				assert.Nil(t, got)
+			}
+		})
+	}
 }
 
 func TestFirstReady(t *testing.T) {
-	tests := append(oneOrNoneAlive, []test{
-		{
-			name: "all alive",
-			nodes: func() []*node {
-				nodes := make([]*node, 10)
-				for i := range nodes {
-					nodes[i] = &node{
-						idx:   i,
-						alive: true,
-					}
-				}
-				return nodes
-			}(),
-			wantIdx: 0,
-		},
-	}...)
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			policy := FirstReady[*node, node]{}
-
-			got := policy.Get(tt.nodes)
-
-			if tt.wantIdx >= 0 {
-				require.NotNil(t, got)
-				assert.Equal(t, tt.wantIdx, got.idx)
-			} else {
-				assert.Nil(t, got)
-			}
-		})
-	}
+	testSimple(t, func() policy_[*node, node] { return &FirstReady[*node, node]{} }, simpleTests)
 }
 
 func TestRandom(t *testing.T) {
-	tests := append(oneOrNoneAlive, []test{
-		{
-			name: "all alive",
-			nodes: func() []*node {
-				nodes := make([]*node, 10)
-				for i := range nodes {
-					nodes[i] = &node{
-						idx:   i,
-						alive: true,
-					}
-				}
-				return nodes
-			}(),
-			checkValid: true,
-		},
-	}...)
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			policy := Random[*node, node]{}
-
-			got := policy.Get(tt.nodes)
-
-			if tt.checkValid {
-				require.NotNil(t, got)
-				assert.True(t, got.idx >= 0 && got.idx <= 9)
-			} else if tt.wantIdx >= 0 {
-				require.NotNil(t, got)
-				assert.Equal(t, tt.wantIdx, got.idx)
-			} else {
-				assert.Nil(t, got)
-			}
-		})
-	}
+	simpleTests[3].checkValid = true
+	testSimple(t, func() policy_[*node, node] { return &Random[*node, node]{} }, simpleTests)
 }
 
 func TestRoundRobin(t *testing.T) {
-	tests := append(oneOrNoneAlive, []test{
-		{
-			name: "all alive",
-			nodes: func() []*node {
-				nodes := make([]*node, 10)
-				for i := range nodes {
-					nodes[i] = &node{
-						idx:   i,
-						alive: true,
-					}
-				}
-				return nodes
-			}(),
-			wantIdx: 1, // rr follows next node
-		},
-	}...)
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			policy := RoundRobin[*node, node]{}
-
-			got := policy.Get(tt.nodes)
-
-			if tt.wantIdx >= 0 {
-				require.NotNil(t, got)
-				assert.Equal(t, tt.wantIdx, got.idx)
-			} else {
-				assert.Nil(t, got)
-			}
-		})
-	}
+	simpleTests[3].checkValid = false
+	simpleTests[3].wantIdx = 1 // rr follows next node
+	testSimple(t, func() policy_[*node, node] { return &RoundRobin[*node, node]{} }, simpleTests)
 }
 
 func TestRoundRobinCircular(t *testing.T) {
