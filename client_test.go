@@ -116,7 +116,7 @@ func TestClient_Queries(t *testing.T) {
 
 		usrCtr := 0
 		res, err = qCtx.Query("SELECT * FROM users").Collect(func(rows []*Ydb.Value) error {
-			for _, _ = range rows {
+			for range rows {
 				usrCtr++
 			}
 			return nil
