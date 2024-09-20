@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	ErrFinished = errors.New("transaction already finished")
+	ErrTxFinished = errors.New("transaction already finished")
 )
 
 type (
@@ -34,7 +34,7 @@ type (
 
 func (tx *Transaction) Rollback(ctx context.Context) error {
 	if tx.finish {
-		return ErrFinished
+		return ErrTxFinished
 	}
 
 	if err := tx.sess.RollbackTX(ctx, tx.id); err != nil {
@@ -49,7 +49,7 @@ func (tx *Transaction) Rollback(ctx context.Context) error {
 
 func (tx *Transaction) Commit(ctx context.Context) error {
 	if tx.finish {
-		return ErrFinished
+		return ErrTxFinished
 	}
 
 	if err := tx.sess.CommitTX(ctx, tx.id); err != nil {
@@ -78,7 +78,7 @@ func (tx *Transaction) exec(
 	commit bool,
 ) (*Result, error) {
 	if tx.finish {
-		return nil, ErrFinished
+		return nil, ErrTxFinished
 	}
 
 	if commit {
