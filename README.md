@@ -15,8 +15,7 @@ Experimental lightweight [YDB](https://ydb.tech) client that focuses on query se
 - Client-side 3-levels load balancing (dc->node->connection) with continuous 'out-of-band' nodes discovery
 - Session pool with session recycling
 - Yandex Cloud IAM auth (for serverless YDB) and user-pass auth
-- Works with and exposes bare YDB GRPC field types `github.com/ydb-platform/ydb-go-genproto/protos/Ydb`
-- ... but provides type helpers for convenience.
+- Works with and exposes bare YDB GRPC field types `github.com/ydb-platform/ydb-go-genproto/protos/Ydb` (but provides type helpers for convenience).
 
 ## TODO
 
@@ -74,26 +73,26 @@ func main() {
 ## More config options
 
 ```go
-    client, err := ydb.Open(ctx, ydb.Config{
-        InitialNodes: []string{"127.0.0.1:2136"},
-        DB:           "/local",
-    },
-    // init logging with external logger.
-	// "debug" here is an internal level (not related to zerolog)
-    ydb.WithZeroLogger(zerolog.New(zerolog.NewConsoleWriter()), "debug"),
+client, err := ydb.Open(ctx, ydb.Config{
+    InitialNodes: []string{"127.0.0.1:2136"},
+    DB:           "/local",
+},
+// init logging with external logger.
+// "debug" here is an internal level (not related to zerolog)
+ydb.WithZeroLogger(zerolog.New(zerolog.NewConsoleWriter()), "debug"),
 
-    // zap is also available
-    // WithZapLogger(zapLogger, "debug"),
+// zap is also available
+// WithZapLogger(zapLogger, "debug"),
 
-    // query execution timeout
-    ydb.WithQueryTimeout(5*time.Minute),
+// query execution timeout
+ydb.WithQueryTimeout(5*time.Minute),
 
-    // session pool size
-    // Note, that it is NOT a number of connections
-    ydb.WithSessionPoolSize(10),
+// session pool size
+// Note, that it is NOT a number of connections
+ydb.WithSessionPoolSize(10),
 
-    // tx mode, serializable rw is default
-    ydb.WithSerializableReadWrite())
+// tx mode, serializable rw is default
+ydb.WithSerializableReadWrite())
 ```
 
 ## Contexts
@@ -123,44 +122,44 @@ global configuration that all queries use.
 At the moment it controls transaction mode and query timeout.
 
 ```go
-    client, _ := ydb.Open(ctx, ydb.Config{
-        InitialNodes: []string{"127.0.0.1:2136"},
-        DB:           "/local",
-    })
+client, _ := ydb.Open(ctx, ydb.Config{
+    InitialNodes: []string{"127.0.0.1:2136"},
+    DB:           "/local",
+})
 
-    qCtx := client.QueryCtx() // get query execution context
+qCtx := client.QueryCtx() // get query execution context
 
-    // DDL and DML queries must be executed outside of transaction
-    res, err := qCtx.Exec(`CREATE TABLE users (
-        user_id Uint64,
-        first_name Utf8,
-        last_name Utf8,
-        email Utf8,
-        registered_ts Uint64,
-        PRIMARY KEY (user_id))`)
+// DDL and DML queries must be executed outside of transaction
+res, err := qCtx.Exec(`CREATE TABLE users (
+    user_id Uint64,
+    first_name Utf8,
+    last_name Utf8,
+    email Utf8,
+    registered_ts Uint64,
+    PRIMARY KEY (user_id))`)
 
-    if err != nil {
-        panic(err)
-    }
+if err != nil {
+    panic(err)
+}
 ```
 
 `qCtx.Query()` executes each query in single transaction. Transaction mode is derived from `query.Ctx`.
 ```go
-    res, err = qCtx.Query(`DECLARE $user_id AS Uint64;
-        DECLARE $first_name AS Utf8;
-        DECLARE $last_name AS Utf8;
-        DECLARE $email AS Utf8;
-        DECLARE $registered_ts AS Uint64;
-        UPSERT INTO users (
-            user_id, first_name, last_name, email, registered_ts
-        ) VALUES (
-            $user_id, $first_name, $last_name, $email, $registered_ts)`).
-        Param("$user_id", types.Uint64(123)).
-        Param("$first_name", types.UTF8("test")).
-        Param("$last_name", types.UTF8("test")).
-        Param("$email", types.UTF8("test@test.test")).
-        Param("$registered_ts", types.Uint64(1726836887)).
-        Exec(ctx)
+res, err = qCtx.Query(`DECLARE $user_id AS Uint64;
+    DECLARE $first_name AS Utf8;
+    DECLARE $last_name AS Utf8;
+    DECLARE $email AS Utf8;
+    DECLARE $registered_ts AS Uint64;
+    UPSERT INTO users (
+        user_id, first_name, last_name, email, registered_ts
+    ) VALUES (
+        $user_id, $first_name, $last_name, $email, $registered_ts)`).
+    Param("$user_id", types.Uint64(123)).
+    Param("$first_name", types.UTF8("test")).
+    Param("$last_name", types.UTF8("test")).
+    Param("$email", types.UTF8("test@test.test")).
+    Param("$registered_ts", types.Uint64(1726836887)).
+    Exec(ctx)
 ```
 
 `qCtx.Query()` is used for select queries as well.
@@ -195,40 +194,40 @@ execute several queries in one transaction.
 Under the hood it will acquire and hold YDB session until transaction is finished. Tx mode is inherited from `query.Ctx`.
 Read more about transactions here https://ydb.tech/docs/en/concepts/transactions.
 ```go
-    tx, err := qCtx.Tx(ctx)
-    if errTx != nil {
-        panic(err)
-    }
-    res, err = tx.Query(`DECLARE $user_id AS Uint64;
-        DECLARE $first_name AS Utf8;
-        DECLARE $last_name AS Utf8;
-        DECLARE $email AS Utf8;
-        DECLARE $registered_ts AS Uint64;
-        UPSERT INTO users (
-            user_id, first_name, last_name, email, registered_ts
-        ) VALUES (
-            $user_id, $first_name, $last_name, $email, $registered_ts)`).
-    Param("$user_id", types.Uint64(123)).
-    Param("$first_name", types.UTF8("test")).
-    Param("$last_name", types.UTF8("test")).
-    Param("$email", types.UTF8("test@test.test")).
-    Param("$registered_ts", types.Uint64(1726836887)).
-    Exec(ctx)
+tx, err := qCtx.Tx(ctx)
+if errTx != nil {
+    panic(err)
+}
+res, err = tx.Query(`DECLARE $user_id AS Uint64;
+    DECLARE $first_name AS Utf8;
+    DECLARE $last_name AS Utf8;
+    DECLARE $email AS Utf8;
+    DECLARE $registered_ts AS Uint64;
+    UPSERT INTO users (
+        user_id, first_name, last_name, email, registered_ts
+    ) VALUES (
+        $user_id, $first_name, $last_name, $email, $registered_ts)`).
+Param("$user_id", types.Uint64(123)).
+Param("$first_name", types.UTF8("test")).
+Param("$last_name", types.UTF8("test")).
+Param("$email", types.UTF8("test@test.test")).
+Param("$registered_ts", types.Uint64(1726836887)).
+Exec(ctx)
 
-    if err != nil {
-        panic(err)
-    }
+if err != nil {
+    panic(err)
+}
 
-    // more queries here
-    // ...
+// more queries here
+// ...
 
-    // commit transaction
-    err = tx.Commit(ctx)
-    if err != nil {
-        panic(err)
-    }
+// commit transaction
+err = tx.Commit(ctx)
+if err != nil {
+    panic(err)
+}
 ```
-You also can send an inline commit together with the last query in the current transaction. This way transaction will be committed immediately after (successful) query execution and explicit `tx.Commit()` call is not needed. This saves you one round trip to YDB if you really care about it.
+You also can send an inline commit together with the last query in the current transaction. This way transaction will be committed immediately after (successful) query execution and explicit `tx.Commit()` call is not needed. This approach saves you one round trip to YDB.
 ```go
 res, err := tx.Query("...").
     Param("$qwe", types.UTF8("test")).
