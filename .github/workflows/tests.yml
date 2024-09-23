@@ -44,6 +44,9 @@ jobs:
       - name: run tests
         env:
           YDB_TEST_ENDPOINT: ydb:2136
+          YDB_SERVERLESS_DB: ${{ secrets.YDB_SERVERLESS_DB }}
+          YDB_SERVERLESS_IAM_KEY: ${{ secrets.YDB_SERVERLESS_IAM_KEY }}
+
         run: |
           go test -v -race -count=1 -cover -coverpkg=./... -coverprofile=profile.cov ./... -tags integration
 
