@@ -47,7 +47,10 @@ const (
 var (
 	ydbEndpoint = "127.0.0.1:2136"
 
-	ydbConfig Config
+	ydbLocalConfig      Config
+	ydbServerlessConfig Config
+
+	ydbServerlessIAMKey string
 
 	zeroLogger = zerolog.New(zerolog.NewConsoleWriter()).
 			Level(zerolog.DebugLevel).
@@ -68,10 +71,17 @@ func init() {
 		ydbEndpoint = val
 	}
 
-	ydbConfig = Config{
+	ydbLocalConfig = Config{
 		InitialNodes: []string{ydbEndpoint},
 		DB:           ydbPath,
 	}
+
+	ydbServerlessConfig = Config{
+		InitialNodes: []string{"ydb.serverless.yandexcloud.net:2135"},
+		DB:           os.Getenv("YDB_SERVERLESS_DB"),
+	}
+
+	ydbServerlessIAMKey = os.Getenv("YDB_SERVERLESS_IAM_KEY")
 }
 
 func TestClient_OpenClose(t *testing.T) {
@@ -97,17 +107,57 @@ func TestClient_OpenClose(t *testing.T) {
 	}
 }
 
-func TestClient_Queries(t *testing.T) {
+func TestClient(t *testing.T) {
+	tests := []struct {
+		name    string
+		config  Config
+		options []Option
+	}{
+		{
+			name:   "Local",
+			config: ydbLocalConfig,
+		},
+		{
+			name:   "Serverless",
+			config: ydbServerlessConfig,
+			options: []Option{
+				WithTransportTLS(),
+				WithYCAuthBytes([]byte(ydbServerlessIAMKey)),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Run("Queries", func(t *testing.T) {
+				testQueries(t, tt.config, tt.options)
+			})
+			t.Run("Transactions", func(t *testing.T) {
+				t.Run("Successful", func(t *testing.T) {
+					testTransactions(t, tt.config, tt.options)
+				})
+				t.Run("Finished", func(t *testing.T) {
+					testTransactionFinished(t, tt.config, tt.options)
+				})
+			})
+		})
+	}
+}
+
+func testQueries(t *testing.T, cfg Config, opts []Option) {
+	t.Helper()
+
 	const (
 		usersCount = 100
 	)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	client, err := Open(ctx, ydbConfig,
+	opts = append(opts,
 		WithZeroLogger(zeroLogger, logLevel),
 		WithQueryTimeout(5*time.Second),
 	)
+
+	client, err := Open(ctx, cfg, opts...)
 	require.NoError(t, err)
 	defer client.Close()
 
@@ -138,14 +188,17 @@ func TestClient_Queries(t *testing.T) {
 	dropUsersTable(ctx, t, qCtx)
 }
 
-func TestClient_TransactionFinished(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func testTransactionFinished(t *testing.T, cfg Config, opts []Option) {
+	t.Helper()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	client, err := Open(ctx, ydbConfig,
+	opts = append(opts,
 		WithZeroLogger(zeroLogger, logLevel),
-		WithQueryTimeout(5*time.Second),
-	)
+		WithQueryTimeout(5*time.Second))
+
+	client, err := Open(ctx, cfg, opts...)
 	require.NoError(t, err)
 	defer client.Close()
 
@@ -170,14 +223,17 @@ func TestClient_TransactionFinished(t *testing.T) {
 	dropUsersTable(ctx, t, qCtx)
 }
 
-func TestClient_Transactions(t *testing.T) {
+func testTransactions(t *testing.T, cfg Config, opts []Option) {
+	t.Helper()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	client, err := Open(ctx, ydbConfig,
+	opts = append(opts,
 		WithZapLogger(zapLogger, logLevel),
-		WithQueryTimeout(5*time.Second),
-	)
+		WithQueryTimeout(5*time.Second))
+
+	client, err := Open(ctx, cfg, opts...)
 	require.NoError(t, err)
 	defer client.Close()
 
