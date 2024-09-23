@@ -5,7 +5,6 @@ go 1.23.1
 require (
 	github.com/brianvoe/gofakeit/v7 v7.0.4
 	github.com/rs/zerolog v1.33.0
-	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.1
 	github.com/yandex-cloud/go-sdk v0.0.0-20240819112606-8a626cdc403d
 	github.com/ydb-platform/ydb-go-genproto v0.0.0-20240528144234-5d5a685e41f7
