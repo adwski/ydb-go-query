@@ -26,7 +26,10 @@ const (
 	defaultSessionCreateTimeout = 3 * time.Second
 	defaultQueryTimeout         = 5 * time.Minute
 	defaultSessionPoolSize      = 10
-	defaultLogLevel             = "info"
+)
+
+var (
+	ErrAuthentication = errors.New("authentication failed")
 )
 
 type (
@@ -137,10 +140,14 @@ func withYC(ycCfg yc.Config) Option {
 		if err != nil {
 			return err //nolint:wrapcheck // unnecessary
 		}
-		cfg.auth = auth.New(ctx, auth.Config{
+		cfg.auth, err = auth.New(ctx, auth.Config{
 			Logger:   cfg.logger,
 			Provider: ycAuth,
 		})
+
+		if err != nil {
+			return errors.Join(ErrAuthentication, err)
+		}
 
 		return nil
 	}
@@ -154,7 +161,7 @@ func WithUserPass(username, password string) Option {
 		if err != nil {
 			return errors.Join(ErrAuthTransport, err)
 		}
-		cfg.auth = auth.New(ctx, auth.Config{
+		cfg.auth, err = auth.New(ctx, auth.Config{
 			Logger: cfg.logger,
 			Provider: userpass.New(userpass.Config{
 				Transport: tr,
@@ -162,6 +169,10 @@ func WithUserPass(username, password string) Option {
 				Password:  password,
 			}),
 		})
+
+		if err != nil {
+			return errors.Join(ErrAuthentication, err)
+		}
 
 		return nil
 	}

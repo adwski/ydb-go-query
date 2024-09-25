@@ -11,6 +11,7 @@ import (
 const (
 	defaultTokenCallTimeout       = 5 * time.Second
 	defaultTokenRenewFailInterval = 10 * time.Second
+	defaultTokenInitialRetry      = time.Second
 )
 
 type (
@@ -38,7 +39,7 @@ type (
 	}
 )
 
-func New(ctx context.Context, cfg Config) *Auth {
+func New(ctx context.Context, cfg Config) (*Auth, error) {
 	auth := &Auth{
 		provider:     cfg.Provider,
 		logger:       cfg.Logger,
@@ -47,9 +48,7 @@ func New(ctx context.Context, cfg Config) *Auth {
 		mx: &sync.RWMutex{},
 	}
 
-	auth.mustGetToken(ctx)
-
-	return auth
+	return auth, auth.mustGetToken(ctx)
 }
 
 func (a *Auth) GetToken() string {
@@ -59,17 +58,21 @@ func (a *Auth) GetToken() string {
 	return a.token
 }
 
-func (a *Auth) mustGetToken(ctx context.Context) {
+func (a *Auth) mustGetToken(ctx context.Context) (err error) {
 getTokenLoop:
 	for {
 		select {
 		case <-ctx.Done():
+			return
 		default:
-			if a.getTokenTick(ctx) == nil {
+			if err = a.getTokenTick(ctx); err == nil {
 				break getTokenLoop
 			}
+			time.Sleep(defaultTokenInitialRetry)
 		}
 	}
+
+	return //nolint:nilerr // unnecessary
 }
 
 func (a *Auth) getTokenTick(ctx context.Context) error {
@@ -78,7 +81,7 @@ func (a *Auth) getTokenTick(ctx context.Context) error {
 
 	token, expires, err := a.provider.GetToken(ctxCall)
 	if err != nil {
-		a.logger.Error("token renew error", "error", err)
+		a.logger.Error("token error", "error", err)
 		a.setTimer(defaultTokenRenewFailInterval)
 
 		return err //nolint:wrapcheck //unnecessary
