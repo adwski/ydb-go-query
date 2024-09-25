@@ -25,6 +25,9 @@ const (
 
 	logLevel = "debug"
 
+	ydbDefaultUser     = "root"
+	ydbDefaultPassword = "1234"
+
 	usersTable = `CREATE TABLE users (                  
     	user_id Uint64,
     	first_name Utf8,
@@ -84,7 +87,7 @@ func init() {
 	ydbServerlessIAMKey = os.Getenv("YDB_SERVERLESS_IAM_KEY")
 }
 
-func TestClient_OpenClose(t *testing.T) {
+func TestClient_Open(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -104,6 +107,62 @@ func TestClient_OpenClose(t *testing.T) {
 	case <-done:
 	case <-time.After(5 * time.Second):
 		require.Fail(t, "close timeout")
+	}
+}
+
+func TestClient_UserPass(t *testing.T) {
+	tests := []struct {
+		name     string
+		username string
+		password string
+		wantErr  error
+	}{
+		{
+			name:     "success",
+			username: ydbDefaultUser,
+			password: ydbDefaultPassword,
+		},
+		{
+			name:     "unauthorized",
+			username: "wronguser",
+			password: "wrongpassword",
+			wantErr:  ErrAuthentication,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			client, err := Open(ctx,
+				Config{
+					InitialNodes: []string{ydbEndpoint},
+					DB:           ydbPath,
+				},
+				WithZeroLogger(zeroLogger, logLevel),
+				WithUserPass(tt.username, tt.password),
+			)
+			if tt.wantErr != nil {
+				require.ErrorIs(t, err, tt.wantErr)
+				require.Nil(t, client)
+				return
+			}
+			require.NoError(t, err)
+			require.NotNil(t, client)
+
+			done := make(chan struct{})
+			go func() {
+				client.Close()
+				done <- struct{}{}
+			}()
+
+			select {
+			case <-done:
+			case <-time.After(5 * time.Second):
+				require.Fail(t, "close timeout")
+			}
+		})
 	}
 }
 
