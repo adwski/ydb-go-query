@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/ydb-platform/ydb-go-genproto/Ydb_Auth_V1"
+	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Auth"
 	"google.golang.org/grpc"
 )
@@ -16,6 +17,8 @@ const (
 
 var (
 	ErrLogin           = errors.New("login request failed")
+	ErrNilOperation    = errors.New("nil operation")
+	ErrUnauthorized    = errors.New("unauthorized")
 	ErrLoginUnmarshall = errors.New("login response unmarshall failed")
 )
 
@@ -54,8 +57,17 @@ func (up *UserPass) GetToken(ctx context.Context) (token string, expires time.Ti
 		err = errors.Join(ErrLogin, err)
 		return
 	}
+	op := resp.GetOperation()
+	if op == nil {
+		err = errors.Join(ErrLogin, ErrNilOperation)
+		return
+	}
+	if op.GetStatus() == Ydb.StatusIds_UNAUTHORIZED {
+		err = ErrUnauthorized
+		return
+	}
 	var result Ydb_Auth.LoginResult
-	if err = resp.GetOperation().Result.UnmarshalTo(&result); err != nil {
+	if err = op.GetResult().UnmarshalTo(&result); err != nil {
 		err = errors.Join(ErrLoginUnmarshall, err)
 		return
 	}
