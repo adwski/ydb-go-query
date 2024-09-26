@@ -13,18 +13,20 @@ Experimental lightweight [YDB](https://ydb.tech) client that focuses on query se
 - Query execution (with parameters)
 - Transactions
 - Client-side 3-levels load balancing (dc->node->connection) with continuous 'out-of-band' nodes discovery
-- Session pool with session recycling
-- Yandex Cloud IAM auth (for serverless YDB) and user-pass auth
+- Session pool with session recycling and auto warm-up
+- Authentication: user-pass and Yandex Cloud IAM (for serverless YDB).
 - Works with and exposes bare YDB GRPC field types `github.com/ydb-platform/ydb-go-genproto/protos/Ydb` (but provides type helpers for convenience).
+- Ready status with high and low thresholds.
 
 ## TODO
 
+- [x] Ready status
 - [ ] DC/location priorities for balancer
 - [ ] Migrations
 - [ ] Scripts
 - [ ] More type helpers
 - [ ] Retries
-- [ ] Ready status
+- [ ] OpenMetrics
 
 # Quickstart
 

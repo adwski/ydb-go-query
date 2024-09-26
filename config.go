@@ -43,7 +43,10 @@ type (
 		DB           string
 		InitialNodes []string
 
-		poolSize             uint
+		poolSize    uint
+		poolReadyHi uint
+		poolReadyLo uint
+
 		sessionCreateTimeout time.Duration
 		queryTimeout         time.Duration
 	}
@@ -107,6 +110,15 @@ func WithQueryTimeout(timeout time.Duration) Option {
 func WithSessionPoolSize(size uint) Option {
 	return func(ctx context.Context, cfg *Config) error {
 		cfg.poolSize = size
+		return nil
+	}
+}
+
+func WithSessionPoolReadyThresholds(high, low uint) Option {
+	return func(ctx context.Context, cfg *Config) error {
+		cfg.poolReadyHi = high
+		cfg.poolReadyLo = low
+
 		return nil
 	}
 }
