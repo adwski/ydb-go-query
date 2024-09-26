@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"sync"
-	"time"
 
 	"github.com/adwski/ydb-go-query/internal/discovery"
 	"github.com/adwski/ydb-go-query/internal/logger"
@@ -35,10 +34,13 @@ func Open(ctx context.Context, cfg Config, opts ...Option) (*Client, error) {
 	runCtx, client.cancel = context.WithCancel(ctx)
 
 	client.querySvc = query.NewService(runCtx, query.Config{
-		Logger:        client.logger,
-		Transport:     client.dispatcher.Transport(),
-		CreateTimeout: client.sessionCreateTimeout,
-		PoolSize:      client.poolSize,
+		Logger:    client.logger,
+		Transport: client.dispatcher.Transport(),
+
+		CreateTimeout:          cfg.sessionCreateTimeout,
+		PoolSize:               cfg.poolSize,
+		PoolReadyThresholdHigh: cfg.poolReadyHi,
+		PoolReadyThresholdLow:  cfg.poolReadyLo,
 	})
 
 	client.queryCtx = qq.NewCtx(client.logger, client.querySvc, cfg.txSettings, cfg.queryTimeout)
@@ -75,9 +77,6 @@ type (
 		cancel context.CancelFunc
 
 		logger logger.Logger
-
-		sessionCreateTimeout time.Duration
-		poolSize             uint
 	}
 )
 
@@ -89,6 +88,10 @@ func (c *Client) Close() {
 	c.cancel()
 	_ = c.querySvc.Close()
 	c.wg.Wait()
+}
+
+func (c *Client) Ready() bool {
+	return c.querySvc.Ready()
 }
 
 func newClient(ctx context.Context, cfg *Config, opts ...Option) (*Client, error) {
@@ -133,9 +136,7 @@ func newClient(ctx context.Context, cfg *Config, opts ...Option) (*Client, error
 	}
 
 	c := &Client{
-		logger:               cfg.logger,
-		sessionCreateTimeout: cfg.sessionCreateTimeout,
-		poolSize:             cfg.poolSize,
+		logger: cfg.logger,
 
 		dispatcher:   dispatcher.New(dispatcherCfg),
 		discoverySvc: discoverySvc,

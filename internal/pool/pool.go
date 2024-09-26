@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math/rand"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	localErrs "github.com/adwski/ydb-go-query/internal/errors"
@@ -20,6 +21,9 @@ const (
 	minPoolSize = 1
 
 	defaultCreateRetryDelayOnLocalErrors = time.Second
+
+	defaultReadyThresholdHigh = 50 // percent
+	defaultReadyThresholdLow  = 0  // percent
 )
 
 type (
@@ -46,11 +50,15 @@ type (
 
 		logger logger.Logger
 
+		stats stats
+
 		createTimeout time.Duration
 		itemLifetime  int64 // seconds
 		recycleWindow int64 // seconds
 
 		size uint
+
+		closed atomic.Bool
 
 		itemRecycling bool
 	}
@@ -75,24 +83,33 @@ type (
 		// and new item will be created instead.
 		// 0 lifetime means item has infinite lifetime and item recycling
 		// is not running.
-		// Lifetime cannot be greater than 0 and less than 5 seconds (minItemLifetime).
+		// Lifetime cannot be less than 5 seconds (minItemLifetime).
 		Lifetime time.Duration
 
 		// RecycleWindow specifies time interval for item recycling:
 		// [Lifetime-RecycleWindow;Lifetime+RecycleWindow]
-		// This prevents items to all be recycled in the same time.
+		// This prevents service degradation caused by recycling of
+		// significant number of items created at the same time.
 		RecycleWindow time.Duration
 
 		// PoolSize specifies amount of items in pool.
 		PoolSize uint
 
+		// Ready thresholds specifies transition points (in percents) for ready status.
+		// If amount of inUse + idle sessions is greater or equal than
+		// high threshold then pool is Ready.
+		// If this amount is equal or less than low threshold then pool is NotReady.
+		// Thresholds should be in range [0;100] and satisfy lo < hi condition
+		// (must not be equal!). If these conditions are not met, pool will fall back
+		// to default lo=0, hi=50 values.
+		ReadyThresholdPercentHigh uint
+		ReadyThresholdPercentLow  uint
+
 		test bool
 	}
 )
 
-func New[PT item[T], T any](ctx context.Context, cfg Config[PT, T]) *Pool[PT, T] {
-	runCtx, cancel := context.WithCancel(ctx)
-
+func (cfg *Config[PT, T]) validate() {
 	if !cfg.test { // bypass min value checks
 		if cfg.CreateTimeout < minCreateTimeout {
 			cfg.CreateTimeout = defaultCreateTimeout
@@ -104,6 +121,27 @@ func New[PT item[T], T any](ctx context.Context, cfg Config[PT, T]) *Pool[PT, T]
 			cfg.PoolSize = minPoolSize
 		}
 	}
+
+	if cfg.ReadyThresholdPercentLow > 100 {
+		cfg.ReadyThresholdPercentLow = defaultReadyThresholdHigh
+	}
+	if cfg.ReadyThresholdPercentHigh > 100 {
+		cfg.ReadyThresholdPercentHigh = defaultReadyThresholdHigh
+	}
+	if cfg.ReadyThresholdPercentHigh <= cfg.ReadyThresholdPercentLow {
+		cfg.ReadyThresholdPercentLow = defaultReadyThresholdLow
+		cfg.ReadyThresholdPercentHigh = defaultReadyThresholdHigh
+	}
+}
+
+func New[PT item[T], T any](ctx context.Context, cfg Config[PT, T]) *Pool[PT, T] {
+	cfg.validate()
+
+	runCtx, cancel := context.WithCancel(ctx)
+
+	// convert from percents to actual values
+	hi := int64(float64(cfg.ReadyThresholdPercentHigh) * float64(cfg.PoolSize) / 100)
+	lo := int64(float64(cfg.ReadyThresholdPercentLow) * float64(cfg.PoolSize) / 100)
 
 	pool := &Pool[PT, T]{
 		logger:        cfg.Logger,
@@ -125,6 +163,8 @@ func New[PT item[T], T any](ctx context.Context, cfg Config[PT, T]) *Pool[PT, T]
 
 		queue:  make(chan PT, cfg.PoolSize),
 		tokens: make(chan struct{}, cfg.PoolSize),
+
+		stats: newStats(hi, lo),
 	}
 
 	// fill tokens
@@ -147,8 +187,16 @@ func New[PT item[T], T any](ctx context.Context, cfg Config[PT, T]) *Pool[PT, T]
 	return pool
 }
 
+func (p *Pool[PT, T]) Ready() bool {
+	if p.closed.Load() {
+		return false
+	}
+	return p.stats.ready().Get()
+}
+
 func (p *Pool[PT, T]) Close() error {
 	p.closeOnce.Do(func() {
+		p.closed.Store(true)
 		p.cancelFunc()
 		p.drain()
 		p.wg.Wait()
@@ -164,7 +212,13 @@ getLoop:
 	for {
 		select {
 		case itm := <-p.queue:
+			p.stats.idle().Dec()
+			p.stats.updateReady()
+
 			if itm.Alive() {
+				p.stats.inUse().Inc()
+				p.stats.updateReady()
+
 				p.logger.Trace("item retrieved from pool", "id", itm.ID())
 				return itm
 			}
@@ -184,9 +238,14 @@ getLoop:
 }
 
 func (p *Pool[PT, T]) Put(itm PT) {
+	p.stats.inUse().Dec()
+	defer p.stats.updateReady()
+
 	// check if alive
 	if itm.Alive() {
 		if !p.itemRecycling || !p.itemExpired(itm) {
+			p.stats.idle().Inc()
+
 			// alive and not expired
 			// push item back and finish iteration
 			p.queue <- itm // ignoring ctx.Done(), should never block here
@@ -235,6 +294,8 @@ spawnLoop:
 				// Ignoring ctx.Done() here and put item in queue anyway,
 				// so it can be closed later by drain().
 				p.queue <- itm
+				p.stats.idle().Inc()
+				p.stats.updateReady()
 
 				break
 			}
@@ -247,6 +308,8 @@ drainLoop:
 	for {
 		select {
 		case itm := <-p.queue:
+			p.stats.idle().Dec()
+			p.stats.updateReady()
 			_ = itm.Close()
 		default:
 			break drainLoop
@@ -320,7 +383,10 @@ recycleLoop:
 				p.queue <- itm // ignoring ctx.Done(), should never block here
 				break
 			}
+
 			// recycle
+			p.stats.idle().Dec()
+			p.stats.updateReady()
 			_ = itm.Close()
 			p.logger.Trace("item recycled", "id", itm.ID())
 			// push token

@@ -33,7 +33,10 @@ type Config struct {
 	Transport     grpc.ClientConnInterface
 	Logger        logger.Logger
 	CreateTimeout time.Duration
-	PoolSize      uint
+
+	PoolSize               uint
+	PoolReadyThresholdHigh uint
+	PoolReadyThresholdLow  uint
 }
 
 func NewService(runCtx context.Context, cfg Config) *Service {
@@ -42,9 +45,11 @@ func NewService(runCtx context.Context, cfg Config) *Service {
 	sessionPool := pool.New[*session.Session, session.Session](
 		runCtx,
 		pool.Config[*session.Session, session.Session]{
-			Logger:        cfg.Logger,
-			CreateTimeout: cfg.CreateTimeout,
-			PoolSize:      cfg.PoolSize,
+			Logger:                    cfg.Logger,
+			CreateTimeout:             cfg.CreateTimeout,
+			PoolSize:                  cfg.PoolSize,
+			ReadyThresholdPercentHigh: cfg.PoolReadyThresholdHigh,
+			ReadyThresholdPercentLow:  cfg.PoolReadyThresholdLow,
 			CreateFunc: func(sessCtx context.Context, timeout time.Duration) (*session.Session, error) {
 				return session.CreateSession(sessCtx, qsc, cfg.Logger, timeout)
 			},
@@ -101,4 +106,8 @@ func (svc *Service) Exec(
 	}
 
 	return stream, cancel, nil
+}
+
+func (svc *Service) Ready() bool {
+	return svc.pool.Ready()
 }

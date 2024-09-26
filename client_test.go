@@ -55,9 +55,11 @@ var (
 
 	ydbServerlessIAMKey string
 
-	zeroLogger = zerolog.New(zerolog.NewConsoleWriter()).
-			Level(zerolog.DebugLevel).
-			With().Timestamp().Logger()
+	zeroLogger = zerolog.New(zerolog.NewConsoleWriter(func(w *zerolog.ConsoleWriter) {
+		w.TimeFormat = time.StampMilli
+	})).
+		Level(zerolog.DebugLevel).
+		With().Timestamp().Logger()
 
 	zapLogger = zap.New(zapcore.NewCore(zapcore.NewConsoleEncoder(zapcore.EncoderConfig{
 		MessageKey:     "msg",
@@ -91,11 +93,27 @@ func TestClient_Open(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := Open(ctx, Config{
-		InitialNodes: []string{ydbEndpoint},
-		DB:           ydbPath,
-	}, WithZeroLogger(zeroLogger, logLevel))
+	client, err := Open(ctx,
+		Config{
+			InitialNodes: []string{ydbEndpoint},
+			DB:           ydbPath,
+		},
+		WithZeroLogger(zeroLogger, logLevel),
+		WithSessionPoolReadyThresholds(100, 0))
 	require.NoError(t, err)
+
+waitForReady:
+	for {
+		select {
+		case <-ctx.Done():
+			t.Fatal("client did not become ready")
+		default:
+			if client.Ready() {
+				break waitForReady
+			}
+			time.Sleep(time.Second)
+		}
+	}
 
 	done := make(chan struct{})
 	go func() {
@@ -390,9 +408,15 @@ func dropUsersTable(ctx context.Context, t *testing.T, qCtx *query.Ctx) {
 func verifyResult(t *testing.T, res *query.Result, err error) {
 	t.Helper()
 
-	require.NoError(t, err)
-	require.NotNil(t, res)
-	require.NoError(t, res.Err())
-	require.Empty(t, res.Issues())
-	require.NotNil(t, res.Stats())
+	ok := assert.NoError(t, err)
+	ok = assert.NotNil(t, res) && ok
+	if res != nil {
+		ok = assert.NoError(t, res.Err()) && ok
+		ok = assert.Empty(t, res.Issues()) && ok
+		ok = assert.NotNil(t, res.Stats()) && ok
+	}
+
+	if !ok {
+		t.FailNow()
+	}
 }
