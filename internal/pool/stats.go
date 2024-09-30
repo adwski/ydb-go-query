@@ -6,17 +6,19 @@ import (
 
 type (
 	stats struct {
-		inUse_ s.Gauge
-		idle_  s.Gauge
-		ready_ s.Indicator
+		inUse_   s.Gauge
+		idle_    s.Gauge
+		waiting_ s.Gauge
+		ready_   s.Indicator
 	}
 )
 
 func newStats(hi, lo int64) stats {
 	return stats{
-		inUse_: s.NewGauge(),
-		idle_:  s.NewGauge(),
-		ready_: s.NewIndicator(hi, lo),
+		inUse_:   s.NewGauge(),
+		idle_:    s.NewGauge(),
+		waiting_: s.NewGauge(),
+		ready_:   s.NewIndicator(hi, lo),
 	}
 }
 
@@ -30,6 +32,10 @@ func (s *stats) idle() s.Gauge {
 
 func (s *stats) ready() s.Indicator {
 	return s.ready_
+}
+
+func (s *stats) waiting() s.Gauge {
+	return s.waiting_
 }
 
 func (s *stats) updateReady() {

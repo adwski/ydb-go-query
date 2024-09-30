@@ -208,6 +208,9 @@ func (p *Pool[PT, T]) Close() error {
 }
 
 func (p *Pool[PT, T]) Get(rCtx context.Context) PT {
+	p.stats.waiting().Inc()
+	defer p.stats.waiting().Dec()
+
 getLoop:
 	for {
 		select {
