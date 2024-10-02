@@ -7,8 +7,7 @@ import (
 )
 
 type (
-	// Announce is helpful message for consumers of this service about changes in YDB endpoints.
-	// For example dispatcher uses it to adjust balancing tree.
+	// Announce consolidates changes observed in YDB endpoints since previous observation.
 	Announce struct {
 		Add    Map         // contains newly discovered endpoints
 		Update Map         // contains endpoints with changes (reserved for later use with load factor)
