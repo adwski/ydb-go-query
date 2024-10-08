@@ -6,7 +6,7 @@ import (
 
 	localErrs "github.com/adwski/ydb-go-query/internal/errors"
 	"github.com/adwski/ydb-go-query/internal/transport"
-	"github.com/adwski/ydb-go-query/internal/transport/balancing"
+	balancing "github.com/adwski/ydb-go-query/internal/transport/balancing/v1"
 	"github.com/adwski/ydb-go-query/internal/xcontext"
 
 	"google.golang.org/grpc"

@@ -13,7 +13,7 @@ import (
 	"github.com/adwski/ydb-go-query/internal/transport/auth"
 	"github.com/adwski/ydb-go-query/internal/transport/auth/userpass"
 	"github.com/adwski/ydb-go-query/internal/transport/auth/yc"
-	"github.com/adwski/ydb-go-query/internal/transport/balancing/grid"
+	"github.com/adwski/ydb-go-query/internal/transport/balancing/v1/grid"
 	transportCreds "github.com/adwski/ydb-go-query/internal/transport/credentials"
 
 	"github.com/rs/zerolog"

@@ -1,11 +1,11 @@
-package balancing
+package v1
 
 import (
 	"errors"
 	"sync"
 	"sync/atomic"
 
-	"github.com/adwski/ydb-go-query/internal/transport/balancing/policy"
+	"github.com/adwski/ydb-go-query/internal/transport/balancing/v1/policy"
 )
 
 const (

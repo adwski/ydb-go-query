@@ -9,7 +9,7 @@ import (
 	"github.com/adwski/ydb-go-query/internal/logger"
 	"github.com/adwski/ydb-go-query/internal/query"
 	"github.com/adwski/ydb-go-query/internal/transport"
-	"github.com/adwski/ydb-go-query/internal/transport/balancing/grid"
+	"github.com/adwski/ydb-go-query/internal/transport/balancing/v1/grid"
 	"github.com/adwski/ydb-go-query/internal/transport/dispatcher"
 	qq "github.com/adwski/ydb-go-query/query"
 )

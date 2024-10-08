@@ -1,4 +1,4 @@
-package balancing
+package v1
 
 import "errors"
 
