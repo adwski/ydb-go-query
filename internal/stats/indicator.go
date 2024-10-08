@@ -1,34 +1,40 @@
 package stats
 
-import "sync/atomic"
+import (
+	"sync"
+)
 
 type Indicator struct {
-	v *atomic.Bool
+	mx sync.Mutex
+	v  bool
 
 	thresholdHi int64
 	thresholdLo int64
 }
 
-func NewIndicator(hi, lo int64) Indicator {
-	return Indicator{
+func NewIndicator(hi, lo int64) *Indicator {
+	return &Indicator{
 		thresholdHi: hi,
 		thresholdLo: lo,
-		v:           &atomic.Bool{},
 	}
 }
 
-func (i Indicator) Observe(val int64) {
-	if i.v.Load() {
+func (i *Indicator) Observe(val int64) {
+	i.mx.Lock()
+	defer i.mx.Unlock()
+
+	if i.v {
 		if val <= i.thresholdLo {
-			i.v.Swap(false)
+			i.v = false
 		}
-	} else {
-		if val >= i.thresholdHi {
-			i.v.Swap(true)
-		}
+	} else if val >= i.thresholdHi {
+		i.v = true
 	}
 }
 
-func (i Indicator) Get() bool {
-	return i.v.Load()
+func (i *Indicator) Get() bool {
+	i.mx.Lock()
+	defer i.mx.Unlock()
+
+	return i.v
 }

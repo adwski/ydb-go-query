@@ -48,9 +48,9 @@ type (
 		itemsExpire map[uint64]int64
 		itemsMx     *sync.RWMutex
 
-		logger logger.Logger
-
 		stats stats
+
+		logger logger.Logger
 
 		createTimeout time.Duration
 		itemLifetime  int64 // seconds
