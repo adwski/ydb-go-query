@@ -8,7 +8,7 @@ import (
 	"github.com/adwski/ydb-go-query/internal/endpoints"
 	"github.com/adwski/ydb-go-query/internal/logger"
 	"github.com/adwski/ydb-go-query/internal/transport"
-	"github.com/adwski/ydb-go-query/internal/transport/balancing/grid"
+	"github.com/adwski/ydb-go-query/internal/transport/balancing/v1/grid"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

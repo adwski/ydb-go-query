@@ -1,9 +1,9 @@
-package balancing
+package v2
 
 import (
 	"errors"
 
-	"github.com/adwski/ydb-go-query/internal/transport/balancing/policy"
+	"github.com/adwski/ydb-go-query/internal/transport/balancing/v2/policy"
 )
 
 const (
@@ -31,5 +31,6 @@ func newPolicy[PT policy.Egress[T], T any](kind string) (balancingPolicy[PT, T],
 	case PolicyKindRoundRobin:
 		return policy.NewRoundRobin[PT, T](), nil
 	}
+
 	return nil, ErrPolicyUnknown
 }

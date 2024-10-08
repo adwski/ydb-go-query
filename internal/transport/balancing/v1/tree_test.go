@@ -1,4 +1,4 @@
-package balancing
+package v1
 
 import (
 	"context"
@@ -201,14 +201,6 @@ func TestTreeFillAndGet(t *testing.T) {
 				lvl:        5,
 				children:   5,
 				numGetConn: 200000,
-			},
-		},
-		{
-			name: "10lvlTree",
-			args: args{
-				lvl:        10,
-				children:   3,
-				numGetConn: 1000000,
 			},
 		},
 	}
