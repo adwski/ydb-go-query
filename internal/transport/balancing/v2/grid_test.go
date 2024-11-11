@@ -187,8 +187,8 @@ func TestTreeGetAddDelConcurrent(t *testing.T) {
 	t.Log("got connections: ", gotConns.Load())
 }
 
-func fillGrid(t *testing.T, gr *Grid[*conn, conn], connFunc func(uint64) *conn, lvl, numCh int) {
-	t.Helper()
+func fillGrid(tb testing.TB, gr *Grid[*conn, conn], connFunc func(uint64) *conn, lvl, numCh int) {
+	tb.Helper()
 
 	var (
 		genLvl func(lvl int, seq []int)
@@ -198,7 +198,7 @@ func fillGrid(t *testing.T, gr *Grid[*conn, conn], connFunc func(uint64) *conn, 
 			ids := stringIDs(seq...)
 			pID := pathID(seq...)
 			err := gr.AddEndpoint(ids, func() (*conn, error) { return connFunc(pID), nil })
-			require.NoError(t, err)
+			require.NoError(tb, err)
 
 			return
 		}
@@ -211,8 +211,8 @@ func fillGrid(t *testing.T, gr *Grid[*conn, conn], connFunc func(uint64) *conn, 
 	genLvl(lvl, make([]int, 0, lvl))
 }
 
-func createGrid(t *testing.T, lvl, connNum int) *Grid[*conn, conn] {
-	t.Helper()
+func createGrid(tb testing.TB, lvl, connNum int) *Grid[*conn, conn] {
+	tb.Helper()
 
 	levels := make([]Level, lvl)
 	for i := 1; i < lvl; i++ {
@@ -234,7 +234,7 @@ func createGrid(t *testing.T, lvl, connNum int) *Grid[*conn, conn] {
 		ConnectionsPerEndpoint: connNum,
 	})
 
-	require.NoError(t, err)
+	require.NoError(tb, err)
 	return gr
 }
 

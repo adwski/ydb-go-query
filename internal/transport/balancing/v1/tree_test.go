@@ -343,8 +343,8 @@ func TestTreeGetAddDelConcurrent(t *testing.T) {
 	t.Log("got connections: ", gotConns.Load())
 }
 
-func createTree(t *testing.T, lvl int) (*Tree[*conn, conn], error) {
-	t.Helper()
+func createTree(tb testing.TB, lvl int) (*Tree[*conn, conn], error) {
+	tb.Helper()
 
 	levels := make([]Level, lvl)
 	for i := 1; i < lvl; i++ {
@@ -363,8 +363,8 @@ func createTree(t *testing.T, lvl int) (*Tree[*conn, conn], error) {
 	})
 }
 
-func fillTree(t *testing.T, tree *Tree[*conn, conn], connFunc func(uint64) *conn, lvl, numCh int) {
-	t.Helper()
+func fillTree(tb testing.TB, tree *Tree[*conn, conn], connFunc func(uint64) *conn, lvl, numCh int) {
+	tb.Helper()
 
 	var (
 		genLvl func(lvl int, seq []int)
@@ -380,7 +380,7 @@ func fillTree(t *testing.T, tree *Tree[*conn, conn], connFunc func(uint64) *conn
 					ConnNumber: numCh,
 				},
 			})
-			require.NoError(t, err)
+			require.NoError(tb, err)
 
 			return
 		}

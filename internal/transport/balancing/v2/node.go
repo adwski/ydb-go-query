@@ -2,6 +2,7 @@ package v2
 
 import (
 	"errors"
+
 	"github.com/adwski/ydb-go-query/internal/transport/balancing/v2/policy"
 )
 
