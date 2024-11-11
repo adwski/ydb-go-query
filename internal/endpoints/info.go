@@ -32,9 +32,9 @@ func NewInfoShort(ep *Ydb_Discovery.EndpointInfo) InfoShort {
 	}
 }
 
-func NewInfoShortFromParams(location, address string, nodeId, port uint32) InfoShort {
+func NewInfoShortFromParams(location, address string, nodeID, port uint32) InfoShort {
 	return InfoShort{
-		NodeID:   nodeId,
+		NodeID:   nodeID,
 		Location: location,
 		Address:  address,
 		Port:     port,
