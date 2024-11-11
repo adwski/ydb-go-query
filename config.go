@@ -13,8 +13,8 @@ import (
 	"github.com/adwski/ydb-go-query/internal/transport/auth"
 	"github.com/adwski/ydb-go-query/internal/transport/auth/userpass"
 	"github.com/adwski/ydb-go-query/internal/transport/auth/yc"
-	"github.com/adwski/ydb-go-query/internal/transport/balancing/v1/grid"
 	transportCreds "github.com/adwski/ydb-go-query/internal/transport/credentials"
+	"github.com/adwski/ydb-go-query/internal/transport/dispatcher"
 
 	"github.com/rs/zerolog"
 	"github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Query"
@@ -169,14 +169,14 @@ var ErrAuthTransport = errors.New("unable to create auth transport")
 
 func WithUserPass(username, password string) Option {
 	return func(ctx context.Context, cfg *Config) error {
-		tr, err := grid.NewWithStaticEndpoints(ctx, cfg.InitialNodes, cfg.transportCredentials, nil, cfg.DB)
+		tr, err := dispatcher.NewStatic(ctx, cfg.InitialNodes, cfg.transportCredentials, nil, cfg.DB)
 		if err != nil {
 			return errors.Join(ErrAuthTransport, err)
 		}
 		cfg.auth, err = auth.New(ctx, auth.Config{
 			Logger: cfg.logger,
 			Provider: userpass.New(userpass.Config{
-				Transport: tr,
+				Transport: tr.Transport(),
 				Username:  username,
 				Password:  password,
 			}),

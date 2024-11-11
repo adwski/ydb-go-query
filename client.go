@@ -9,7 +9,7 @@ import (
 	"github.com/adwski/ydb-go-query/internal/logger"
 	"github.com/adwski/ydb-go-query/internal/query"
 	"github.com/adwski/ydb-go-query/internal/transport"
-	"github.com/adwski/ydb-go-query/internal/transport/balancing/v1/grid"
+	balancer "github.com/adwski/ydb-go-query/internal/transport/balancing/v3"
 	"github.com/adwski/ydb-go-query/internal/transport/dispatcher"
 	qq "github.com/adwski/ydb-go-query/query"
 )
@@ -66,7 +66,7 @@ type (
 		Run(ctx context.Context, wg *sync.WaitGroup)
 	}
 	Client struct {
-		dispatcher *dispatcher.Dispatcher
+		dispatcher *dispatcher.Dynamic
 
 		discoverySvc *discovery.Service
 		querySvc     *query.Service
@@ -110,7 +110,7 @@ func newClient(ctx context.Context, cfg *Config, opts ...Option) (*Client, error
 		}
 	}
 
-	tr, err := grid.NewWithStaticEndpoints(ctx, cfg.InitialNodes, cfg.transportCredentials, cfg.auth, cfg.DB)
+	tr, err := dispatcher.NewStatic(ctx, cfg.InitialNodes, cfg.transportCredentials, cfg.auth, cfg.DB)
 	if err != nil {
 		return nil, errors.Join(ErrDiscoveryTransportCreate, err)
 	}
@@ -118,7 +118,7 @@ func newClient(ctx context.Context, cfg *Config, opts ...Option) (*Client, error
 	discoverySvc := discovery.NewService(discovery.Config{
 		Logger:     cfg.logger,
 		DB:         cfg.DB,
-		Transport:  tr,
+		Transport:  tr.Transport(),
 		DoAnnounce: true,
 	})
 
@@ -126,8 +126,10 @@ func newClient(ctx context.Context, cfg *Config, opts ...Option) (*Client, error
 		Logger:    cfg.logger,
 		InitNodes: cfg.InitialNodes,
 		DB:        cfg.DB,
-		GridConfig: grid.Config{
-			ConnectionsPerEndpoint: defaultConnectionsPerEndpoint,
+		Balancer: balancer.Config{
+			LocationPreference: []string{"TODO"},
+			ConnsPerEndpoint:   defaultConnectionsPerEndpoint,
+			IgnoreLocations:    false,
 		},
 		TransportCredentials: cfg.transportCredentials,
 		Auth:                 cfg.auth,
@@ -138,7 +140,7 @@ func newClient(ctx context.Context, cfg *Config, opts ...Option) (*Client, error
 	c := &Client{
 		logger: cfg.logger,
 
-		dispatcher:   dispatcher.New(dispatcherCfg),
+		dispatcher:   dispatcher.NewDynamic(dispatcherCfg),
 		discoverySvc: discoverySvc,
 
 		wg: &sync.WaitGroup{},
