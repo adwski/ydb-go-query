@@ -79,12 +79,12 @@ func (db *DB) Update(endpoints []*Ydb_Discovery.EndpointInfo) (Announce, int, in
 	}
 
 	for _, ep := range endpoints {
-		key := InfoShort{
-			NodeID:   ep.NodeId,
-			Location: ep.Location,
-			Address:  ep.Address,
-			Port:     ep.Port,
-		}
+		key := NewInfoShortFromParams(
+			ep.Location,
+			ep.Address,
+			ep.NodeId,
+			ep.Port,
+		)
 		if _, ok := db.dbm[key]; !ok {
 			ann.Add[key] = ep
 		}

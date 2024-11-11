@@ -39,12 +39,12 @@ func TestDB(t *testing.T) {
 				len: 1,
 				ann: Announce{
 					Add: Map{
-						InfoShort{
-							Address:  "1.1.1.1",
-							Port:     1234,
-							Location: "0",
-							NodeID:   1234,
-						}: {
+						NewInfoShortFromParams(
+							"0",
+							"1.1.1.1",
+							1234,
+							1234,
+						): {
 							Address:  "1.1.1.1",
 							Port:     1234,
 							Location: "0",
@@ -76,23 +76,23 @@ func TestDB(t *testing.T) {
 			want: want{
 				ann: Announce{
 					Add: Map{
-						{
-							Address:  "1.1.1.1",
-							Port:     1234,
-							Location: "0",
-							NodeID:   1234,
-						}: {
+						NewInfoShortFromParams(
+							"0",
+							"1.1.1.1",
+							1234,
+							1234,
+						): {
 							Address:  "1.1.1.1",
 							Port:     1234,
 							Location: "0",
 							NodeId:   1234,
 						},
-						{
-							Address:  "2.2.2.2",
-							Port:     1234,
-							Location: "1",
-							NodeID:   1234,
-						}: {
+						NewInfoShortFromParams(
+							"1",
+							"2.2.2.2",
+							1234,
+							1234,
+						): {
 							Address:  "2.2.2.2",
 							Port:     1234,
 							Location: "1",
@@ -108,12 +108,12 @@ func TestDB(t *testing.T) {
 			name: "add existing endpoint",
 			args: args{
 				epsMap: map[InfoShort]*Ydb_Discovery.EndpointInfo{
-					{
-						Address:  "1.1.1.1",
-						Port:     1234,
-						Location: "0",
-						NodeID:   1234,
-					}: {
+					NewInfoShortFromParams(
+						"0",
+						"1.1.1.1",
+						1234,
+						1234,
+					): {
 						Address:  "1.1.1.1",
 						Port:     1234,
 						Location: "0",
@@ -143,12 +143,12 @@ func TestDB(t *testing.T) {
 			name: "add one more",
 			args: args{
 				epsMap: map[InfoShort]*Ydb_Discovery.EndpointInfo{
-					{
-						Address:  "1.1.1.1",
-						Port:     1234,
-						Location: "0",
-						NodeID:   1234,
-					}: {
+					NewInfoShortFromParams(
+						"0",
+						"1.1.1.1",
+						1234,
+						1234,
+					): {
 						Address:  "1.1.1.1",
 						Port:     1234,
 						Location: "0",
@@ -176,12 +176,12 @@ func TestDB(t *testing.T) {
 				len:  2,
 				ann: Announce{
 					Add: map[InfoShort]*Ydb_Discovery.EndpointInfo{
-						{
-							Address:  "2.2.2.2",
-							Port:     1234,
-							Location: "1",
-							NodeID:   1234,
-						}: {
+						NewInfoShortFromParams(
+							"1",
+							"2.2.2.2",
+							1234,
+							1234,
+						): {
 							Address:  "2.2.2.2",
 							Port:     1234,
 							Location: "1",
@@ -196,12 +196,12 @@ func TestDB(t *testing.T) {
 			name: "add and del",
 			args: args{
 				epsMap: map[InfoShort]*Ydb_Discovery.EndpointInfo{
-					{
-						Address:  "1.1.1.1",
-						Port:     1234,
-						Location: "0",
-						NodeID:   1234,
-					}: {
+					NewInfoShortFromParams(
+						"0",
+						"1.1.1.1",
+						1234,
+						1234,
+					): {
 						Address:  "1.1.1.1",
 						Port:     1234,
 						Location: "0",
@@ -223,12 +223,12 @@ func TestDB(t *testing.T) {
 				len:  1,
 				ann: Announce{
 					Add: map[InfoShort]*Ydb_Discovery.EndpointInfo{
-						{
-							Address:  "2.2.2.2",
-							Port:     1234,
-							Location: "1",
-							NodeID:   1234,
-						}: {
+						NewInfoShortFromParams(
+							"1",
+							"2.2.2.2",
+							1234,
+							1234,
+						): {
 							Address:  "2.2.2.2",
 							Port:     1234,
 							Location: "1",
@@ -236,12 +236,12 @@ func TestDB(t *testing.T) {
 						},
 					},
 					Del: []InfoShort{
-						{
-							Address:  "1.1.1.1",
-							Port:     1234,
-							Location: "0",
-							NodeID:   1234,
-						},
+						NewInfoShortFromParams(
+							"0",
+							"1.1.1.1",
+							1234,
+							1234,
+						),
 					},
 				},
 			},
