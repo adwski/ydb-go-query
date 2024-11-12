@@ -16,6 +16,7 @@ import (
 )
 
 type conn struct {
+	loc   string
 	uid   uint64
 	id    uint64
 	alive bool
@@ -142,6 +143,91 @@ func TestAddDel(t *testing.T) {
 			require.Equal(t, tt.nilAfterDel, got == nil)
 		})
 	}
+}
+
+func TestLocationFallback(t *testing.T) {
+	balancer := NewGrid[*conn, conn](Config{
+		ConnsPerEndpoint:   4,
+		LocationPreference: []string{"aaa", "bbb", "ccc"},
+	})
+
+	locMp := make(map[string][]*conn, 20)
+
+	require.NoError(t, balancer.Add("aaa", func() (*conn, error) {
+		conn_ := &conn{alive: true, loc: "aaa"}
+		locMp["aaa"] = append(locMp["aaa"], conn_)
+		return conn_, nil
+	}))
+	require.NoError(t, balancer.Add("bbb", func() (*conn, error) {
+		conn_ := &conn{alive: true, loc: "bbb"}
+		locMp["bbb"] = append(locMp["bbb"], conn_)
+		return conn_, nil
+	}))
+	require.NoError(t, balancer.Add("bbb", func() (*conn, error) {
+		conn_ := &conn{alive: true, loc: "ccc"}
+		locMp["ccc"] = append(locMp["ccc"], conn_)
+		return conn_, nil
+	}))
+	require.NoError(t, balancer.Add("ddd", func() (*conn, error) {
+		conn_ := &conn{alive: true, loc: "ddd"}
+		locMp["ddd"] = append(locMp["ddd"], conn_)
+		return conn_, nil
+	}))
+
+	getConns := func(t *testing.T, loc string) {
+		t.Helper()
+
+		for range len(locMp) {
+			conn_ := balancer.GetConn()
+			require.NotNil(t, conn_)
+			require.Equal(t, loc, conn_.loc)
+		}
+	}
+
+	setAlive := func(t *testing.T, loc string, alive bool) {
+		t.Helper()
+
+		for _, conn_ := range locMp[loc] {
+			conn_.alive = alive
+		}
+	}
+
+	// first location should be used
+	getConns(t, "aaa")
+	// set aaa to be not alive
+	setAlive(t, "aaa", false)
+	// second location should be used
+	getConns(t, "bbb")
+	// set aaa to be not alive
+	setAlive(t, "bbb", false)
+	// third location should be used
+	getConns(t, "ccc")
+	// set ccc to be not alive
+	setAlive(t, "ccc", false)
+	// forth location should be used
+	getConns(t, "ddd")
+	// set ddd to be not alive
+	setAlive(t, "ddd", false)
+	// no connections should be available
+	for range len(locMp) {
+		require.Nil(t, balancer.GetConn())
+	}
+	// set ddd to be not alive
+	setAlive(t, "ddd", true)
+	// forth location should be used
+	getConns(t, "ddd")
+	// set ccc to alive
+	setAlive(t, "ccc", true)
+	// third location should be used
+	getConns(t, "ccc")
+	// set bbb to be not alive
+	setAlive(t, "bbb", true)
+	// second location should be used
+	getConns(t, "bbb")
+	// set aaa to be not alive
+	setAlive(t, "aaa", true)
+	// first location should be used
+	getConns(t, "aaa")
 }
 
 func TestTreeFillAndGet(t *testing.T) {

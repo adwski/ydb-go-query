@@ -34,7 +34,7 @@ type (
 		mx *sync.Mutex
 
 		locDta   map[string][]PT // connections per location
-		connIdxs map[string]int  // nex available indexes per location
+		connIdxs map[string]int  // next available indexes per location
 		blnIdxs  map[string]int  // round-robin indexes per location
 
 		locPrefM map[string]struct{} // locations with configured preference
