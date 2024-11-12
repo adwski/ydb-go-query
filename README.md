@@ -101,7 +101,7 @@ ydb.WithSessionCreateTimeout(5*time.Second)
 
 // Amount of connections to create per each discovered endpoint.
 // Default is 2
-ydb.WithConnectionsPerEndpoint(4),
+ydb.WithConnectionsPerEndpoint(4)
 
 // Location preference.
 // Client will use connections in first location from this list,
