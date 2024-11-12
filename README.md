@@ -10,9 +10,9 @@ Experimental lightweight [YDB](https://ydb.tech) client that focuses on query se
 
 # Features
 
-- Query execution (with parameters)
+- Query execution
 - Transactions
-- Client-side 3-levels load balancing (dc->node->connection) with continuous 'out-of-band' nodes discovery
+- Location aware load balancing with continuous 'out-of-band' nodes discovery
 - Session pool with session recycling and auto warm-up
 - Authentication: user-pass and Yandex Cloud IAM (for serverless YDB).
 - Works with and exposes bare YDB GRPC field types `github.com/ydb-platform/ydb-go-genproto/protos/Ydb` (but provides type helpers for convenience).
@@ -21,7 +21,7 @@ Experimental lightweight [YDB](https://ydb.tech) client that focuses on query se
 ## TODO
 
 - [x] Ready status
-- [ ] DC/location priorities for balancer
+- [x] DC/location priorities for balancer
 - [ ] Migrations
 - [ ] Scripts
 - [ ] More type helpers
@@ -75,10 +75,6 @@ func main() {
 ## More config options
 
 ```go
-client, err := ydb.Open(ctx, ydb.Config{
-    InitialNodes: []string{"127.0.0.1:2136"},
-    DB:           "/local",
-},
 // init logging with external logger.
 // "debug" here is an internal level (not related to zerolog)
 ydb.WithZeroLogger(zerolog.New(zerolog.NewConsoleWriter()), "debug"),
@@ -86,15 +82,36 @@ ydb.WithZeroLogger(zerolog.New(zerolog.NewConsoleWriter()), "debug"),
 // zap is also available
 // WithZapLogger(zapLogger, "debug"),
 
-// query execution timeout
+// Query execution timeout, default 5 minutes. 
 ydb.WithQueryTimeout(5*time.Minute),
 
-// session pool size
-// Note, that it is NOT a number of connections
-ydb.WithSessionPoolSize(10),
+// Session pool size, default is 10.
+ydb.WithSessionPoolSize(50),
+
+// Session pool ready Low and High thresholds.
+// If amount of ready sessions hit above High threshold,
+// then client.Ready() returns true.
+// If amount of ready sessions hit below Low threshold,
+// then client.Ready() returns false.
+// Default is low=0, high=50
+ydb.WithSessionPoolReadyThresholds(10, 80)
+
+// Session create timeout, default is 3 seconds.
+ydb.WithSessionCreateTimeout(5*time.Second)
+
+// Amount of connections to create per each discovered endpoint.
+// Default is 2
+ydb.WithConnectionsPerEndpoint(4),
+
+// Location preference.
+// Client will use connections in first location from this list,
+// if all connections in this location are not alive, it will move to next.
+// If there's no alive connections in ether of these locations,
+// alive connections from other discovered locations (if any) will be used.
+ydb.WithLocationPreference([]string{"ru-central1-b", "ru-central1-a"})
 
 // tx mode, serializable rw is default
-ydb.WithSerializableReadWrite())
+ydb.WithSerializableReadWrite()
 ```
 
 ## Contexts
