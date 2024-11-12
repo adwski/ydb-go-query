@@ -189,10 +189,12 @@ func TestClient(t *testing.T) {
 		name    string
 		config  Config
 		options []Option
+		timeout time.Duration
 	}{
 		{
-			name:   "Local",
-			config: ydbLocalConfig,
+			name:    "Local",
+			config:  ydbLocalConfig,
+			timeout: 30 * time.Second,
 		},
 		{
 			name:   "Serverless",
@@ -201,32 +203,33 @@ func TestClient(t *testing.T) {
 				WithTransportTLS(),
 				WithYCAuthBytes([]byte(ydbServerlessIAMKey)),
 			},
+			timeout: time.Minute,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Run("Queries", func(t *testing.T) {
-				testQueries(t, tt.config, tt.options)
+				testQueries(t, tt.config, tt.options, tt.timeout)
 			})
 			t.Run("Transactions", func(t *testing.T) {
 				t.Run("Successful", func(t *testing.T) {
-					testTransactions(t, tt.config, tt.options)
+					testTransactions(t, tt.config, tt.options, tt.timeout)
 				})
 				t.Run("Finished", func(t *testing.T) {
-					testTransactionFinished(t, tt.config, tt.options)
+					testTransactionFinished(t, tt.config, tt.options, tt.timeout)
 				})
 			})
 		})
 	}
 }
 
-func testQueries(t *testing.T, cfg Config, opts []Option) {
+func testQueries(t *testing.T, cfg Config, opts []Option, timeout time.Duration) {
 	t.Helper()
 
 	const (
 		usersCount = 100
 	)
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	opts = append(opts,
@@ -265,10 +268,10 @@ func testQueries(t *testing.T, cfg Config, opts []Option) {
 	dropUsersTable(ctx, t, qCtx)
 }
 
-func testTransactionFinished(t *testing.T, cfg Config, opts []Option) {
+func testTransactionFinished(t *testing.T, cfg Config, opts []Option, timeout time.Duration) {
 	t.Helper()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	opts = append(opts,
@@ -300,10 +303,10 @@ func testTransactionFinished(t *testing.T, cfg Config, opts []Option) {
 	dropUsersTable(ctx, t, qCtx)
 }
 
-func testTransactions(t *testing.T, cfg Config, opts []Option) {
+func testTransactions(t *testing.T, cfg Config, opts []Option, timeout time.Duration) {
 	t.Helper()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	opts = append(opts,
