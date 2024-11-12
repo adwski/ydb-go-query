@@ -14,10 +14,6 @@ import (
 	qq "github.com/adwski/ydb-go-query/query"
 )
 
-const (
-	defaultConnectionsPerEndpoint = 2
-)
-
 var (
 	ErrNoInitialNodes           = errors.New("no initial nodes was provided")
 	ErrDBEmpty                  = errors.New("db is empty")
@@ -127,8 +123,8 @@ func newClient(ctx context.Context, cfg *Config, opts ...Option) (*Client, error
 		InitNodes: cfg.InitialNodes,
 		DB:        cfg.DB,
 		Balancer: balancer.Config{
-			LocationPreference: []string{"TODO"},
-			ConnsPerEndpoint:   defaultConnectionsPerEndpoint,
+			LocationPreference: cfg.locationPreference,
+			ConnsPerEndpoint:   cfg.connectionsPerEndpoint,
 			IgnoreLocations:    false,
 		},
 		TransportCredentials: cfg.transportCredentials,

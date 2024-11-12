@@ -3,6 +3,7 @@ package ydbgoquery
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/adwski/ydb-go-query/internal/logger"
@@ -23,9 +24,10 @@ import (
 )
 
 const (
-	defaultSessionCreateTimeout = 3 * time.Second
-	defaultQueryTimeout         = 5 * time.Minute
-	defaultSessionPoolSize      = 10
+	defaultSessionCreateTimeout   = 3 * time.Second
+	defaultQueryTimeout           = 5 * time.Minute
+	defaultSessionPoolSize        = 10
+	defaultConnectionsPerEndpoint = 2
 )
 
 var (
@@ -43,9 +45,13 @@ type (
 		DB           string
 		InitialNodes []string
 
+		locationPreference []string
+
 		poolSize    uint
 		poolReadyHi uint
 		poolReadyLo uint
+
+		connectionsPerEndpoint int
 
 		sessionCreateTimeout time.Duration
 		queryTimeout         time.Duration
@@ -58,6 +64,7 @@ func (cfg *Config) setDefaults() {
 	cfg.sessionCreateTimeout = defaultSessionCreateTimeout
 	cfg.queryTimeout = defaultQueryTimeout
 	cfg.poolSize = defaultSessionPoolSize
+	cfg.connectionsPerEndpoint = defaultConnectionsPerEndpoint
 	cfg.transportCredentials = transportCreds.Insecure()
 	cfg.txSettings = txsettings.SerializableReadWrite()
 }
@@ -118,6 +125,27 @@ func WithSessionPoolReadyThresholds(high, low uint) Option {
 	return func(ctx context.Context, cfg *Config) error {
 		cfg.poolReadyHi = high
 		cfg.poolReadyLo = low
+
+		return nil
+	}
+}
+
+func WithLocationPreference(pref string) Option {
+	return func(ctx context.Context, cfg *Config) error {
+		cfg.locationPreference = strings.Split(pref, ",")
+		for idx := range cfg.locationPreference {
+			cfg.locationPreference[idx] = strings.TrimSpace(cfg.locationPreference[idx])
+		}
+
+		return nil
+	}
+}
+
+func WithConnectionsPerEndpoint(connections int) Option {
+	return func(ctx context.Context, cfg *Config) error {
+		if connections > 0 {
+			cfg.connectionsPerEndpoint = connections
+		}
 
 		return nil
 	}
