@@ -29,8 +29,9 @@ type (
 	Connection struct {
 		*grpc.ClientConn
 
-		auth Authenticator
-		db   string
+		auth       Authenticator
+		db         string
+		endpointID uint64
 	}
 )
 
@@ -40,6 +41,7 @@ func NewConnection(
 	creds credentials.TransportCredentials,
 	auth Authenticator,
 	db string,
+	endpointID uint64,
 ) (*Connection, error) {
 	var opts []grpc.DialOption
 	opts = append(opts,
@@ -54,7 +56,12 @@ func NewConnection(
 		ClientConn: grpcConn,
 		auth:       auth,
 		db:         db,
+		endpointID: endpointID,
 	}, nil
+}
+
+func (c *Connection) ID() uint64 {
+	return c.endpointID
 }
 
 func (c *Connection) Close() error {
