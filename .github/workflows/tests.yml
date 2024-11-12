@@ -23,7 +23,7 @@ jobs:
           - "2136:2136"
           - "8765:8765"
 
-    container: golang:1.23.1-bookworm
+    container: golang:1.23.3-bookworm
 
     steps:
       # installing/updating deps because steps are running inside container
