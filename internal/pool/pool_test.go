@@ -11,6 +11,7 @@ import (
 	localErrs "github.com/adwski/ydb-go-query/internal/errors"
 	"github.com/adwski/ydb-go-query/internal/logger"
 	"github.com/adwski/ydb-go-query/internal/logger/noop"
+	"github.com/stretchr/testify/assert"
 )
 
 type itm struct {
@@ -277,5 +278,113 @@ func TestPool_LocalErrorCreateRetry(t *testing.T) {
 
 	if ctr != 3 {
 		t.Error("something wrong with create retry delay, ctr:", ctr)
+	}
+}
+
+func TestPool_Validate(t *testing.T) {
+	tests := []struct {
+		name string
+		args Config[*itm, itm]
+		want Config[*itm, itm]
+	}{
+		{
+			name: "all fine",
+			args: Config[*itm, itm]{
+				CreateTimeout:             time.Second,
+				Lifetime:                  0,
+				PoolSize:                  10,
+				ReadyThresholdPercentHigh: 100,
+				ReadyThresholdPercentLow:  50,
+			},
+			want: Config[*itm, itm]{
+				CreateTimeout:             time.Second,
+				Lifetime:                  0,
+				PoolSize:                  10,
+				ReadyThresholdPercentHigh: 100,
+				ReadyThresholdPercentLow:  50,
+				hi:                        10,
+				lo:                        5,
+			},
+		},
+		{
+			name: "empty config",
+			args: Config[*itm, itm]{},
+			want: Config[*itm, itm]{
+				CreateTimeout:             3 * time.Second,
+				PoolSize:                  1,
+				ReadyThresholdPercentHigh: 50,
+				ReadyThresholdPercentLow:  0,
+				hi:                        1,
+				lo:                        0,
+			},
+		},
+		{
+			name: "small lifetime",
+			args: Config[*itm, itm]{
+				Lifetime: 4 * time.Minute,
+			},
+			want: Config[*itm, itm]{
+				CreateTimeout:             3 * time.Second,
+				PoolSize:                  1,
+				ReadyThresholdPercentHigh: 50,
+				ReadyThresholdPercentLow:  0,
+				hi:                        1,
+				lo:                        0,
+			},
+		},
+		{
+			name: "extreme hilo",
+			args: Config[*itm, itm]{
+				ReadyThresholdPercentLow:  99,
+				ReadyThresholdPercentHigh: 100,
+				PoolSize:                  10,
+			},
+			want: Config[*itm, itm]{
+				CreateTimeout:             3 * time.Second,
+				PoolSize:                  10,
+				ReadyThresholdPercentHigh: 100,
+				ReadyThresholdPercentLow:  99,
+				hi:                        10,
+				lo:                        9,
+			},
+		},
+		{
+			name: "extreme hilo2",
+			args: Config[*itm, itm]{
+				ReadyThresholdPercentLow:  0,
+				ReadyThresholdPercentHigh: 1,
+				PoolSize:                  10,
+			},
+			want: Config[*itm, itm]{
+				CreateTimeout:             3 * time.Second,
+				PoolSize:                  10,
+				ReadyThresholdPercentHigh: 1,
+				ReadyThresholdPercentLow:  0,
+				hi:                        1,
+				lo:                        0,
+			},
+		},
+		{
+			name: "extreme hilo3",
+			args: Config[*itm, itm]{
+				ReadyThresholdPercentLow:  99,
+				ReadyThresholdPercentHigh: 100,
+				PoolSize:                  1,
+			},
+			want: Config[*itm, itm]{
+				CreateTimeout:             3 * time.Second,
+				PoolSize:                  1,
+				ReadyThresholdPercentHigh: 100,
+				ReadyThresholdPercentLow:  99,
+				hi:                        1,
+				lo:                        0,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.args.validate()
+			assert.Equal(t, tt.want, tt.args)
+		})
 	}
 }
