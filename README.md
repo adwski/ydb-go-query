@@ -89,10 +89,11 @@ ydb.WithQueryTimeout(5*time.Minute),
 ydb.WithSessionPoolSize(50),
 
 // Session pool ready Low and High thresholds.
-// If amount of ready sessions hit above High threshold,
+// If amount of ready sessions hit High threshold,
 // then client.Ready() returns true.
-// If amount of ready sessions hit below Low threshold,
+// If amount of ready sessions hit Low threshold,
 // then client.Ready() returns false.
+// Possible values are 0<=low<high<=100.
 // Default is low=0, high=50
 ydb.WithSessionPoolReadyThresholds(10, 80)
 
@@ -104,10 +105,14 @@ ydb.WithSessionCreateTimeout(5*time.Second)
 ydb.WithConnectionsPerEndpoint(4)
 
 // Location preference.
-// Client will use connections in first location from this list,
-// if all connections in this location are not alive, it will move to next.
+// When making balancing decision, client's balancer will look
+// for connections from locations in order specified by this param.
+// If all connections in first location are not alive, it will move to next.
 // If there's no alive connections in ether of these locations,
 // alive connections from other discovered locations (if any) will be used.
+// If this param is not specified or empty, balancer will treat all
+// connections as if they are from the same location.
+// Within location balancer selects connection using round-robin approach.
 ydb.WithLocationPreference([]string{"ru-central1-b", "ru-central1-a"})
 
 // tx mode, serializable rw is default
