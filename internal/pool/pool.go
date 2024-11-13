@@ -3,6 +3,7 @@ package pool
 import (
 	"context"
 	"errors"
+	"math"
 	"math/rand"
 	"sync"
 	"sync/atomic"
@@ -105,7 +106,8 @@ type (
 		ReadyThresholdPercentHigh uint
 		ReadyThresholdPercentLow  uint
 
-		test bool
+		hi, lo int64
+		test   bool
 	}
 )
 
@@ -132,16 +134,16 @@ func (cfg *Config[PT, T]) validate() {
 		cfg.ReadyThresholdPercentLow = defaultReadyThresholdLow
 		cfg.ReadyThresholdPercentHigh = defaultReadyThresholdHigh
 	}
+
+	// convert from percents to actual values
+	cfg.hi = int64(math.Ceil(float64(cfg.ReadyThresholdPercentHigh) * float64(cfg.PoolSize) / 100))
+	cfg.lo = int64(math.Floor(float64(cfg.ReadyThresholdPercentLow) * float64(cfg.PoolSize) / 100))
 }
 
 func New[PT item[T], T any](ctx context.Context, cfg Config[PT, T]) *Pool[PT, T] {
 	cfg.validate()
 
 	runCtx, cancel := context.WithCancel(ctx)
-
-	// convert from percents to actual values
-	hi := int64(float64(cfg.ReadyThresholdPercentHigh) * float64(cfg.PoolSize) / 100)
-	lo := int64(float64(cfg.ReadyThresholdPercentLow) * float64(cfg.PoolSize) / 100)
 
 	pool := &Pool[PT, T]{
 		logger:        cfg.Logger,
@@ -164,7 +166,7 @@ func New[PT item[T], T any](ctx context.Context, cfg Config[PT, T]) *Pool[PT, T]
 		queue:  make(chan PT, cfg.PoolSize),
 		tokens: make(chan struct{}, cfg.PoolSize),
 
-		stats: newStats(hi, lo),
+		stats: newStats(cfg.hi, cfg.lo),
 	}
 
 	// fill tokens
