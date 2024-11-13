@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestIndicator(t *testing.T) {
+func TestIndicator5060(t *testing.T) {
 	i := NewIndicator(60, 50)
 
 	assert.False(t, i.Get())
@@ -36,5 +36,41 @@ func TestIndicator(t *testing.T) {
 	assert.True(t, i.Get())
 
 	i.Observe(51)
+	assert.True(t, i.Get())
+}
+
+func TestIndicator0100(t *testing.T) {
+	i := NewIndicator(100, 0)
+
+	assert.False(t, i.Get())
+
+	i.Observe(50)
+	assert.False(t, i.Get())
+
+	i.Observe(99)
+	assert.False(t, i.Get())
+
+	i.Observe(100)
+	assert.True(t, i.Get())
+
+	i.Observe(50)
+	assert.True(t, i.Get())
+
+	i.Observe(1)
+	assert.True(t, i.Get())
+
+	i.Observe(0)
+	assert.False(t, i.Get())
+
+	i.Observe(50)
+	assert.False(t, i.Get())
+
+	i.Observe(99)
+	assert.False(t, i.Get())
+
+	i.Observe(100)
+	assert.True(t, i.Get())
+
+	i.Observe(50)
 	assert.True(t, i.Get())
 }
