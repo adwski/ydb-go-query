@@ -97,35 +97,37 @@
 				
 				<option value="file20">github.com/adwski/ydb-go-query/internal/transport/auth/auth.go (95.1%)</option>
 				
-				<option value="file21">github.com/adwski/ydb-go-query/internal/transport/auth/userpass/auth.go (70.0%)</option>
+				<option value="file21">github.com/adwski/ydb-go-query/internal/transport/auth/userpass/auth.go (80.0%)</option>
 				
 				<option value="file22">github.com/adwski/ydb-go-query/internal/transport/auth/yc/auth.go (63.6%)</option>
 				
 				<option value="file23">github.com/adwski/ydb-go-query/internal/transport/balancing/v3/grid.go (96.5%)</option>
 				
-				<option value="file24">github.com/adwski/ydb-go-query/internal/transport/connection.go (82.1%)</option>
+				<option value="file24">github.com/adwski/ydb-go-query/internal/transport/balancing/v4/grid.go (92.8%)</option>
 				
-				<option value="file25">github.com/adwski/ydb-go-query/internal/transport/credentials/credentials.go (66.7%)</option>
+				<option value="file25">github.com/adwski/ydb-go-query/internal/transport/connection.go (82.1%)</option>
 				
-				<option value="file26">github.com/adwski/ydb-go-query/internal/transport/dispatcher/dynamic.go (78.3%)</option>
+				<option value="file26">github.com/adwski/ydb-go-query/internal/transport/credentials/credentials.go (66.7%)</option>
 				
-				<option value="file27">github.com/adwski/ydb-go-query/internal/transport/dispatcher/invoker.go (70.0%)</option>
+				<option value="file27">github.com/adwski/ydb-go-query/internal/transport/dispatcher/dynamic.go (78.3%)</option>
 				
-				<option value="file28">github.com/adwski/ydb-go-query/internal/transport/dispatcher/static.go (87.5%)</option>
+				<option value="file28">github.com/adwski/ydb-go-query/internal/transport/dispatcher/invoker.go (70.0%)</option>
 				
-				<option value="file29">github.com/adwski/ydb-go-query/internal/xcontext/context.go (100.0%)</option>
+				<option value="file29">github.com/adwski/ydb-go-query/internal/transport/dispatcher/static.go (87.5%)</option>
 				
-				<option value="file30">github.com/adwski/ydb-go-query/query/context.go (81.8%)</option>
+				<option value="file30">github.com/adwski/ydb-go-query/internal/xcontext/context.go (100.0%)</option>
 				
-				<option value="file31">github.com/adwski/ydb-go-query/query/query.go (66.7%)</option>
+				<option value="file31">github.com/adwski/ydb-go-query/query/context.go (81.8%)</option>
 				
-				<option value="file32">github.com/adwski/ydb-go-query/query/result.go (74.4%)</option>
+				<option value="file32">github.com/adwski/ydb-go-query/query/query.go (66.7%)</option>
 				
-				<option value="file33">github.com/adwski/ydb-go-query/query/transaction.go (82.5%)</option>
+				<option value="file33">github.com/adwski/ydb-go-query/query/result.go (74.4%)</option>
 				
-				<option value="file34">github.com/adwski/ydb-go-query/query/txquery.go (57.1%)</option>
+				<option value="file34">github.com/adwski/ydb-go-query/query/transaction.go (82.5%)</option>
 				
-				<option value="file35">github.com/adwski/ydb-go-query/types/types.go (22.2%)</option>
+				<option value="file35">github.com/adwski/ydb-go-query/query/txquery.go (57.1%)</option>
+				
+				<option value="file36">github.com/adwski/ydb-go-query/types/types.go (22.2%)</option>
 				
 				</select>
 			</div>
@@ -159,7 +161,7 @@ import (
         "github.com/adwski/ydb-go-query/internal/logger"
         "github.com/adwski/ydb-go-query/internal/query"
         "github.com/adwski/ydb-go-query/internal/transport"
-        balancer "github.com/adwski/ydb-go-query/internal/transport/balancing/v3"
+        balancing "github.com/adwski/ydb-go-query/internal/transport/balancing/v4"
         "github.com/adwski/ydb-go-query/internal/transport/dispatcher"
         qq "github.com/adwski/ydb-go-query/query"
 )
@@ -272,7 +274,7 @@ func newClient(ctx context.Context, cfg *Config, opts ...Option) (*Client, error
                 Logger:    cfg.logger,
                 InitNodes: cfg.InitialNodes,
                 DB:        cfg.DB,
-                Balancer: balancer.Config{
+                Balancing: balancing.Config{
                         LocationPreference: cfg.locationPreference,
                         ConnsPerEndpoint:   cfg.connectionsPerEndpoint,
                         IgnoreLocations:    false,
@@ -1063,8 +1065,8 @@ func (l *Logger) Level(lvl int) <span class="cov0" title="0">{
         l.lvl = lvl
 }</span>
 
-func (l *Logger) Trace(msg string, args ...any) <span class="cov10" title="907675">{
-        if l.lvl &gt; levelTrace </span><span class="cov10" title="907675">{
+func (l *Logger) Trace(msg string, args ...any) <span class="cov10" title="889963">{
+        if l.lvl &gt; levelTrace </span><span class="cov10" title="889963">{
                 return
         }</span>
 
@@ -1375,7 +1377,7 @@ type (
         }
 )
 
-func (cfg *Config[PT, T]) validate() <span class="cov2" title="18">{
+func (cfg *Config[PT, T]) validate() <span class="cov3" title="18">{
         if !cfg.test </span><span class="cov2" title="17">{ // bypass min value checks
                 if cfg.CreateTimeout &lt; minCreateTimeout </span><span class="cov2" title="6">{
                         cfg.CreateTimeout = defaultCreateTimeout
@@ -1388,19 +1390,19 @@ func (cfg *Config[PT, T]) validate() <span class="cov2" title="18">{
                 }</span>
         }
 
-        <span class="cov2" title="18">if cfg.ReadyThresholdPercentLow &gt; 100 </span><span class="cov0" title="0">{
+        <span class="cov3" title="18">if cfg.ReadyThresholdPercentLow &gt; 100 </span><span class="cov0" title="0">{
                 cfg.ReadyThresholdPercentLow = defaultReadyThresholdHigh
         }</span>
-        <span class="cov2" title="18">if cfg.ReadyThresholdPercentHigh &gt; 100 </span><span class="cov0" title="0">{
+        <span class="cov3" title="18">if cfg.ReadyThresholdPercentHigh &gt; 100 </span><span class="cov0" title="0">{
                 cfg.ReadyThresholdPercentHigh = defaultReadyThresholdHigh
         }</span>
-        <span class="cov2" title="18">if cfg.ReadyThresholdPercentHigh &lt;= cfg.ReadyThresholdPercentLow </span><span class="cov2" title="13">{
+        <span class="cov3" title="18">if cfg.ReadyThresholdPercentHigh &lt;= cfg.ReadyThresholdPercentLow </span><span class="cov2" title="13">{
                 cfg.ReadyThresholdPercentLow = defaultReadyThresholdLow
                 cfg.ReadyThresholdPercentHigh = defaultReadyThresholdHigh
         }</span>
 
         // convert from percents to actual values
-        <span class="cov2" title="18">cfg.hi = int64(math.Ceil(float64(cfg.ReadyThresholdPercentHigh) * float64(cfg.PoolSize) / 100))
+        <span class="cov3" title="18">cfg.hi = int64(math.Ceil(float64(cfg.ReadyThresholdPercentHigh) * float64(cfg.PoolSize) / 100))
         cfg.lo = int64(math.Floor(float64(cfg.ReadyThresholdPercentLow) * float64(cfg.PoolSize) / 100))</span>
 }
 
@@ -1473,28 +1475,28 @@ func (p *Pool[PT, T]) Close() error <span class="cov2" title="13">{
         <span class="cov2" title="13">return nil</span>
 }
 
-func (p *Pool[PT, T]) Get(rCtx context.Context) PT <span class="cov9" title="453581">{
+func (p *Pool[PT, T]) Get(rCtx context.Context) PT <span class="cov9" title="444725">{
         p.stats.waiting().Inc()
         defer p.stats.waiting().Dec()
 
 getLoop:
-        for </span><span class="cov10" title="454187">{
+        for </span><span class="cov10" title="445326">{
                 select </span>{
-                case itm := &lt;-p.queue:<span class="cov9" title="454186">
+                case itm := &lt;-p.queue:<span class="cov9" title="445325">
                         p.stats.idle().Dec()
                         p.stats.updateReady()
 
-                        if itm.Alive() </span><span class="cov9" title="453580">{
+                        if itm.Alive() </span><span class="cov9" title="444724">{
                                 p.stats.inUse().Inc()
                                 p.stats.updateReady()
 
                                 p.logger.Trace("item retrieved from pool", "id", itm.ID())
                                 return itm
                         }</span>
-                        <span class="cov5" title="606">_ = itm.Close()
+                        <span class="cov5" title="601">_ = itm.Close()
 
                         select </span>{
-                        case p.tokens &lt;- struct{}{}:<span class="cov5" title="606"></span>
+                        case p.tokens &lt;- struct{}{}:<span class="cov5" title="601"></span>
                         case &lt;-rCtx.Done():<span class="cov0" title="0">
                                 break getLoop</span>
                         }
@@ -1506,13 +1508,13 @@ getLoop:
         <span class="cov1" title="1">return nil</span>
 }
 
-func (p *Pool[PT, T]) Put(itm PT) <span class="cov9" title="453580">{
+func (p *Pool[PT, T]) Put(itm PT) <span class="cov9" title="444724">{
         p.stats.inUse().Dec()
         defer p.stats.updateReady()
 
         // check if alive
-        if itm.Alive() </span><span class="cov9" title="453566">{
-                if !p.itemRecycling || !p.itemExpired(itm) </span><span class="cov9" title="453566">{
+        if itm.Alive() </span><span class="cov9" title="444707">{
+                if !p.itemRecycling || !p.itemExpired(itm) </span><span class="cov9" title="444707">{
                         p.stats.idle().Inc()
 
                         // alive and not expired
@@ -1522,7 +1524,7 @@ func (p *Pool[PT, T]) Put(itm PT) <span class="cov9" title="453580">{
                         return
                 }</span>
         }
-        <span class="cov2" title="14">p.logger.Trace("item recycled on returning", "id", itm.ID())
+        <span class="cov2" title="17">p.logger.Trace("item recycled on returning", "id", itm.ID())
         // recycle
         _ = itm.Close()
         // push token
@@ -1537,13 +1539,13 @@ func (p *Pool[PT, T]) spawnItems(ctx context.Context) <span class="cov2" title="
         }</span>()
 
 <span class="cov2" title="12">spawnLoop:
-        for </span><span class="cov5" title="799">{
+        for </span><span class="cov5" title="797">{
                 select </span>{
                 case &lt;-ctx.Done():<span class="cov2" title="10">
                         break spawnLoop</span>
-                case &lt;-p.tokens:<span class="cov5" title="789">
+                case &lt;-p.tokens:<span class="cov5" title="787">
                 createLoop:
-                        for </span><span class="cov5" title="810">{
+                        for </span><span class="cov5" title="808">{
                                 p.wg.Add(1)
                                 itm, err := p.spawnItem(ctx)
                                 if err != nil </span><span class="cov3" title="23">{
@@ -1562,7 +1564,7 @@ func (p *Pool[PT, T]) spawnItems(ctx context.Context) <span class="cov2" title="
 
                                 // Ignoring ctx.Done() here and put item in queue anyway,
                                 // so it can be closed later by drain().
-                                <span class="cov5" title="787">p.queue &lt;- itm
+                                <span class="cov5" title="785">p.queue &lt;- itm
                                 p.stats.idle().Inc()
                                 p.stats.updateReady()
 
@@ -1586,7 +1588,7 @@ drainLoop:
         }
 }
 
-func (p *Pool[PT, T]) spawnItem(ctx context.Context) (PT, error) <span class="cov5" title="810">{
+func (p *Pool[PT, T]) spawnItem(ctx context.Context) (PT, error) <span class="cov5" title="808">{
         defer p.wg.Done()
 
         itm, err := p.createFunc(ctx, p.createTimeout)
@@ -1596,11 +1598,11 @@ func (p *Pool[PT, T]) spawnItem(ctx context.Context) (PT, error) <span class="co
                 return nil, err
         }</span>
 
-        <span class="cov5" title="787">if p.itemRecycling </span><span class="cov1" title="2">{
+        <span class="cov5" title="785">if p.itemRecycling </span><span class="cov1" title="2">{
                 p.setItemExpire(itm.ID())
         }</span>
 
-        <span class="cov5" title="787">return itm, nil</span>
+        <span class="cov5" title="785">return itm, nil</span>
 }
 
 func (p *Pool[PT, T]) setItemExpire(id uint64) <span class="cov1" title="2">{
@@ -1689,11 +1691,11 @@ func newStats(hi, lo int64) stats <span class="cov2" title="12">{
         }
 }</span>
 
-func (s *stats) inUse() *s.Gauge <span class="cov9" title="907160">{
+func (s *stats) inUse() *s.Gauge <span class="cov9" title="889448">{
         return s.inUse_
 }</span>
 
-func (s *stats) idle() *s.Gauge <span class="cov9" title="908705">{
+func (s *stats) idle() *s.Gauge <span class="cov9" title="890983">{
         return s.idle_
 }</span>
 
@@ -1701,11 +1703,11 @@ func (s *stats) ready() *s.Indicator <span class="cov2" title="5">{
         return s.ready_
 }</span>
 
-func (s *stats) waiting() *s.Gauge <span class="cov9" title="907162">{
+func (s *stats) waiting() *s.Gauge <span class="cov9" title="889450">{
         return s.waiting_
 }</span>
 
-func (s *stats) updateReady() <span class="cov10" title="1362299">{
+func (s *stats) updateReady() <span class="cov10" title="1335724">{
         s.ready_.Observe(s.idle_.Get() + s.inUse_.Get())
 }</span>
 </pre>
@@ -2224,15 +2226,15 @@ func NewGauge() *Gauge <span class="cov3" title="38">{
         return &amp;Gauge{v: &amp;atomic.Int64{}}
 }</span>
 
-func (g Gauge) Inc() <span class="cov9" title="2361515">{
+func (g Gauge) Inc() <span class="cov9" title="2334942">{
         g.v.Add(1)
 }</span>
 
-func (g Gauge) Dec() <span class="cov9" title="1861515">{
+func (g Gauge) Dec() <span class="cov9" title="1834942">{
         g.v.Add(-1)
 }</span>
 
-func (g Gauge) Get() int64 <span class="cov10" title="2724602">{
+func (g Gauge) Get() int64 <span class="cov10" title="2671452">{
         return g.v.Load()
 }</span>
 </pre>
@@ -2258,15 +2260,15 @@ func NewIndicator(hi, lo int64) *Indicator <span class="cov2" title="14">{
         }
 }</span>
 
-func (i *Indicator) Observe(val int64) <span class="cov10" title="1362318">{
+func (i *Indicator) Observe(val int64) <span class="cov10" title="1335743">{
         i.mx.Lock()
         defer i.mx.Unlock()
 
-        if i.v </span><span class="cov9" title="1362081">{
+        if i.v </span><span class="cov9" title="1335158">{
                 if val &lt;= i.thresholdLo </span><span class="cov2" title="12">{
                         i.v = false
                 }</span>
-        } else<span class="cov4" title="237"> if val &gt;= i.thresholdHi </span><span class="cov2" title="15">{
+        } else<span class="cov5" title="585"> if val &gt;= i.thresholdHi </span><span class="cov2" title="15">{
                 i.v = true
         }</span>
 }
@@ -2332,7 +2334,7 @@ func New(ctx context.Context, cfg Config) (*Auth, error) <span class="cov3" titl
         return auth, auth.mustGetToken(ctx)
 }</span>
 
-func (a *Auth) GetToken() string <span class="cov10" title="226">{
+func (a *Auth) GetToken() string <span class="cov10" title="227">{
         a.mx.RLock()
         defer a.mx.RUnlock()
 
@@ -2471,16 +2473,16 @@ func (up *UserPass) GetToken(ctx context.Context) (token string, expires time.Ti
                 Password: up.pass,
         })
 
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov1" title="1">{
                 err = errors.Join(ErrLogin, err)
                 return
         }</span>
-        <span class="cov10" title="6">op := resp.GetOperation()
+        <span class="cov9" title="5">op := resp.GetOperation()
         if op == nil </span><span class="cov0" title="0">{
                 err = errors.Join(ErrLogin, ErrNilOperation)
                 return
         }</span>
-        <span class="cov10" title="6">if op.GetStatus() == Ydb.StatusIds_UNAUTHORIZED </span><span class="cov9" title="5">{
+        <span class="cov9" title="5">if op.GetStatus() == Ydb.StatusIds_UNAUTHORIZED </span><span class="cov7" title="4">{
                 err = ErrUnauthorized
                 return
         }</span>
@@ -2649,7 +2651,7 @@ type (
 )
 
 // NewGrid creates new grid load balancer.
-func NewGrid[PT connection[T], T any](cfg Config) *Grid[PT, T] <span class="cov2" title="27">{
+func NewGrid[PT connection[T], T any](cfg Config) *Grid[PT, T] <span class="cov2" title="9">{
         dta := make(map[string][]PT)
         locPrefM := make(map[string]struct{})
 
@@ -2657,12 +2659,12 @@ func NewGrid[PT connection[T], T any](cfg Config) *Grid[PT, T] <span class="cov2
                 dta[location] = make([]PT, 0, cfg.ConnsPerEndpoint*nodesPrealloc)
                 locPrefM[location] = struct{}{}
         }</span>
-        <span class="cov2" title="27">if len(cfg.LocationPreference) == 0 </span><span class="cov2" title="23">{
+        <span class="cov2" title="9">if len(cfg.LocationPreference) == 0 </span><span class="cov1" title="5">{
                 dta[defaultLocation] = make([]PT, 0, cfg.ConnsPerEndpoint*nodesPrealloc)
                 cfg.IgnoreLocations = true
         }</span>
 
-        <span class="cov2" title="27">grid := &amp;Grid[PT, T]{
+        <span class="cov2" title="9">grid := &amp;Grid[PT, T]{
                 mx: &amp;sync.Mutex{},
 
                 locDta:   dta,
@@ -2690,17 +2692,17 @@ func NewGrid[PT connection[T], T any](cfg Config) *Grid[PT, T] <span class="cov2
 // - If IgnoreLocations is set, it uses only default location.
 //
 // Within one location connections are selected using round-robin approach.
-func (g *Grid[PT, T]) GetConn() PT <span class="cov9" title="3631540">{
+func (g *Grid[PT, T]) GetConn() PT <span class="cov9" title="3377499">{
         g.mx.Lock()
         defer g.mx.Unlock()
 
-        if g.ignoreLocations </span><span class="cov9" title="2286445">{
+        if g.ignoreLocations </span><span class="cov9" title="2170516">{
                 return g.lookupInLocation(defaultLocation)
         }</span>
 
         // lookup in available locations according to preference
-        <span class="cov9" title="1345095">for _, loc := range g.locPref </span><span class="cov9" title="1345135">{
-                if _, ok := g.locDta[loc]; ok </span><span class="cov9" title="1345135">{
+        <span class="cov9" title="1206983">for _, loc := range g.locPref </span><span class="cov9" title="1207023">{
+                if _, ok := g.locDta[loc]; ok </span><span class="cov9" title="1207023">{
                         conn := g.lookupInLocation(loc)
                         if conn != nil </span><span class="cov2" title="26">{
                                 return conn
@@ -2710,11 +2712,11 @@ func (g *Grid[PT, T]) GetConn() PT <span class="cov9" title="3631540">{
 
         // If some locations are not in preference,
         // lookup inside them as well.
-        <span class="cov9" title="1345069">if len(g.locDta) &gt; len(g.locPref) </span><span class="cov9" title="1345069">{
-                for loc := range g.locDta </span><span class="cov9" title="3100060">{
-                        if _, ok := g.locPrefM[loc]; !ok </span><span class="cov9" title="2930914">{
+        <span class="cov9" title="1206957">if len(g.locDta) &gt; len(g.locPref) </span><span class="cov9" title="1206957">{
+                for loc := range g.locDta </span><span class="cov9" title="2768562">{
+                        if _, ok := g.locPrefM[loc]; !ok </span><span class="cov9" title="2650852">{
                                 conn := g.lookupInLocation(loc)
-                                if conn != nil </span><span class="cov9" title="1345065">{
+                                if conn != nil </span><span class="cov9" title="1206953">{
                                         return conn
                                 }</span>
                         }
@@ -2724,7 +2726,7 @@ func (g *Grid[PT, T]) GetConn() PT <span class="cov9" title="3631540">{
         <span class="cov1" title="4">return nil</span>
 }
 
-func (g *Grid[PT, T]) lookupInLocation(location string) PT <span class="cov9" title="6562494">{
+func (g *Grid[PT, T]) lookupInLocation(location string) PT <span class="cov9" title="6028391">{
         var (
                 idx   = g.blnIdxs[location]
                 nodes = g.locDta[location]
@@ -2733,25 +2735,25 @@ func (g *Grid[PT, T]) lookupInLocation(location string) PT <span class="cov9" ti
 
         // Get next alive conn,
         // making full circle in worst case.
-        for i := idx; i &lt; idx+ln; i++ </span><span class="cov10" title="7023608">{
+        for i := idx; i &lt; idx+ln; i++ </span><span class="cov10" title="6483421">{
                 conn := nodes[i%ln]
-                if conn != nil &amp;&amp; conn.Alive() </span><span class="cov9" title="3631506">{
+                if conn != nil &amp;&amp; conn.Alive() </span><span class="cov9" title="3377492">{
                         g.blnIdxs[location] = (i + 1) % ln
                         return conn
                 }</span>
         }
 
-        <span class="cov9" title="2930988">return nil</span>
+        <span class="cov9" title="2650899">return nil</span>
 }
 
 // Add creates connections in specified location.
-func (g *Grid[PT, T]) Add(location string, creatF createFunc[PT, T]) error <span class="cov4" title="307">{
+func (g *Grid[PT, T]) Add(location string, creatF createFunc[PT, T]) error <span class="cov4" title="286">{
         g.mx.Lock()
         defer g.mx.Unlock()
 
         // Spawn connections
         newConns := make([]PT, 0, g.conns)
-        for range g.conns </span><span class="cov5" title="1179">{
+        for range g.conns </span><span class="cov5" title="1147">{
                 conn, err := creatF()
                 if err != nil </span><span class="cov0" title="0">{
                         for _, conn_ := range newConns </span><span class="cov0" title="0">{
@@ -2760,15 +2762,15 @@ func (g *Grid[PT, T]) Add(location string, creatF createFunc[PT, T]) error <span
                         <span class="cov0" title="0">return errors.Join(ErrConnCreate, err)</span>
                 }
 
-                <span class="cov5" title="1179">newConns = append(newConns, conn)</span>
+                <span class="cov5" title="1147">newConns = append(newConns, conn)</span>
         }
 
-        <span class="cov4" title="307">if g.ignoreLocations </span><span class="cov4" title="204">{
+        <span class="cov4" title="286">if g.ignoreLocations </span><span class="cov3" title="182">{
                 location = defaultLocation
         }</span>
-        <span class="cov4" title="307">nodes, ok := g.locDta[location]
+        <span class="cov4" title="286">nodes, ok := g.locDta[location]
 
-        if !ok </span><span class="cov3" title="100">{
+        if !ok </span><span class="cov3" title="101">{
                 // First time seeing this location
                 newLoc := make([]PT, g.conns, g.conns*nodesPrealloc)
                 copy(newLoc, newConns)
@@ -2779,25 +2781,25 @@ func (g *Grid[PT, T]) Add(location string, creatF createFunc[PT, T]) error <span
         }</span>
 
         // get next available index
-        <span class="cov4" title="207">idx := g.connIdxs[location]
+        <span class="cov3" title="185">idx := g.connIdxs[location]
 
         // add new connections to location
-        for _, conn := range newConns </span><span class="cov4" title="977">{
-                for </span><span class="cov5" title="1431">{
-                        if idx == len(nodes) </span><span class="cov4" title="841">{
+        for _, conn := range newConns </span><span class="cov4" title="943">{
+                for </span><span class="cov5" title="1375">{
+                        if idx == len(nodes) </span><span class="cov4" title="803">{
                                 nodes = append(nodes, conn)
                                 g.locDta[location] = nodes
                                 idx++
                                 break</span>
-                        } else<span class="cov4" title="590"> if nodes[idx] == nil </span><span class="cov3" title="136">{
+                        } else<span class="cov4" title="572"> if nodes[idx] == nil </span><span class="cov3" title="140">{
                                 nodes[idx] = conn
                                 idx++
                                 break</span>
                         }
-                        <span class="cov4" title="454">idx++</span>
+                        <span class="cov4" title="432">idx++</span>
                 }
         }
-        <span class="cov4" title="207">g.connIdxs[location] = idx
+        <span class="cov3" title="185">g.connIdxs[location] = idx
 
         return nil</span>
 }
@@ -2805,42 +2807,335 @@ func (g *Grid[PT, T]) Add(location string, creatF createFunc[PT, T]) error <span
 // Delete deletes connections from location.
 // It uses linear search within location to find all matching connections.
 // 'Slots' from deleted connections can be reused later by Add().
-func (g *Grid[PT, T]) Delete(location string, id uint64) error <span class="cov4" title="199">{
+func (g *Grid[PT, T]) Delete(location string, id uint64) error <span class="cov4" title="201">{
         g.mx.Lock()
         defer g.mx.Unlock()
 
-        if g.ignoreLocations </span><span class="cov3" title="100">{
+        if g.ignoreLocations </span><span class="cov3" title="101">{
                 location = defaultLocation
         }</span>
-        <span class="cov4" title="199">nodes, ok := g.locDta[location]
+        <span class="cov4" title="201">nodes, ok := g.locDta[location]
         if !ok </span><span class="cov1" title="1">{
                 return ErrUnknownLocation
         }</span>
 
-        <span class="cov4" title="198">deleted := false
+        <span class="cov4" title="200">deleted := false
 
         // Search for connections with given ID and delete them from location.
-        for idx, nd := range nodes </span><span class="cov5" title="5382">{
-                if nd != nil &amp;&amp; nd.ID() == id </span><span class="cov4" title="392">{
-                        if idx &lt; g.connIdxs[location] </span><span class="cov3" title="128">{
+        for idx, nd := range nodes </span><span class="cov5" title="5398">{
+                if nd != nil &amp;&amp; nd.ID() == id </span><span class="cov4" title="396">{
+                        if idx &lt; g.connIdxs[location] </span><span class="cov3" title="133">{
                                 // update next available index
                                 g.connIdxs[location] = idx
                         }</span>
-                        <span class="cov4" title="392">deleted = true
+                        <span class="cov4" title="396">deleted = true
                         _ = nd.Close()
                         nodes[idx] = nil</span>
                 }
         }
 
-        <span class="cov4" title="198">if !deleted </span><span class="cov1" title="2">{
+        <span class="cov4" title="200">if !deleted </span><span class="cov1" title="2">{
                 return ErrNoSuchID
         }</span>
 
-        <span class="cov4" title="196">return nil</span>
+        <span class="cov4" title="198">return nil</span>
 }
 </pre>
 		
-		<pre class="file" id="file24" style="display: none">package transport
+		<pre class="file" id="file24" style="display: none">package v3
+
+import (
+        "errors"
+        "sync"
+)
+
+const (
+        defaultLocation = "&amp;&amp;def"
+
+        minConnectionsPerEndpoint = 1
+)
+
+var (
+        ErrConnCreate = errors.New("connection create failed")
+
+        ErrUnknownLocation = errors.New("unknown location")
+        ErrNoSuchID        = errors.New("no such id")
+        ErrEmptyLocation   = errors.New("empty location")
+)
+
+type (
+        connection[T any] interface {
+                *T
+
+                Alive() bool
+                Close() error
+                ID() uint64
+        }
+
+        node[PT connection[T], T any] struct {
+                next *node[PT, T]
+                conn PT
+        }
+
+        locationData[PT connection[T], T any] struct {
+                lookupPtr *node[PT, T] // points to next balancing decision
+                insertPtr *node[PT, T] // points to insertion point for new connections
+                size      int          // amount of connections inside current location
+        }
+
+        // Grid is fixed-level load balancer that is specifically
+        // balances between connections grouped by locations.
+        //
+        Grid[PT connection[T], T any] struct {
+                mx *sync.Mutex
+
+                locDta map[string]locationData[PT, T] // connections per location
+
+                locPrefM map[string]struct{} // locations with configured preference
+                locPref  []string            // ordered preference for locations
+
+                connsPerEndpoint int  // amount of connsPerEndpoint to spawn for each endpoint
+                ignoreLocations  bool // use default locations for all endpoints
+        }
+
+        // Config provides initial params for Grid.
+        Config struct {
+                // LocationPreference defines location processing sequence.
+                // See GetConn().
+                LocationPreference []string
+
+                // ConnsPerEndpoint specifies how many individual connections will be
+                // spawned during Add() call.
+                ConnsPerEndpoint int
+
+                // IgnoreLocations explicitly sets to ignore LocationPreference and
+                // use common default location for all endpoints.
+                // If LocationPreference is empty, default location is used regardless
+                // of this flag's value.
+                IgnoreLocations bool
+        }
+
+        createFunc[PT connection[T], T any] func() (PT, error)
+)
+
+// NewGrid creates new grid load balancer.
+func NewGrid[PT connection[T], T any](cfg Config) *Grid[PT, T] <span class="cov2" title="27">{
+        if len(cfg.LocationPreference) == 0 </span><span class="cov2" title="24">{
+                cfg.IgnoreLocations = true
+        }</span>
+        <span class="cov2" title="27">if cfg.ConnsPerEndpoint &lt; 1 </span><span class="cov0" title="0">{
+                cfg.ConnsPerEndpoint = minConnectionsPerEndpoint
+        }</span>
+
+        <span class="cov2" title="27">grid := &amp;Grid[PT, T]{
+                mx: &amp;sync.Mutex{},
+
+                locDta:   make(map[string]locationData[PT, T]),
+                locPrefM: make(map[string]struct{}),
+
+                locPref:          cfg.LocationPreference,
+                connsPerEndpoint: cfg.ConnsPerEndpoint,
+                ignoreLocations:  cfg.IgnoreLocations,
+        }
+
+        for _, location := range cfg.LocationPreference </span><span class="cov1" title="5">{
+                grid.locPrefM[location] = struct{}{}
+        }</span>
+
+        <span class="cov2" title="27">return grid</span>
+}
+
+// GetConn selects balanced connection based on available
+// locations and alive connections.
+// - It will always return connections from first location
+// in LocationPreference list.
+// - If there's no alive connections in first location,
+// next location from the list is used (and so on).
+// - If there's no alive connections in any of preferred locations,
+// other existing location will be checked in no particular order.
+// - If IgnoreLocations is set, it uses only default location.
+//
+// Within one location connections are selected using round-robin approach.
+func (g *Grid[PT, T]) GetConn() PT <span class="cov9" title="6780553">{
+        g.mx.Lock()
+        defer g.mx.Unlock()
+
+        if g.ignoreLocations </span><span class="cov9" title="3913361">{
+                return g.lookupInLocation(defaultLocation)
+        }</span>
+
+        // lookup in available locations according to preference
+        <span class="cov9" title="2867192">for _, loc := range g.locPref </span><span class="cov9" title="2867240">{
+                if _, ok := g.locDta[loc]; ok </span><span class="cov3" title="86">{
+                        conn := g.lookupInLocation(loc)
+                        if conn != nil </span><span class="cov2" title="26">{
+                                return conn
+                        }</span>
+                }
+        }
+
+        // If some locations are not in preference,
+        // lookup inside them as well.
+        <span class="cov9" title="2867166">for loc := range g.locDta </span><span class="cov9" title="2867200">{
+                if _, ok := g.locPrefM[loc]; !ok </span><span class="cov9" title="2867166">{
+                        conn := g.lookupInLocation(loc)
+                        if conn != nil </span><span class="cov9" title="2867162">{
+                                return conn
+                        }</span>
+                }
+        }
+
+        <span class="cov1" title="4">return nil</span>
+}
+
+func (g *Grid[PT, T]) lookupInLocation(location string) PT <span class="cov9" title="6780613">{
+        var (
+                loc  = g.locDta[location]
+                ptr  = loc.lookupPtr
+                size = loc.size
+        )
+
+        // Get next alive conn,
+        // making full circle in worst case.
+        for ; size &gt; 0; size-- </span><span class="cov10" title="6780788">{
+                if ptr.conn.Alive() </span><span class="cov9" title="6780519">{
+                        loc.lookupPtr = ptr.next
+                        g.locDta[location] = loc
+
+                        return ptr.conn
+                }</span>
+                <span class="cov4" title="269">ptr = ptr.next</span>
+        }
+
+        <span class="cov3" title="94">return nil</span>
+}
+
+// Add creates connections in specified location.
+func (g *Grid[PT, T]) Add(location string, creatF createFunc[PT, T]) error <span class="cov4" title="304">{
+        // Spawn connections
+        var (
+                head, prev *node[PT, T]
+        )
+        for range g.connsPerEndpoint </span><span class="cov5" title="1173">{
+                conn, err := creatF()
+                if err != nil </span><span class="cov0" title="0">{
+                        for ; head != nil; head = head.next </span><span class="cov0" title="0">{
+                                _ = head.conn.Close()
+                        }</span>
+                        <span class="cov0" title="0">return errors.Join(ErrConnCreate, err)</span>
+                }
+
+                <span class="cov5" title="1173">if prev == nil </span><span class="cov4" title="304">{
+                        prev = &amp;node[PT, T]{conn: conn}
+                        head = prev
+                }</span> else<span class="cov4" title="869"> {
+                        prev.next = &amp;node[PT, T]{conn: conn}
+                        prev = prev.next
+                }</span>
+        }
+
+        // Attach connections to location
+        <span class="cov4" title="304">g.mx.Lock()
+        defer g.mx.Unlock()
+
+        if g.ignoreLocations </span><span class="cov4" title="206">{
+                location = defaultLocation
+        }</span>
+        <span class="cov4" title="304">locDta, ok := g.locDta[location]
+        if ok &amp;&amp; locDta.size != 0 </span><span class="cov3" title="183">{
+                // insert conn list into location list
+                locDta.insertPtr.next, prev.next = head, locDta.insertPtr.next
+                locDta.size += g.connsPerEndpoint
+                g.locDta[location] = locDta
+
+                return nil
+        }</span>
+
+        // First time seeing this location
+        <span class="cov3" title="121">prev.next = head // cycle nodes
+        g.locDta[location] = locationData[PT, T]{
+                lookupPtr: head,
+                insertPtr: prev,
+                size:      g.connsPerEndpoint,
+        }
+
+        return nil</span>
+}
+
+// Delete deletes connections from location.
+// It uses linear search within location to find all matching connections.
+func (g *Grid[PT, T]) Delete(location string, id uint64) error <span class="cov4" title="196">{
+        g.mx.Lock()
+        defer g.mx.Unlock()
+
+        if g.ignoreLocations </span><span class="cov3" title="102">{
+                location = defaultLocation
+        }</span>
+        <span class="cov4" title="196">locDta, ok := g.locDta[location]
+        switch </span>{
+        case !ok:<span class="cov1" title="1">
+                return ErrUnknownLocation</span>
+        case locDta.size == 0:<span class="cov0" title="0">
+                return ErrEmptyLocation</span>
+        case locDta.size == g.connsPerEndpoint:<span class="cov3" title="97">
+                // We have connsPerEndpoint of only one endpoint.
+                if locDta.insertPtr.conn.ID() == id </span><span class="cov3" title="95">{
+                        // delete last remaining endpoint
+                        delete(g.locDta, location)
+
+                        return nil
+                }</span>
+
+                <span class="cov1" title="2">return ErrNoSuchID</span>
+        }
+
+        <span class="cov3" title="98">var (
+                start *node[PT, T]
+
+                // prev and ptr are starting at border between some endpoints
+                ptr  = locDta.insertPtr.next
+                prev = locDta.insertPtr
+        )
+
+        // New conns for the same endpoint are always added
+        // as continuous range. To delete conns by endpoint id
+        // we need to find conn (start) preceding first conn of this endpoint
+        // then find first conn of next endpoint.
+        // And finally point start.next to conn of next endpoint.
+        for size := locDta.size; size &gt;= 0; size-- </span><span class="cov5" title="3823">{
+                if ptr.conn.ID() == id </span><span class="cov3" title="98">{
+                        // found first conn in deletion range
+                        start = prev
+
+                        // scroll to conn of next endpoint
+                        for ctr := 0; ctr &lt; g.connsPerEndpoint; ctr++ </span><span class="cov4" title="196">{
+                                ptr = ptr.next
+                        }</span>
+                        // found last conn
+                        <span class="cov3" title="98">start.next = ptr
+
+                        // Warp lookup and insert pointers
+                        // if they are in deleted range.
+                        if locDta.insertPtr.conn.ID() == id </span><span class="cov2" title="8">{
+                                locDta.insertPtr = ptr
+                        }</span>
+                        <span class="cov3" title="98">if locDta.lookupPtr.conn.ID() == id </span><span class="cov1" title="5">{
+                                locDta.lookupPtr = ptr
+                        }</span>
+
+                        <span class="cov3" title="98">g.locDta[location] = locDta
+
+                        return nil</span>
+                }
+
+                <span class="cov5" title="3725">prev, ptr = ptr, ptr.next</span>
+        }
+
+        <span class="cov0" title="0">return ErrNoSuchID</span>
+}
+</pre>
+		
+		<pre class="file" id="file25" style="display: none">package transport
 
 import (
         "context"
@@ -2913,23 +3208,23 @@ func (c *Connection) Close() error <span class="cov1" title="1">{
         <span class="cov1" title="1">return nil</span>
 }
 
-func (c *Connection) Alive() bool <span class="cov7" title="84">{
+func (c *Connection) Alive() bool <span class="cov7" title="88">{
         switch c.GetState() </span>{
         case connectivity.Ready, connectivity.Idle:<span class="cov7" title="77">
                 return true</span>
-        default:<span class="cov3" title="7">
+        default:<span class="cov4" title="11">
                 return false</span>
         }
 }
 
 func setContextMD(ctx context.Context, auth Authenticator, db string) (context.Context, error) <span class="cov10" title="507">{
         md := metadata.Pairs(headerDatabase, db)
-        if auth != nil </span><span class="cov8" title="226">{
+        if auth != nil </span><span class="cov8" title="227">{
                 token := auth.GetToken()
                 if token == "" </span><span class="cov0" title="0">{
                         return nil, ErrNoToken
                 }</span>
-                <span class="cov8" title="226">md.Append(headerAuth, token)</span>
+                <span class="cov8" title="227">md.Append(headerAuth, token)</span>
         }
 
         <span class="cov10" title="507">return metadata.NewOutgoingContext(ctx, md), nil</span>
@@ -2957,7 +3252,7 @@ func (c *Connection) NewStream(
 }
 </pre>
 		
-		<pre class="file" id="file25" style="display: none">package credentials
+		<pre class="file" id="file26" style="display: none">package credentials
 
 import (
         "crypto/tls"
@@ -2993,7 +3288,7 @@ func tlsConfig() *tls.Config <span class="cov1" title="1">{
 }
 </pre>
 		
-		<pre class="file" id="file26" style="display: none">package dispatcher
+		<pre class="file" id="file27" style="display: none">package dispatcher
 
 import (
         "context"
@@ -3003,7 +3298,7 @@ import (
         "github.com/adwski/ydb-go-query/internal/endpoints"
         "github.com/adwski/ydb-go-query/internal/logger"
         "github.com/adwski/ydb-go-query/internal/transport"
-        balancer "github.com/adwski/ydb-go-query/internal/transport/balancing/v3"
+        balancing "github.com/adwski/ydb-go-query/internal/transport/balancing/v4"
 
         "google.golang.org/grpc"
         "google.golang.org/grpc/credentials"
@@ -3021,7 +3316,7 @@ type (
         // and acts as grpc transport.
         Dynamic struct {
                 logger   logger.Logger
-                balancer *balancer.Grid[*transport.Connection, transport.Connection]
+                balancer *balancing.Grid[*transport.Connection, transport.Connection]
                 invoker  *invoker
 
                 discovery EndpointsProvider
@@ -3039,12 +3334,12 @@ type (
                 TransportCredentials credentials.TransportCredentials
                 DB                   string
                 InitNodes            []string
-                Balancer             balancer.Config
+                Balancing            balancing.Config
         }
 )
 
 func NewDynamic(cfg Config) *Dynamic <span class="cov6" title="8">{
-        grid := balancer.NewGrid[*transport.Connection, transport.Connection](cfg.Balancer)
+        grid := balancing.NewGrid[*transport.Connection, transport.Connection](cfg.Balancing)
         return &amp;Dynamic{
                 logger:               cfg.Logger,
                 discovery:            cfg.EndpointsProvider,
@@ -3112,7 +3407,7 @@ func endpointFullAddress(ep addrPort) string <span class="cov8" title="13">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file27" style="display: none">package dispatcher
+		<pre class="file" id="file28" style="display: none">package dispatcher
 
 import (
         "context"
@@ -3120,7 +3415,7 @@ import (
 
         localErrs "github.com/adwski/ydb-go-query/internal/errors"
         "github.com/adwski/ydb-go-query/internal/transport"
-        balancing "github.com/adwski/ydb-go-query/internal/transport/balancing/v3"
+        balancing "github.com/adwski/ydb-go-query/internal/transport/balancing/v4"
         "github.com/adwski/ydb-go-query/internal/xcontext"
 
         "google.golang.org/grpc"
@@ -3161,14 +3456,14 @@ func (inv *invoker) NewStream(
 }
 </pre>
 		
-		<pre class="file" id="file28" style="display: none">package dispatcher
+		<pre class="file" id="file29" style="display: none">package dispatcher
 
 import (
         "context"
         "errors"
 
         "github.com/adwski/ydb-go-query/internal/transport"
-        balancing "github.com/adwski/ydb-go-query/internal/transport/balancing/v3"
+        balancing "github.com/adwski/ydb-go-query/internal/transport/balancing/v4"
 
         "google.golang.org/grpc"
         "google.golang.org/grpc/credentials"
@@ -3209,7 +3504,7 @@ func (s *Static) Transport() grpc.ClientConnInterface <span class="cov10" title=
 }</span>
 </pre>
 		
-		<pre class="file" id="file29" style="display: none">package xcontext
+		<pre class="file" id="file30" style="display: none">package xcontext
 
 import (
         "context"
@@ -3235,7 +3530,7 @@ func GetTransportPtr(ctx context.Context) *grpc.ClientConnInterface <span class=
 }
 </pre>
 		
-		<pre class="file" id="file30" style="display: none">package query
+		<pre class="file" id="file31" style="display: none">package query
 
 import (
         "context"
@@ -3403,7 +3698,7 @@ func strip(s string) string <span class="cov0" title="0">{
 }
 </pre>
 		
-		<pre class="file" id="file31" style="display: none">package query
+		<pre class="file" id="file32" style="display: none">package query
 
 import (
         "context"
@@ -3469,7 +3764,7 @@ func (q *Query) Exec(ctx context.Context) (*Result, error) <span class="cov8" ti
 }</span>
 </pre>
 		
-		<pre class="file" id="file32" style="display: none">package query
+		<pre class="file" id="file33" style="display: none">package query
 
 import (
         "context"
@@ -3619,7 +3914,7 @@ func (r *Result) recv() error <span class="cov10" title="298">{
 }
 </pre>
 		
-		<pre class="file" id="file33" style="display: none">package query
+		<pre class="file" id="file34" style="display: none">package query
 
 import (
         "context"
@@ -3755,7 +4050,7 @@ func (tx *Transaction) exec(
 }
 </pre>
 		
-		<pre class="file" id="file34" style="display: none">package query
+		<pre class="file" id="file35" style="display: none">package query
 
 import (
         "context"
@@ -3830,7 +4125,7 @@ func (q *TxQuery) Exec(ctx context.Context) (*Result, error) <span class="cov7" 
 }</span>
 </pre>
 		
-		<pre class="file" id="file35" style="display: none">package types
+		<pre class="file" id="file36" style="display: none">package types
 
 import "github.com/ydb-platform/ydb-go-genproto/protos/Ydb"
 
