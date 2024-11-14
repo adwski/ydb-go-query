@@ -8,7 +8,7 @@ import (
 	"github.com/adwski/ydb-go-query/internal/endpoints"
 	"github.com/adwski/ydb-go-query/internal/logger"
 	"github.com/adwski/ydb-go-query/internal/transport"
-	balancer "github.com/adwski/ydb-go-query/internal/transport/balancing/v3"
+	balancing "github.com/adwski/ydb-go-query/internal/transport/balancing/v4"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -26,7 +26,7 @@ type (
 	// and acts as grpc transport.
 	Dynamic struct {
 		logger   logger.Logger
-		balancer *balancer.Grid[*transport.Connection, transport.Connection]
+		balancer *balancing.Grid[*transport.Connection, transport.Connection]
 		invoker  *invoker
 
 		discovery EndpointsProvider
@@ -44,12 +44,12 @@ type (
 		TransportCredentials credentials.TransportCredentials
 		DB                   string
 		InitNodes            []string
-		Balancer             balancer.Config
+		Balancing            balancing.Config
 	}
 )
 
 func NewDynamic(cfg Config) *Dynamic {
-	grid := balancer.NewGrid[*transport.Connection, transport.Connection](cfg.Balancer)
+	grid := balancing.NewGrid[*transport.Connection, transport.Connection](cfg.Balancing)
 	return &Dynamic{
 		logger:               cfg.Logger,
 		discovery:            cfg.EndpointsProvider,

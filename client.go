@@ -9,7 +9,7 @@ import (
 	"github.com/adwski/ydb-go-query/internal/logger"
 	"github.com/adwski/ydb-go-query/internal/query"
 	"github.com/adwski/ydb-go-query/internal/transport"
-	balancer "github.com/adwski/ydb-go-query/internal/transport/balancing/v3"
+	balancing "github.com/adwski/ydb-go-query/internal/transport/balancing/v4"
 	"github.com/adwski/ydb-go-query/internal/transport/dispatcher"
 	qq "github.com/adwski/ydb-go-query/query"
 )
@@ -122,7 +122,7 @@ func newClient(ctx context.Context, cfg *Config, opts ...Option) (*Client, error
 		Logger:    cfg.logger,
 		InitNodes: cfg.InitialNodes,
 		DB:        cfg.DB,
-		Balancer: balancer.Config{
+		Balancing: balancing.Config{
 			LocationPreference: cfg.locationPreference,
 			ConnsPerEndpoint:   cfg.connectionsPerEndpoint,
 			IgnoreLocations:    false,

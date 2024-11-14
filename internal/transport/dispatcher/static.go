@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/adwski/ydb-go-query/internal/transport"
-	balancing "github.com/adwski/ydb-go-query/internal/transport/balancing/v3"
+	balancing "github.com/adwski/ydb-go-query/internal/transport/balancing/v4"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
