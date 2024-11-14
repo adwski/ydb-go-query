@@ -88,11 +88,12 @@ ydb.WithQueryTimeout(5*time.Minute),
 // Session pool size, default is 10.
 ydb.WithSessionPoolSize(50),
 
-// Session pool ready Low and High thresholds.
-// If amount of ready sessions hit High threshold,
+// Session pool ready Low and High thresholds (in percents).
+// If sum of idle and inuse sessions hits High threshold,
 // then client.Ready() returns true.
-// If amount of ready sessions hit Low threshold,
-// then client.Ready() returns false.
+// If this sum hits Low threshold, then client.Ready() is false.
+// This suites for readiness probes, but should not
+// be used to handle pool congestion.
 // Possible values are 0<=low<high<=100.
 // Default is low=0, high=50
 ydb.WithSessionPoolReadyThresholds(10, 80)
@@ -108,10 +109,10 @@ ydb.WithConnectionsPerEndpoint(4)
 // When making balancing decision, client's balancer will look
 // for connections from locations in order specified by this param.
 // If all connections in first location are not alive, it will move to next.
-// If there's no alive connections in ether of these locations,
+// If there's no alive connections in either of these locations,
 // alive connections from other discovered locations (if any) will be used.
 // If this param is not specified or empty, balancer will treat all
-// connections as if they are from the same location.
+// connections as if they are from same location.
 // Within location balancer selects connection using round-robin approach.
 ydb.WithLocationPreference([]string{"ru-central1-b", "ru-central1-a"})
 
