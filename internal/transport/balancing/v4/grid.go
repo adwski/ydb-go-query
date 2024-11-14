@@ -270,13 +270,13 @@ func (g *Grid[PT, T]) Delete(location string, id uint64) error {
 			// found last conn
 			start.next = ptr
 
-			// Scroll lookup and insert pointers
-			// if they are inside deleted range.
-			for locDta.insertPtr.conn.ID() == id {
-				locDta.insertPtr = locDta.insertPtr.next
+			// Warp lookup and insert pointers
+			// if they are in deleted range.
+			if locDta.insertPtr.conn.ID() == id {
+				locDta.insertPtr = ptr
 			}
-			for locDta.lookupPtr.conn.ID() == id {
-				locDta.lookupPtr = locDta.lookupPtr.next
+			if locDta.lookupPtr.conn.ID() == id {
+				locDta.lookupPtr = ptr
 			}
 
 			g.locDta[location] = locDta
